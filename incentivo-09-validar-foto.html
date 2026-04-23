@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Naowee Incentivos — Evidencia de entrega</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
+<link rel="stylesheet" href="shared/shell.css"/>
+
+<style>
+  .page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:24px}
+  .page-title{font-size:24px;font-weight:700;line-height:1.2;margin-bottom:4px}
+  .page-sub{font-size:13.5px;color:var(--text-secondary);line-height:1.5;max-width:640px}
+  .step-indicator{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);padding:6px 12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-full)}
+  .step-indicator .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+
+  .stepper{display:flex;align-items:center;gap:0;margin-bottom:24px;padding:14px 20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto}
+  .step{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--text-secondary)}
+  .step .n{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border-dark);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-secondary)}
+  .step.active .n{background:var(--accent);border-color:var(--accent);color:#fff}
+  .step.active{color:var(--text-primary)}
+  .step.done .n{background:var(--green);border-color:var(--green);color:#fff}
+  .step-sep{flex:1;height:1px;background:var(--border);min-width:20px;margin:0 12px}
+
+  .recap{
+    display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:14px 18px;margin-bottom:20px;box-shadow:var(--shadow-card);
+  }
+  .recap__ava{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ffbf75,#d74009);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1px var(--border)}
+  .recap__info{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .recap__name{font-size:14px;font-weight:700;color:var(--text-primary)}
+  .recap__meta{font-size:11.5px;color:var(--text-secondary);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .recap__meta .dot{width:3px;height:3px;background:var(--border-dark);border-radius:50%}
+  .recap__meta code{font-family:'SF Mono',monospace;font-size:11px;color:var(--accent);background:#fff3e6;padding:1px 6px;border-radius:4px}
+
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:20px}
+  @media(max-width:1100px){ .layout{grid-template-columns:1fr} }
+
+  .panel{
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
+    box-shadow:var(--shadow-card);padding:28px;
+  }
+  .panel h3{font-size:15px;font-weight:700;margin-bottom:4px}
+  .panel p.desc{font-size:12.5px;color:var(--text-secondary);margin-bottom:20px;line-height:1.55;max-width:640px}
+
+  /* Tabs */
+  .mode-tabs{display:inline-flex;gap:2px;background:#f5f6fa;padding:4px;border-radius:var(--radius-full);margin-bottom:20px}
+  .mode-tab{
+    padding:8px 18px;border-radius:var(--radius-full);border:none;background:transparent;cursor:pointer;
+    font-size:12.5px;font-weight:700;color:var(--text-secondary);transition:all .15s;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .mode-tab.active{background:#fff;color:var(--accent);box-shadow:var(--shadow-sm)}
+
+  /* Capture / upload area */
+  .capture-area{
+    border:2px dashed var(--border-dark);border-radius:var(--radius-xl);
+    padding:36px 24px;text-align:center;
+    transition:border-color .15s,background .15s;
+    background:#fafbfd;position:relative;min-height:300px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  }
+  .capture-area.drag{border-color:var(--accent);background:#fff3e6}
+  .capture-area.filled{border-style:solid;border-color:var(--green-border);background:var(--green-bg);padding:0;overflow:hidden}
+  .capture-icon{
+    width:64px;height:64px;border-radius:50%;background:#fff;border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:var(--accent);
+    box-shadow:var(--shadow-sm);
+  }
+  .capture-title{font-size:15px;font-weight:700;color:var(--text-primary)}
+  .capture-hint{font-size:12.5px;color:var(--text-secondary);max-width:380px;line-height:1.5}
+  .capture-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+  .file-formats{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+  .fmt{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;background:#fff;border:1px solid var(--border);color:var(--text-secondary);text-transform:uppercase;letter-spacing:.3px}
+
+  /* Filled state: preview */
+  .preview{position:relative;width:100%;max-width:540px;margin:0 auto;background:#000;aspect-ratio:4/3;overflow:hidden;border-radius:var(--radius-xl)}
+  .preview img{width:100%;height:100%;object-fit:cover;display:block}
+  .preview__fallback{
+    width:100%;height:100%;
+    background:
+      linear-gradient(135deg,rgba(31,137,35,.4),rgba(31,120,209,.35)),
+      radial-gradient(circle at 30% 40%, rgba(255,255,255,.2), transparent 50%),
+      #1a3d5c;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    font-size:13px;font-weight:600;opacity:.95;
+  }
+  .preview__meta{
+    position:absolute;bottom:0;left:0;right:0;
+    padding:14px 18px;display:flex;justify-content:space-between;align-items:center;
+    background:linear-gradient(180deg,transparent,rgba(0,0,0,.7));color:#fff;font-size:12px;
+  }
+  .preview__meta .left{display:flex;gap:12px;align-items:center}
+  .preview__badge{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 10px;border-radius:var(--radius-full);
+    background:rgba(31,137,35,.9);color:#fff;font-size:11px;font-weight:700;
+    backdrop-filter:blur(10px);
+  }
+  .preview__actions{display:flex;gap:6px}
+  .preview-btn{
+    padding:6px 10px;border-radius:6px;background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.25);color:#fff;font:inherit;font-size:11.5px;font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:4px;backdrop-filter:blur(10px);
+  }
+  .preview-btn:hover{background:rgba(255,255,255,.25)}
+
+  /* File mode: file chip */
+  .file-chip{
+    display:flex;gap:14px;align-items:center;width:100%;max-width:520px;margin:0 auto;
+    padding:14px 18px;background:#fff;border:1px solid var(--green-border);border-radius:var(--radius-lg);
+  }
+  .file-chip__ico{
+    width:48px;height:48px;border-radius:var(--radius-md);background:var(--green-bg);color:var(--green);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .file-chip__body{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+  .file-chip__name{font-size:13px;font-weight:700;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .file-chip__meta{font-size:11.5px;color:var(--text-secondary)}
+  .file-chip__close{padding:6px;border:none;background:transparent;cursor:pointer;color:var(--text-secondary);border-radius:6px}
+  .file-chip__close:hover{background:#fafbfd;color:var(--accent)}
+
+  .btn-primary{height:46px;padding:0 22px;border:none;border-radius:var(--radius-md);background:var(--accent);color:#fff;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+  .btn-primary:hover{box-shadow:0 6px 16px rgba(215,64,9,.22)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+  .btn-outline{height:40px;padding:0 16px;border:1px solid var(--border-dark);border-radius:var(--radius-md);background:#fff;color:var(--text-primary);font:inherit;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .btn-outline:hover{background:#fafbfd}
+  .btn-small{height:36px;padding:0 14px;border-radius:var(--radius-md);font-size:12.5px}
+
+  /* Observation */
+  .obs-field{margin-top:22px}
+  .obs-field label{font-size:11.5px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:6px}
+  .obs-field textarea{
+    width:100%;min-height:80px;padding:12px 14px;border:1px solid var(--border-dark);
+    border-radius:var(--radius-md);font:inherit;font-size:13px;resize:vertical;
+  }
+  .obs-field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(215,64,9,.15)}
+
+  /* Summary sidebar (reused pattern) */
+  .summary{
+    background:linear-gradient(180deg,#fff 0%,#fafbfd 100%);
+    border:1px solid var(--border);border-radius:var(--radius-xl);
+    box-shadow:var(--shadow-card);padding:24px;position:sticky;top:20px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .summary h4{font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#b5b9d4}
+  .summary-row{display:flex;justify-content:space-between;gap:12px;font-size:13px;align-items:flex-start}
+  .summary-row .lbl{color:var(--text-secondary);font-weight:500}
+  .summary-row .val{color:var(--text-primary);font-weight:700;text-align:right;max-width:60%;word-break:break-all}
+  .summary-row.big .val{font-size:18px;font-weight:800}
+  .summary hr{border:none;border-top:1px dashed var(--border)}
+  .summary-note{font-size:11.5px;color:var(--text-secondary);line-height:1.5;padding:10px 12px;background:var(--orange-bg);border-radius:var(--radius-md);border-left:3px solid var(--accent)}
+  .summary-note strong{color:var(--accent)}
+  .summary-actions{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <button class="burger-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#282834" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <svg class="naowee-logo" viewBox="0 0 180 34" fill="none"><text x="0" y="24" font-family="Inter" font-weight="800" font-size="22" fill="#002B5B">Naowee</text></svg>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">INCENTIVOS</div>
+      <div class="nav-row" onclick="fadeAndGo('index.html')">
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/></svg></div>
+        <span class="lbl">Índice</span>
+      </div>
+      <div class="nav-row active">
+        <div class="active-bar"></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+        <span class="lbl">Asignar incentivo</span>
+      </div>
+      <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
+        <span class="lbl">Asignaciones</span>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="nav-row" onclick="fadeAndGo('incentivo-01-login.html')">
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="#B5B9D4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="lbl">Cerrar sesión</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top-header">
+      <div class="profile-switcher" id="profileSwitcher">
+        <div class="user-chip" onclick="toggleProfileDD(event)">
+          <div class="ava"><div class="ava-ring" style="background:#ffdfb5;color:#92400e">DV</div><div class="ava-dot"></div></div>
+          <div class="user-info"><span class="user-name">Doug Vargas</span><span class="user-role">Operador</span></div>
+          <button class="user-chip__chevron" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="page">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Evidencia de entrega</h1>
+          <p class="page-sub">Registra una foto del momento de entrega o sube un archivo (ej. certificado, documento firmado). Es el respaldo oficial de que el incentivo fue entregado al deportista.</p>
+        </div>
+        <div class="step-indicator"><span class="dot"></span> Paso 3 de 4</div>
+      </div>
+
+      <div class="stepper">
+        <div class="step done"><span class="n">✓</span> Buscar deportista</div>
+        <span class="step-sep"></span>
+        <div class="step done"><span class="n">✓</span> Seleccionar incentivo</div>
+        <span class="step-sep"></span>
+        <div class="step active"><span class="n">3</span> Evidencia de entrega</div>
+        <span class="step-sep"></span>
+        <div class="step"><span class="n">4</span> Confirmación</div>
+      </div>
+
+      <div class="recap">
+        <div class="recap__ava" id="recapAva">MC</div>
+        <div class="recap__info">
+          <div class="recap__name" id="recapName">María Camila Herrera Rojas</div>
+          <div class="recap__meta">
+            <span id="recapDoc"><strong>CC</strong> 1.001.234.567</span><span class="dot"></span>
+            <span id="recapInc">Beca educativa · Medallistas de oro</span><span class="dot"></span>
+            <code id="recapCode">2026BEC-00042</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout">
+        <div>
+
+          <div class="panel">
+            <h3>Registra la evidencia</h3>
+            <p class="desc">Puedes tomar una foto en vivo del momento de la entrega o subir un archivo si la entrega requiere respaldo documental (ej. certificado de beca firmado).</p>
+
+            <div class="mode-tabs" role="tablist">
+              <button class="mode-tab active" data-mode="photo" onclick="switchMode('photo', this)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                Tomar foto
+              </button>
+              <button class="mode-tab" data-mode="file" onclick="switchMode('file', this)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                Subir archivo
+              </button>
+            </div>
+
+            <!-- Photo mode -->
+            <div class="capture-area" id="captureArea">
+              <div class="capture-icon" id="captureIcon">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+              <div class="capture-title" id="captureTitle">Tomar foto de la entrega</div>
+              <div class="capture-hint" id="captureHint">Captura el momento en el que entregas el incentivo al deportista. La foto queda asociada a la asignación como evidencia.</div>
+              <div class="capture-actions">
+                <button class="btn-primary" onclick="simulateCapture()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M2 12h2M20 12h2M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                  Capturar con cámara
+                </button>
+                <button class="btn-outline" onclick="document.getElementById('fileInput').click()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                  Desde galería
+                </button>
+                <input type="file" id="fileInput" accept="image/*,.pdf" hidden onchange="onFileChosen(event)"/>
+              </div>
+              <div class="file-formats">
+                <span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">PDF</span><span class="fmt">Máx 10MB</span>
+              </div>
+            </div>
+
+            <div class="obs-field">
+              <label for="obs">Observaciones del operador (opcional)</label>
+              <textarea id="obs" placeholder="Ej. Entrega realizada al finalizar la jornada del evento. Deportista acompañado por su entrenador."></textarea>
+            </div>
+          </div>
+
+        </div>
+
+        <aside class="summary">
+          <div><h4>Resumen de la asignación</h4></div>
+
+          <div class="summary-row"><span class="lbl">Deportista</span><span class="val" id="sumName">María C. Herrera</span></div>
+          <div class="summary-row"><span class="lbl">Documento</span><span class="val" id="sumDoc">CC 1.001.234.567</span></div>
+          <hr/>
+          <div class="summary-row"><span class="lbl">Incentivo</span><span class="val" id="sumInc">Beca educativa</span></div>
+          <div class="summary-row"><span class="lbl">Código</span><span class="val" id="sumCode" style="font-family:'SF Mono',monospace;font-size:12px">2026BEC-00042</span></div>
+          <div class="summary-row big"><span class="lbl">Valor</span><span class="val" id="sumValue">$1.000.000</span></div>
+          <hr/>
+          <div class="summary-row"><span class="lbl">Evidencia</span><span class="val" id="sumEvidence" style="color:var(--text-secondary);font-weight:500;font-style:italic">Pendiente</span></div>
+
+          <div class="summary-note">
+            <strong>Último paso:</strong> registra la evidencia para completar la asignación. El código se marcará como <strong>Asignado</strong> y el inventario se actualizará.
+          </div>
+
+          <div class="summary-actions">
+            <button class="btn-primary" id="btnConfirm" disabled onclick="confirmDelivery()">
+              Completar entrega
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <button class="btn-outline" onclick="fadeAndGo('incentivo-10-asignar-tipo.html')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              Volver
+            </button>
+          </div>
+        </aside>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let mode = 'photo'; // photo | file
+let evidenceReady = false;
+
+function switchMode(m, btn){
+  mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t === btn));
+  resetCapture();
+  const ico = document.getElementById('captureIcon');
+  const tit = document.getElementById('captureTitle');
+  const hint = document.getElementById('captureHint');
+  if(m === 'photo'){
+    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+    tit.textContent = 'Tomar foto de la entrega';
+    hint.textContent = 'Captura el momento en el que entregas el incentivo al deportista. La foto queda asociada a la asignación como evidencia.';
+  }else{
+    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>';
+    tit.textContent = 'Subir documento de respaldo';
+    hint.textContent = 'Arrastra un archivo o haz click para seleccionarlo. Útil para becas o incentivos que requieren certificado firmado.';
+  }
+}
+
+function resetCapture(){
+  const area = document.getElementById('captureArea');
+  area.classList.remove('filled');
+  area.innerHTML = `
+    <div class="capture-icon" id="captureIcon"></div>
+    <div class="capture-title" id="captureTitle"></div>
+    <div class="capture-hint" id="captureHint"></div>
+    <div class="capture-actions">
+      ${mode === 'photo'
+        ? `<button class="btn-primary" onclick="simulateCapture()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M2 12h2M20 12h2M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> Capturar con cámara</button>
+           <button class="btn-outline" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> Desde galería</button>`
+        : `<button class="btn-primary" onclick="document.getElementById('fileInput').click()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> Seleccionar archivo</button>`
+      }
+      <input type="file" id="fileInput" accept="image/*,.pdf" hidden onchange="onFileChosen(event)"/>
+    </div>
+    <div class="file-formats">
+      <span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">PDF</span><span class="fmt">Máx 10MB</span>
+    </div>
+  `;
+  // re-bind title/icon
+  const ico = document.getElementById('captureIcon');
+  const tit = document.getElementById('captureTitle');
+  const hint = document.getElementById('captureHint');
+  if(mode === 'photo'){
+    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+    tit.textContent = 'Tomar foto de la entrega';
+    hint.textContent = 'Captura el momento en el que entregas el incentivo al deportista. La foto queda asociada a la asignación como evidencia.';
+  }else{
+    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>';
+    tit.textContent = 'Subir documento de respaldo';
+    hint.textContent = 'Selecciona un archivo (certificado, documento firmado) que sirva como evidencia de entrega.';
+  }
+  evidenceReady = false;
+  document.getElementById('btnConfirm').disabled = true;
+  const sum = document.getElementById('sumEvidence');
+  sum.textContent = 'Pendiente';
+  sum.style.color = 'var(--text-secondary)';
+  sum.style.fontStyle = 'italic';
+  sum.style.fontWeight = '500';
+}
+
+function simulateCapture(){
+  const area = document.getElementById('captureArea');
+  area.classList.add('filled');
+  area.innerHTML = `
+    <div class="preview">
+      <div class="preview__fallback">
+        <div style="text-align:center;padding:20px">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;opacity:.7;display:block"><circle cx="12" cy="13" r="4"/><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/></svg>
+          <div style="font-size:16px;font-weight:700">Foto capturada</div>
+          <div style="font-size:11.5px;opacity:.75;margin-top:4px">14/11/2026 · 15:42 · GPS activo</div>
+        </div>
+      </div>
+      <div class="preview__meta">
+        <div class="left">
+          <span class="preview__badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Capturada</span>
+          <span style="font-size:11.5px;opacity:.9">evidencia-entrega-MC-2026BEC-00042.jpg · 1.2 MB</span>
+        </div>
+        <div class="preview__actions">
+          <button class="preview-btn" onclick="resetCapture()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
+            Retomar
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  markReady('Foto capturada · 1.2 MB');
+}
+
+function onFileChosen(ev){
+  const f = ev.target.files?.[0];
+  if(!f) return;
+  const area = document.getElementById('captureArea');
+  area.classList.add('filled');
+  area.innerHTML = `
+    <div class="file-chip">
+      <div class="file-chip__ico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 14l2 2 4-4"/></svg>
+      </div>
+      <div class="file-chip__body">
+        <div class="file-chip__name">${f.name}</div>
+        <div class="file-chip__meta">${(f.size/1024).toFixed(1)} KB · ${f.type || 'archivo'}</div>
+      </div>
+      <button class="file-chip__close" onclick="resetCapture()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `;
+  markReady(`${f.name} · ${(f.size/1024).toFixed(1)} KB`);
+}
+
+function markReady(text){
+  evidenceReady = true;
+  document.getElementById('btnConfirm').disabled = false;
+  const sum = document.getElementById('sumEvidence');
+  sum.textContent = text;
+  sum.style.color = 'var(--green)';
+  sum.style.fontStyle = 'normal';
+  sum.style.fontWeight = '700';
+  sum.style.fontSize = '11.5px';
+}
+
+function confirmDelivery(){
+  // persistir la info final
+  sessionStorage.setItem('inc-assignment-complete', JSON.stringify({
+    doc:'1.001.234.567', docType:'CC',
+    name:'María Camila Herrera Rojas', initials:'MC',
+    incentive:'Beca educativa · Medallistas de oro',
+    code:'2026BEC-00042',
+    value:1000000,
+    observation: document.getElementById('obs').value || null,
+    evidence: mode === 'photo' ? 'Foto capturada' : 'Archivo subido',
+    ts: Date.now()
+  }));
+  fadeAndGo('incentivo-11-asignar-exito.html');
+}
+
+/* Hydrate summary from session if exists */
+(function hydrate(){
+  try{
+    const s = JSON.parse(sessionStorage.getItem('inc-assignment') || '{}');
+    if(s.name) document.getElementById('sumName').textContent = s.name.split(' ').slice(0,2).join(' ') + ' ' + s.name.split(' ').slice(2).map(w=>w[0]+'.').join(' ');
+    if(s.doc) document.getElementById('sumDoc').textContent = `${s.docType || 'CC'} ${s.doc}`;
+    if(s.incentive?.name) document.getElementById('sumInc').textContent = s.incentive.name.length > 30 ? s.incentive.name.slice(0,28)+'…' : s.incentive.name;
+    if(s.code) document.getElementById('sumCode').textContent = s.code;
+    if(s.incentive?.value) document.getElementById('sumValue').textContent = `$${s.incentive.value.toLocaleString('es-CO')}`;
+    if(s.initials) document.getElementById('recapAva').textContent = s.initials;
+    if(s.name) document.getElementById('recapName').textContent = s.name;
+    if(s.doc) document.getElementById('recapDoc').innerHTML = `<strong>${s.docType}</strong> ${s.doc}`;
+    if(s.incentive?.name) document.getElementById('recapInc').textContent = s.incentive.name;
+    if(s.code) document.getElementById('recapCode').textContent = s.code;
+  }catch(e){}
+})();
+
+function fadeAndGo(url){
+  document.body.style.transition = 'opacity .25s ease';
+  document.body.style.opacity = '0';
+  setTimeout(() => { window.location.href = url; }, 260);
+}
+function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('profileSwitcher')?.classList.toggle('open'); }
+document.addEventListener('click', (e) => { const sw = document.getElementById('profileSwitcher'); if(sw && !sw.contains(e.target)) sw.classList.remove('open'); });
+</script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Naowee Incentivos — Asignación exitosa</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
+<link rel="stylesheet" href="shared/shell.css"/>
+
+<style>
+  .stepper{display:flex;align-items:center;gap:0;margin-bottom:24px;padding:14px 20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto}
+  .step{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--text-secondary)}
+  .step .n{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border-dark);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-secondary)}
+  .step.done .n{background:var(--green);border-color:var(--green);color:#fff}
+  .step.done{color:var(--text-primary)}
+  .step-sep{flex:1;height:1px;background:var(--border);min-width:20px;margin:0 12px}
+
+  .success-wrap{
+    max-width:760px;margin:0 auto;padding:28px 0;
+    animation:fadeInUp .4s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+  .success-hero{
+    background:linear-gradient(180deg,#fff 0%,#fafbfd 100%);
+    border:1px solid var(--border);border-radius:var(--radius-xl);
+    box-shadow:var(--shadow-card);padding:40px 36px;text-align:center;
+    margin-bottom:20px;position:relative;overflow:hidden;
+  }
+  .success-hero::before{
+    content:"";position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+    width:280px;height:280px;border-radius:50%;
+    background:radial-gradient(circle, rgba(31,137,35,.12) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .success-check{
+    width:88px;height:88px;border-radius:50%;
+    background:linear-gradient(135deg,#25a12a,#1f8923);
+    display:inline-flex;align-items:center;justify-content:center;color:#fff;
+    margin-bottom:18px;box-shadow:0 8px 28px rgba(31,137,35,.35);
+    animation:pop .5s cubic-bezier(.34,1.56,.64,1);
+    position:relative;z-index:1;
+  }
+  @keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+  .success-hero h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px;position:relative;z-index:1}
+  .success-hero p{font-size:14px;color:var(--text-secondary);line-height:1.5;max-width:480px;margin:0 auto;position:relative;z-index:1}
+  .success-stamp{
+    display:inline-flex;align-items:center;gap:6px;margin-top:14px;
+    font-family:'SF Mono',monospace;font-size:11.5px;font-weight:700;
+    color:var(--text-secondary);padding:5px 12px;background:#fff;
+    border:1px solid var(--border);border-radius:var(--radius-full);
+    position:relative;z-index:1;
+  }
+
+  /* Confetti */
+  .confetti{position:absolute;inset:0;pointer-events:none;z-index:0}
+  .confetti span{
+    position:absolute;width:8px;height:12px;
+    animation:fall 2.4s linear forwards;opacity:0;
+  }
+  @keyframes fall{
+    0%{transform:translateY(-30px) rotate(0);opacity:0}
+    15%{opacity:1}
+    100%{transform:translateY(280px) rotate(720deg);opacity:0}
+  }
+
+  /* Receipt card */
+  .receipt{
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
+    box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:20px;
+  }
+  .receipt__head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:20px 28px;border-bottom:1px dashed var(--border);
+  }
+  .receipt__head h3{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.6px}
+  .receipt__id{
+    font-family:'SF Mono',monospace;font-size:12.5px;font-weight:700;
+    color:var(--accent);background:#fff3e6;padding:4px 10px;border-radius:var(--radius-md);
+  }
+
+  .receipt__body{padding:24px 28px;display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+  @media(max-width:640px){ .receipt__body{grid-template-columns:1fr} }
+  .receipt__ava{
+    width:88px;height:88px;border-radius:50%;
+    background:linear-gradient(135deg,#ffbf75,#d74009);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:800;
+    border:3px solid #fff;box-shadow:0 0 0 1px var(--border);
+  }
+  .receipt__person{display:flex;flex-direction:column;gap:4px}
+  .receipt__person-name{font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--text-primary)}
+  .receipt__person-meta{font-size:12.5px;color:var(--text-secondary)}
+
+  .receipt__details{
+    padding:0 28px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;
+  }
+  @media(max-width:640px){ .receipt__details{grid-template-columns:1fr} }
+  .detail{
+    display:flex;flex-direction:column;gap:2px;padding:12px 14px;
+    background:#fafbfd;border:1px solid var(--border);border-radius:var(--radius-md);
+  }
+  .detail dt{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:#b5b9d4;text-transform:uppercase}
+  .detail dd{font-size:13px;color:var(--text-primary);font-weight:700}
+  .detail.highlight{background:var(--green-bg);border-color:var(--green-border)}
+  .detail.highlight dd{color:#0c4d10;font-size:15px}
+  .detail code{font-family:'SF Mono',monospace;font-size:12px;color:var(--accent);font-weight:700}
+
+  .receipt__footer{
+    padding:18px 28px;border-top:1px dashed var(--border);
+    display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+    font-size:11.5px;color:var(--text-secondary);background:#fafbfd;
+  }
+  .receipt__footer strong{color:var(--text-primary)}
+
+  /* Actions */
+  .actions{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:24px}
+  @media(max-width:640px){ .actions{grid-template-columns:1fr} }
+  .btn{
+    height:48px;padding:0 20px;border-radius:var(--radius-md);font:inherit;font-size:13.5px;font-weight:700;
+    cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;
+    border:none;
+  }
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{box-shadow:0 6px 16px rgba(215,64,9,.22)}
+  .btn-outline{background:#fff;color:var(--text-primary);border:1px solid var(--border-dark)}
+  .btn-outline:hover{background:#fafbfd;border-color:var(--text-secondary)}
+
+  /* Status change banner */
+  .status-banner{
+    background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:14px 20px;display:flex;gap:14px;align-items:center;margin-bottom:20px;
+    box-shadow:var(--shadow-card);
+  }
+  .status-banner__ico{
+    width:40px;height:40px;border-radius:var(--radius-md);
+    background:var(--green-bg);color:var(--green);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .status-banner__body{flex:1;min-width:0}
+  .status-banner__title{font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
+  .status-banner__sub{font-size:12px;color:var(--text-secondary)}
+  .status-transition{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700}
+  .status-chip{padding:3px 10px;border-radius:var(--radius-full);font-family:'Inter',sans-serif}
+  .status-chip.otorgado{background:var(--orange-bg);color:var(--accent);border:1px solid var(--orange-border);text-decoration:line-through;opacity:.7}
+  .status-chip.asignado{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+
+  /* Help footer */
+  .help{
+    text-align:center;font-size:12px;color:var(--text-secondary);line-height:1.5;
+  }
+  .help a{color:var(--accent);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <button class="burger-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#282834" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <svg class="naowee-logo" viewBox="0 0 180 34" fill="none"><text x="0" y="24" font-family="Inter" font-weight="800" font-size="22" fill="#002B5B">Naowee</text></svg>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">INCENTIVOS</div>
+      <div class="nav-row" onclick="fadeAndGo('index.html')">
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/></svg></div>
+        <span class="lbl">Índice</span>
+      </div>
+      <div class="nav-row active">
+        <div class="active-bar"></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+        <span class="lbl">Asignar incentivo</span>
+      </div>
+      <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
+        <span class="lbl">Asignaciones</span>
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="nav-row" onclick="fadeAndGo('incentivo-01-login.html')">
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="#B5B9D4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="lbl">Cerrar sesión</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top-header">
+      <div class="profile-switcher" id="profileSwitcher">
+        <div class="user-chip" onclick="toggleProfileDD(event)">
+          <div class="ava"><div class="ava-ring" style="background:#ffdfb5;color:#92400e">DV</div><div class="ava-dot"></div></div>
+          <div class="user-info"><span class="user-name">Doug Vargas</span><span class="user-role">Operador</span></div>
+          <button class="user-chip__chevron" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="page">
+
+      <div class="stepper">
+        <div class="step done"><span class="n">✓</span> Buscar deportista</div>
+        <span class="step-sep"></span>
+        <div class="step done"><span class="n">✓</span> Seleccionar incentivo</div>
+        <span class="step-sep"></span>
+        <div class="step done"><span class="n">✓</span> Evidencia de entrega</div>
+        <span class="step-sep"></span>
+        <div class="step done"><span class="n">✓</span> Confirmación</div>
+      </div>
+
+      <div class="success-wrap">
+
+        <div class="success-hero">
+          <div class="confetti" id="confetti"></div>
+          <div class="success-check">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h1>¡Incentivo entregado con éxito!</h1>
+          <p>El incentivo fue registrado y asociado al perfil del deportista en la plataforma. El código quedó marcado como <strong>Asignado</strong> y se descontó del rubro del programa.</p>
+          <div class="success-stamp" id="stamp">ID · #—</div>
+        </div>
+
+        <!-- Status transition -->
+        <div class="status-banner">
+          <div class="status-banner__ico">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="status-banner__body">
+            <div class="status-banner__title">Estado del incentivo actualizado</div>
+            <div class="status-banner__sub">El cambio quedó registrado en el historial con timestamp y datos del gestor.</div>
+          </div>
+          <div class="status-transition">
+            <span class="status-chip otorgado">Otorgado</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span class="status-chip asignado">Asignado</span>
+          </div>
+        </div>
+
+        <!-- Receipt -->
+        <div class="receipt">
+          <div class="receipt__head">
+            <h3>Comprobante de entrega</h3>
+            <span class="receipt__id" id="receiptId">#INC-2026-04821</span>
+          </div>
+          <div class="receipt__body">
+            <div class="receipt__ava" id="receiptAva">MC</div>
+            <div class="receipt__person">
+              <div class="receipt__person-name" id="receiptName">María Camila Herrera Rojas</div>
+              <div class="receipt__person-meta"><span id="receiptDoc">CC 1.001.234.567</span> · 19 años · Atletismo</div>
+            </div>
+          </div>
+          <dl class="receipt__details">
+            <div class="detail">
+              <dt>Incentivo</dt>
+              <dd id="receiptInc">Beca educativa · Medallistas de oro</dd>
+            </div>
+            <div class="detail highlight">
+              <dt>Valor entregado</dt>
+              <dd id="receiptValue">$1.000.000</dd>
+            </div>
+            <div class="detail">
+              <dt>Código asignado</dt>
+              <dd><code id="receiptCode">2026BEC-00042</code></dd>
+            </div>
+            <div class="detail">
+              <dt>Programa</dt>
+              <dd>Becas deportivas 2026</dd>
+            </div>
+            <div class="detail">
+              <dt>Gestor en campo</dt>
+              <dd>Doug Vargas</dd>
+            </div>
+            <div class="detail">
+              <dt>Fecha y hora</dt>
+              <dd id="receiptDate">—</dd>
+            </div>
+          </dl>
+          <div class="receipt__footer">
+            <span>Evidencia registrada: <strong id="evidenceLabel">Foto de entrega · 1.2 MB</strong></span>
+            <span>Zona: <strong>Atlántico · Barranquilla</strong></span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button class="btn btn-primary" onclick="fadeAndGo('incentivo-08-asignar-buscar.html')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva asignación
+          </button>
+          <button class="btn btn-outline" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+            Imprimir
+          </button>
+          <button class="btn btn-outline" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg>
+            Ver historial
+          </button>
+        </div>
+
+        <div class="help">
+          ¿Necesitas revertir esta asignación? Solicita al gestor de incentivos desde
+          <a href="incentivo-12-asignaciones.html">el historial de asignaciones</a>.
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Confetti */
+(function confetti(){
+  const colors = ['#FF7500','#d74009','#1f8923','#1f78d1','#ffbf75','#fff'];
+  const wrap = document.getElementById('confetti');
+  for(let i=0;i<40;i++){
+    const s = document.createElement('span');
+    s.style.left = (Math.random()*100)+'%';
+    s.style.background = colors[Math.floor(Math.random()*colors.length)];
+    s.style.animationDelay = (Math.random()*.6)+'s';
+    s.style.animationDuration = (1.8 + Math.random()*1.4)+'s';
+    s.style.top = '0';
+    s.style.borderRadius = Math.random() > .5 ? '2px':'50%';
+    wrap.appendChild(s);
+  }
+})();
+
+/* Generate receipt ID */
+const rid = '#INC-2026-' + String(Math.floor(Math.random()*90000)+10000);
+document.getElementById('receiptId').textContent = rid;
+document.getElementById('stamp').textContent = 'ID · ' + rid;
+
+/* Date */
+const now = new Date();
+document.getElementById('receiptDate').textContent = now.toLocaleString('es-CO', {
+  day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'
+});
+
+/* Hydrate from session */
+try{
+  const s = JSON.parse(sessionStorage.getItem('inc-assignment-complete') || '{}');
+  if(s.name) document.getElementById('receiptName').textContent = s.name;
+  if(s.initials) document.getElementById('receiptAva').textContent = s.initials;
+  if(s.doc) document.getElementById('receiptDoc').textContent = `${s.docType || 'CC'} ${s.doc}`;
+  if(s.incentive) document.getElementById('receiptInc').textContent = s.incentive;
+  if(s.code) document.getElementById('receiptCode').textContent = s.code;
+  if(s.value) document.getElementById('receiptValue').textContent = `$${s.value.toLocaleString('es-CO')}`;
+  if(s.evidence) document.getElementById('evidenceLabel').textContent = s.evidence;
+}catch(e){}
+
+/* Helpers */
+function fadeAndGo(url){
+  document.body.style.transition = 'opacity .25s ease';
+  document.body.style.opacity = '0';
+  setTimeout(() => { window.location.href = url; }, 260);
+}
+function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('profileSwitcher')?.classList.toggle('open'); }
+document.addEventListener('click', (e) => { const sw = document.getElementById('profileSwitcher'); if(sw && !sw.contains(e.target)) sw.classList.remove('open'); });
+</script>
+</body>
+</html>
