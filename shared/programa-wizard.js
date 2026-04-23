@@ -48,9 +48,14 @@
     upgradeDropdowns();
     upgradeDatepickers();
     wireDropzone();
+    wireDropzoneClick();
     wireChipPicker();
     wireSegments();
+    wireCodesMode();
     wireInputMasks();
+    wireBudgetInputs();
+    seedManualRows();
+    seedFirstCondition();
     // ESC
     document.addEventListener('keydown', e => {
       if(e.key === 'Escape' && document.getElementById('wzOverlay').classList.contains('open')){
@@ -93,6 +98,17 @@
 
   function goStep(s){ currentStep = s; renderStep(); }
 
+  /* Clic en stepper:
+     - Permite ir a pasos ya completados (s < currentStep) sin validar
+     - Permite quedarse en el actual
+     - Bloquea saltar hacia adelante — forzar uso del botón "Continuar" */
+  function tryGoStep(s){
+    if(s <= currentStep){ goStep(s); return; }
+    if(!validateStep(currentStep)) return;
+    if(s === currentStep + 1){ currentStep = s; renderStep(); }
+    // más de un paso adelante: bloqueado, solo secuencial
+  }
+
   function nextStep(){
     if(!validateStep(currentStep)) return;
     if(currentStep < totalSteps){ currentStep++; renderStep(); }
@@ -105,6 +121,7 @@
     const pane = document.querySelector(`.wz-pane[data-pane="${step}"]`);
     if(!pane) return true;
     let ok = true;
+    let firstInvalid = null;
     pane.querySelectorAll('[data-wz-required]').forEach(field => {
       const input = field.querySelector('input, textarea');
       const isDropdown = field.classList.contains('naowee-dropdown');
@@ -115,10 +132,32 @@
       if(isEmpty){
         ok = false;
         markError(field);
+        if(!firstInvalid) firstInvalid = field;
       }else{
         clearError(field);
       }
     });
+    if(!ok && firstInvalid){
+      // Scroll suave dentro del body del modal al primer campo inválido
+      const body = document.getElementById('wzBody');
+      if(body){
+        const bodyRect = body.getBoundingClientRect();
+        const fieldRect = firstInvalid.getBoundingClientRect();
+        const targetTop = body.scrollTop + (fieldRect.top - bodyRect.top) - 24;
+        body.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+      }else{
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      // Relanzar la animación shake después del scroll para que sea visible
+      setTimeout(() => {
+        pane.querySelectorAll('.naowee-textfield--error, .naowee-dropdown--error').forEach(f => {
+          f.classList.remove('wz-shake');
+          void f.offsetWidth;
+          f.classList.add('wz-shake');
+          setTimeout(() => f.classList.remove('wz-shake'), 500);
+        });
+      }, 260);
+    }
     return ok;
   }
 
@@ -471,35 +510,619 @@
     });
   }
 
-  /* ══ Step-3 toggle ══ */
-  function toggleIncType(el){
-    el.parentElement.querySelectorAll('.toggle-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+  /* ══ Step-5 codes mode (upload vs manual) ══ */
+  function wireCodesMode(){
+    const seg = document.querySelector('[data-wz-name="codes-mode"]');
+    if(!seg || seg.dataset.wzCodesWired) return;
+    seg.dataset.wzCodesWired = '1';
+    seg.querySelectorAll('.naowee-segment__item').forEach(it => {
+      it.addEventListener('click', () => {
+        const mode = it.dataset.val;
+        document.querySelectorAll('.wz-codes-mode').forEach(pane => {
+          pane.hidden = pane.dataset.mode !== mode;
+        });
+        updateBudget();
+      });
+    });
   }
 
-  /* ══ Step-4 add condition ══ */
-  function addConditionRow(btn){
+  function wireBudgetInputs(){
+    ['wzRubroTotal', 'wzValorUnit'].forEach(id => {
+      const el = document.getElementById(id);
+      if(!el || el.dataset.wzBudgetWired) return;
+      el.dataset.wzBudgetWired = '1';
+      el.addEventListener('input', updateBudget);
+    });
+  }
+
+  function seedManualRows(){
+    const rows = document.getElementById('wzManualRows');
+    if(!rows || rows.children.length > 0) return;
+    for(let i = 1; i <= 3; i++){
+      const row = makeManualRow(i);
+      rows.appendChild(row);
+    }
+    upgradeDropdowns();
+    wireInputMasks();
+    rows.addEventListener('input', updateBudget);
+  }
+
+  function makeManualRow(defaultIdx){
+    const row = document.createElement('div');
+    row.className = 'manual-row';
+    row.innerHTML = `
+      <input type="text" placeholder="2026BEC-${String(defaultIdx || 1).padStart(5, '0')}"/>
+      <div class="naowee-dropdown manual-row__cat" data-wz-dropdown data-wz-name="manual-cat">
+        <div class="naowee-dropdown__trigger" tabindex="0">
+          <span class="naowee-dropdown__placeholder">Categoría</span>
+          <div class="naowee-dropdown__controls">
+            <span class="naowee-dropdown__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+        </div>
+        <div class="naowee-dropdown__menu" role="listbox">
+          <div class="naowee-dropdown__option" data-val="bono">Bono</div>
+          <div class="naowee-dropdown__option" data-val="beca">Beca</div>
+          <div class="naowee-dropdown__option" data-val="kit">Kit</div>
+          <div class="naowee-dropdown__option" data-val="transporte">Transporte</div>
+          <div class="naowee-dropdown__option" data-val="inscripcion">Inscripción</div>
+          <div class="naowee-dropdown__option" data-val="descuento">Descuento</div>
+          <div class="naowee-dropdown__option" data-val="pase">Pase / acceso</div>
+          <div class="naowee-dropdown__option" data-val="dinero">Dinero</div>
+        </div>
+      </div>
+      <input type="text" inputmode="numeric" placeholder="1.000.000" data-wz-input="money"/>
+      <button type="button" class="x-btn" onclick="removeManualRow(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+    return row;
+  }
+
+  function seedFirstCondition(){
+    const builder = document.getElementById('wzCondBuilder');
+    if(!builder || builder.children.length > 0) return;
+    addConditionGroup();
+  }
+
+  function addManualRow(){
+    const rows = document.getElementById('wzManualRows');
+    if(!rows) return;
+    const defaultIdx = rows.children.length + 1;
+    const row = makeManualRow(defaultIdx);
+    rows.appendChild(row);
+    upgradeDropdowns();
+    wireInputMasks();
+    updateBudget();
+    const firstInput = row.querySelector('input');
+    if(firstInput) firstInput.focus();
+  }
+
+  function removeManualRow(btn){
+    const row = btn.closest('.manual-row');
+    const rows = document.getElementById('wzManualRows');
+    if(rows && rows.children.length <= 1) return;
+    row.remove();
+    updateBudget();
+  }
+
+  /* ══ Step-3 — toggle single vs multi + add/remove incentivos ══ */
+  let incTypesMode = 'single';
+  let incCounter = 1;
+
+  function setIncTypesMode(el, mode){
+    incTypesMode = mode;
+    el.parentElement.querySelectorAll('.toggle-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const addBtn = document.getElementById('wzAddInc');
+    if(addBtn) addBtn.hidden = (mode !== 'multi');
+    // Si cambió a single: dejar sólo la primera tarjeta
+    if(mode === 'single'){
+      const list = document.getElementById('wzIncList');
+      if(list){
+        [...list.querySelectorAll('.wz-inc-card')].slice(1).forEach(c => c.remove());
+        incCounter = 1;
+      }
+    }
+  }
+
+  function addIncentive(){
+    if(incTypesMode !== 'multi') return;
+    const list = document.getElementById('wzIncList');
+    if(!list) return;
+    incCounter++;
+    const idx = incCounter;
+    const card = document.createElement('div');
+    card.className = 'wz-inc-card';
+    card.dataset.idx = idx;
+    card.innerHTML = `
+      <div class="wz-inc-card__head">
+        <span class="wz-inc-card__badge">Incentivo #${idx}</span>
+        <button type="button" class="wz-inc-card__remove" onclick="removeIncentive(this)" aria-label="Eliminar incentivo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="wz-grid">
+        <div class="naowee-textfield" data-wz-required>
+          <label class="naowee-textfield__label naowee-textfield__label--required">Nombre del incentivo</label>
+          <div class="naowee-textfield__input-wrap">
+            <input class="naowee-textfield__input" type="text" placeholder="Ej. Kit deportivo" data-wz-input="text" maxlength="100"/>
+          </div>
+        </div>
+        <div class="naowee-dropdown" data-wz-dropdown data-wz-name="categoria" data-wz-required>
+          <label class="naowee-dropdown__label naowee-dropdown__label--required">Categoría</label>
+          <div class="naowee-dropdown__trigger" tabindex="0">
+            <span class="naowee-dropdown__placeholder">Selecciona categoría</span>
+            <div class="naowee-dropdown__controls">
+              <span class="naowee-dropdown__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </div>
+          </div>
+          <div class="naowee-dropdown__menu" role="listbox">
+            <div class="naowee-dropdown__option" data-val="bono">Bono</div>
+            <div class="naowee-dropdown__option" data-val="beca">Beca</div>
+            <div class="naowee-dropdown__option" data-val="kit">Kit</div>
+            <div class="naowee-dropdown__option" data-val="transporte">Transporte</div>
+            <div class="naowee-dropdown__option" data-val="inscripcion">Inscripción</div>
+            <div class="naowee-dropdown__option" data-val="descuento">Descuento</div>
+            <div class="naowee-dropdown__option" data-val="pase">Pase / acceso</div>
+            <div class="naowee-dropdown__option" data-val="dinero">Dinero</div>
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(card);
+    upgradeDropdowns();
+    wireInputMasks();
+    const firstInput = card.querySelector('input');
+    if(firstInput) firstInput.focus();
+  }
+
+  function removeIncentive(btn){
+    const card = btn.closest('.wz-inc-card');
+    if(!card) return;
+    const list = document.getElementById('wzIncList');
+    if(list && list.children.length <= 1) return; // siempre al menos uno
+    card.remove();
+  }
+
+  /* ══ Step-4 — condiciones dinámicas (Edad, Género, Categoría, Logros) ══ */
+  const COND_FIELDS = {
+    edad:      { label: 'Edad',                operators: [['gte','≥'],['lte','≤'],['eq','='],['neq','≠']], valueType: 'number', placeholder: 'Años' },
+    genero:    { label: 'Género',              operators: [['eq','='],['neq','≠']],                         valueType: 'select',  options: [['masculino','Masculino'],['femenino','Femenino'],['otro','Otro']] },
+    categoria: { label: 'Categoría deportiva', operators: [['eq','='],['in','∈']],                          valueType: 'select',  options: [['infantil','Infantil'],['prejuvenil','Pre-juvenil'],['juvenil','Juvenil'],['junior','Junior'],['sub23','Sub-23'],['mayores','Mayores'],['master','Máster']] },
+    logros:    { label: 'Logros',              operators: [['in','∈'],['nin','∉']],                         valueType: 'select',  options: [['oro','Medalla de oro'],['plata','Medalla de plata'],['bronce','Medalla de bronce'],['top10','Top 10'],['participacion','Participación']] }
+  };
+
+  let condRowCounter = 0;
+  let condGroupCounter = 0;
+
+  function addConditionGroup(){
+    const builder = document.getElementById('wzCondBuilder');
+    if(!builder) return;
+    // Si ya hay al menos un grupo, inserta divider OR antes del nuevo
+    if(builder.children.length > 0){
+      const divider = document.createElement('div');
+      divider.className = 'cond-or-divider';
+      divider.innerHTML = `<span class="cond-or-divider__pill">OR</span>`;
+      builder.appendChild(divider);
+    }
+    condGroupCounter++;
+    const groupNum = builder.querySelectorAll('.cond-group').length + 1;
+    const group = document.createElement('div');
+    group.className = 'cond-group';
+    group.dataset.groupId = condGroupCounter;
+    group.innerHTML = `
+      <div class="cond-group__head">
+        <span class="cond-group__badge">Grupo ${groupNum} · AND</span>
+        <button type="button" class="cond-group__remove" onclick="removeConditionGroup(this)" aria-label="Eliminar grupo"${groupNum === 1 ? ' hidden' : ''}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="cond-rows"></div>
+      <button type="button" class="add-cond" onclick="addConditionRow(this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Añadir condición
+      </button>`;
+    builder.appendChild(group);
+    // Auto-añadir la primera condición del grupo
+    addConditionRow(group.querySelector('.add-cond'));
+    // Re-renumerar badges (por si se quitó uno en medio)
+    renumberCondGroups();
+  }
+
+  function removeConditionGroup(btn){
     const group = btn.closest('.cond-group');
+    if(!group) return;
+    // Quitar divider OR hermano (antes o después)
+    const prev = group.previousElementSibling;
+    const next = group.nextElementSibling;
+    if(prev && prev.classList.contains('cond-or-divider')) prev.remove();
+    else if(next && next.classList.contains('cond-or-divider')) next.remove();
+    group.remove();
+    renumberCondGroups();
+    refreshCondPreview();
+  }
+
+  function renumberCondGroups(){
+    const groups = document.querySelectorAll('#wzCondBuilder .cond-group');
+    groups.forEach((g, i) => {
+      const badge = g.querySelector('.cond-group__badge');
+      if(badge) badge.textContent = `Grupo ${i + 1} · AND`;
+      const rm = g.querySelector('.cond-group__remove');
+      if(rm) rm.hidden = (groups.length === 1);
+    });
+  }
+
+  function addConditionRow(btnOrNothing){
+    // Resolver el grupo: si viene del botón, usa ese grupo; si no, el último grupo
+    let group;
+    if(btnOrNothing && btnOrNothing.closest){
+      group = btnOrNothing.closest('.cond-group');
+    }else{
+      const groups = document.querySelectorAll('#wzCondBuilder .cond-group');
+      group = groups[groups.length - 1];
+    }
+    if(!group) return;
+    const rows = group.querySelector('.cond-rows');
+    if(!rows) return;
+    condRowCounter++;
+    const id = condRowCounter;
     const row = document.createElement('div');
     row.className = 'cond-row';
+    row.dataset.rowId = id;
     row.innerHTML = `
-      <select><option>Edad</option><option>Género</option><option selected>Categoría deportiva</option><option>Logros</option></select>
-      <select><option selected>=</option><option>≥</option><option>≤</option></select>
-      <input type="text" placeholder="Valor"/>
-      <button class="x-btn" onclick="this.closest('.cond-row').remove()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
-    group.insertBefore(row, btn);
+      <div class="naowee-dropdown cond-field" data-wz-dropdown data-cond-field data-val="edad">
+        <div class="naowee-dropdown__trigger" tabindex="0">
+          <span class="naowee-dropdown__value">Edad</span>
+          <div class="naowee-dropdown__controls">
+            <span class="naowee-dropdown__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+        </div>
+        <div class="naowee-dropdown__menu" role="listbox">
+          ${Object.entries(COND_FIELDS).map(([k,v], i) => `<div class="naowee-dropdown__option${i === 0 ? ' naowee-dropdown__option--selected' : ''}" data-val="${k}">${v.label}</div>`).join('')}
+        </div>
+      </div>
+      <div class="naowee-dropdown cond-op" data-wz-dropdown data-cond-op>
+        <div class="naowee-dropdown__trigger" tabindex="0">
+          <span class="naowee-dropdown__value">≥</span>
+          <div class="naowee-dropdown__controls">
+            <span class="naowee-dropdown__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+        </div>
+        <div class="naowee-dropdown__menu" role="listbox"></div>
+      </div>
+      <span data-cond-value></span>
+      <button type="button" class="x-btn" onclick="removeConditionRow(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+    rows.appendChild(row);
+    rebuildCondRow(row, 'edad');
+    // Wire dropdowns (field + op)
+    upgradeDropdowns();
+    // Custom behavior: when field option picked, rebuild operator + value (after native upgrade)
+    const fieldDd = row.querySelector('.cond-field');
+    fieldDd.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const newField = opt.dataset.val;
+        fieldDd.dataset.val = newField;
+        setTimeout(() => rebuildCondRow(row, newField), 0);
+      });
+    });
+    refreshCondPreview();
+  }
+
+  function removeConditionRow(btn){
+    const row = btn.closest('.cond-row');
+    if(!row) return;
+    row.remove();
+    refreshCondPreview();
+  }
+
+  function rebuildCondRow(row, fieldKey){
+    const def = COND_FIELDS[fieldKey];
+    if(!def) return;
+    const opDd = row.querySelector('.cond-op');
+    if(opDd){
+      const menu = opDd.querySelector('.naowee-dropdown__menu');
+      menu.innerHTML = def.operators.map(([v, lbl], i) => `<div class="naowee-dropdown__option${i === 0 ? ' naowee-dropdown__option--selected' : ''}" data-val="${v}">${lbl}</div>`).join('');
+      opDd.querySelector('.naowee-dropdown__value').textContent = def.operators[0][1];
+      opDd.dataset.val = def.operators[0][0];
+      // Re-wire options for op (since menu replaced)
+      opDd.removeAttribute('data-wz-wired');
+      delete opDd.dataset.wzWired;
+      upgradeDropdowns();
+      opDd.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          opDd.dataset.val = opt.dataset.val;
+          refreshCondPreview();
+        });
+      });
+    }
+    const valSpan = row.querySelector('[data-cond-value]');
+    if(def.valueType === 'number'){
+      valSpan.innerHTML = makeStepper({ min: 0, max: 120, value: 18, unit: def.placeholder || '' });
+      wireStepper(valSpan.querySelector('[data-cond-val]'));
+    }else if(def.valueType === 'select'){
+      valSpan.innerHTML = `
+        <div class="naowee-dropdown cond-val" data-wz-dropdown data-cond-val>
+          <div class="naowee-dropdown__trigger" tabindex="0">
+            <span class="naowee-dropdown__placeholder">Selecciona…</span>
+            <div class="naowee-dropdown__controls">
+              <span class="naowee-dropdown__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </div>
+          </div>
+          <div class="naowee-dropdown__menu" role="listbox">
+            ${def.options.map(([v, lbl]) => `<div class="naowee-dropdown__option" data-val="${v}">${lbl}</div>`).join('')}
+          </div>
+        </div>`;
+      upgradeDropdowns();
+      valSpan.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          valSpan.querySelector('.cond-val').dataset.val = opt.dataset.val;
+          refreshCondPreview();
+        });
+      });
+    }
+    refreshCondPreview();
+  }
+
+  /* Stepper DS helpers */
+  function makeStepper({ min = 0, max = 120, value = 0, unit = '' } = {}){
+    return `
+      <div class="naowee-input-stepper naowee-input-stepper--small" data-cond-val data-min="${min}" data-max="${max}">
+        <div class="naowee-input-stepper__content">
+          <div class="naowee-input-stepper__input">
+            <button type="button" class="naowee-input-stepper__btn" data-step="-1" aria-label="Restar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <div class="naowee-input-stepper__value">
+              <input class="naowee-input-stepper__value-input" type="number" value="${value}" min="${min}" max="${max}"/>
+              ${unit ? `<span class="naowee-input-stepper__value-comp">${unit}</span>` : ''}
+            </div>
+            <button type="button" class="naowee-input-stepper__btn" data-step="1" aria-label="Sumar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+  }
+  function wireStepper(stepper){
+    if(!stepper) return;
+    const input = stepper.querySelector('.naowee-input-stepper__value-input');
+    const min = Number(stepper.dataset.min) || 0;
+    const max = Number(stepper.dataset.max) || 999;
+    stepper.querySelectorAll('.naowee-input-stepper__btn').forEach(b => {
+      b.addEventListener('click', () => {
+        const delta = Number(b.dataset.step);
+        let v = Number(input.value) || 0;
+        v = Math.max(min, Math.min(max, v + delta));
+        input.value = v;
+        refreshCondPreview();
+      });
+    });
+    input.addEventListener('input', () => {
+      let v = Number(input.value) || 0;
+      if(v < min) v = min;
+      if(v > max) v = max;
+      refreshCondPreview();
+    });
+    input.addEventListener('focus', () => stepper.classList.add('naowee-input-stepper--active'));
+    input.addEventListener('blur', () => stepper.classList.remove('naowee-input-stepper--active'));
+  }
+
+  function refreshCondPreview(){
+    const pv = document.getElementById('wzCondPreview');
+    if(!pv) return;
+    const groups = document.querySelectorAll('#wzCondBuilder .cond-group');
+    if(!groups.length){
+      pv.innerHTML = `Vista previa: <em>agrega al menos una condición para ver la vista previa.</em>`;
+      return;
+    }
+    const groupPieces = [];
+    groups.forEach(g => {
+      const rows = g.querySelectorAll('.cond-row');
+      if(!rows.length) return;
+      const rowPieces = [...rows].map(r => {
+        const fieldKey = r.querySelector('[data-cond-field]').dataset.val || 'edad';
+        const def = COND_FIELDS[fieldKey];
+        const opVal = r.querySelector('[data-cond-op]').dataset.val || def.operators[0][0];
+        const opLbl = (def.operators.find(o => o[0] === opVal) || ['', '?'])[1];
+        const valEl = r.querySelector('[data-cond-val]');
+        let rawVal = '';
+        if(valEl){
+          if(valEl.classList.contains('naowee-input-stepper')){
+            rawVal = valEl.querySelector('input').value;
+          }else if(valEl.classList.contains('naowee-dropdown')){
+            rawVal = valEl.querySelector('.naowee-dropdown__value')?.textContent || '';
+          }
+        }
+        const val = String(rawVal).trim() || '…';
+        return `<code>${def.label} ${opLbl} ${val}</code>`;
+      });
+      const joined = rowPieces.join(` <strong>AND</strong> `);
+      groupPieces.push(groups.length > 1 ? `(${joined})` : joined);
+    });
+    if(!groupPieces.length){
+      pv.innerHTML = `Vista previa: <em>agrega al menos una condición para ver la vista previa.</em>`;
+      return;
+    }
+    pv.innerHTML = `Vista previa: ${groupPieces.join(' <strong>OR</strong> ')}`;
+  }
+
+  /* ══ Step-5 — dropzone clickeable + file chip + budget live ══ */
+  function wireDropzoneClick(){
+    const dz = document.getElementById('wzDrop');
+    const input = document.getElementById('wzFileInput');
+    if(!dz || !input || dz.dataset.wzClickWired) return;
+    dz.dataset.wzClickWired = '1';
+    dz.addEventListener('click', () => input.click());
+    dz.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); input.click(); }
+    });
+    input.addEventListener('change', () => {
+      const f = input.files && input.files[0];
+      if(!f) return;
+      const chip = document.getElementById('wzFileChip');
+      if(!chip) return;
+      chip.hidden = false;
+      dz.style.display = 'none';
+      chip.innerHTML = `
+        <div class="wz-file-chip__ico">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="wz-file-chip__body">
+          <div class="wz-file-chip__name">${escapeHtml(f.name)}</div>
+          <div class="wz-file-chip__meta">${(f.size/1024).toFixed(1)} KB · listo para procesar</div>
+        </div>
+        <button type="button" class="wz-file-chip__remove" onclick="resetWzFile()" aria-label="Quitar archivo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>`;
+    });
+  }
+  function resetWzFile(){
+    const chip = document.getElementById('wzFileChip');
+    const dz = document.getElementById('wzDrop');
+    const input = document.getElementById('wzFileInput');
+    if(chip){ chip.hidden = true; chip.innerHTML = ''; }
+    if(dz) dz.style.display = '';
+    if(input) input.value = '';
+    updateBudget();
+  }
+  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function parseMoney(el){
+    if(!el) return 0;
+    const digits = String(el.value || '').replace(/\D/g, '');
+    return digits ? Number(digits) : 0;
+  }
+
+  function updateBudget(){
+    const bx = document.getElementById('wzBudget');
+    if(!bx) return;
+    const rubro = parseMoney(document.getElementById('wzRubroTotal'));
+    const unit = parseMoney(document.getElementById('wzValorUnit'));
+    const mode = (document.querySelector('[data-wz-name="codes-mode"]')?.dataset?.wzValue) || 'upload';
+    if(!rubro || !unit){
+      bx.hidden = true; bx.innerHTML = '';
+      return;
+    }
+    const expected = Math.floor(rubro / unit);
+    const fmt = n => `$${n.toLocaleString('es-CO')}`;
+    let variant, iconSvg, text;
+    if(mode === 'manual'){
+      const rows = [...document.querySelectorAll('#wzManualRows .manual-row')];
+      const count = rows.length;
+      const sum = rows.reduce((acc, r) => {
+        const inputs = r.querySelectorAll('input[data-wz-input="money"], input[inputmode="numeric"]');
+        const v = parseMoney(inputs[inputs.length - 1]);
+        return acc + (v || unit);
+      }, 0);
+      if(sum > rubro){
+        variant = 'negative';
+        iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+        text = `Los <strong>${count} códigos</strong> suman <strong>${fmt(sum)}</strong>, que excede el rubro disponible de <strong>${fmt(rubro)}</strong>. Ajusta valores o elimina códigos.`;
+      }else if(sum === rubro){
+        variant = 'positive';
+        iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+        text = `<strong>${count} códigos</strong> por un total de <strong>${fmt(sum)}</strong>. Rubro consumido al 100%.`;
+      }else{
+        variant = 'informative';
+        iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`;
+        const restante = rubro - sum;
+        text = `<strong>${count} de ${expected} códigos</strong> registrados (<strong>${fmt(sum)}</strong> de ${fmt(rubro)}). Faltan <strong>${fmt(restante)}</strong> por asignar.`;
+      }
+    }else{
+      variant = 'informative';
+      iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`;
+      text = `Rubro <strong>${fmt(rubro)}</strong> ÷ valor unitario <strong>${fmt(unit)}</strong> = <strong>${expected} códigos</strong> esperados en el archivo.`;
+    }
+    bx.hidden = false;
+    bx.innerHTML = `
+      <div class="naowee-message naowee-message--${variant}">
+        <div class="naowee-message__header">
+          <div class="naowee-message__icon">${iconSvg}</div>
+          <div class="naowee-message__text">${text}</div>
+        </div>
+      </div>`;
+  }
+
+  /* ══ Success modal ══ */
+  function showSuccessModal(){
+    const overlay = document.getElementById('wzSuccessOverlay');
+    if(!overlay) return;
+    // Poblar stats
+    const rubro = parseMoney(document.getElementById('wzRubroTotal'));
+    const unit = parseMoney(document.getElementById('wzValorUnit'));
+    const expected = rubro && unit ? Math.floor(rubro / unit) : 0;
+    const from = document.querySelector('.wz-pane[data-pane="1"] [data-wz-datepicker]:nth-of-type(1) input')?.value || '—';
+    const to = document.querySelector('.wz-pane[data-pane="1"] [data-wz-datepicker]:nth-of-type(2) input')?.value || '—';
+    overlay.querySelector('[data-key="rubro"]').textContent = rubro ? `$${rubro.toLocaleString('es-CO')}` : '—';
+    overlay.querySelector('[data-key="codigos"]').textContent = expected || '—';
+    overlay.querySelector('[data-key="vigencia"]').textContent = (from !== '—' && to !== '—') ? `${from} → ${to}` : (from !== '—' ? from : '—');
+    seedConfetti();
+    overlay.classList.add('open');
+  }
+
+  function seedConfetti(){
+    const root = document.getElementById('wzConfetti');
+    if(!root) return;
+    root.innerHTML = '';
+    const colors = ['#d74009', '#ff9f3c', '#1f8923', '#1f78d1', '#7c3aed', '#f7b500', '#e53935'];
+    const pieces = 32;
+    for(let i = 0; i < pieces; i++){
+      const p = document.createElement('div');
+      p.className = 'wz-confetti__piece';
+      const angle = (Math.random() * Math.PI) - Math.PI / 2; // -90 a +90 grados
+      const dist = 110 + Math.random() * 120;
+      const x = Math.cos(angle) * dist;
+      const y = -Math.abs(Math.sin(angle) * dist) - 30;
+      p.style.background = colors[i % colors.length];
+      p.style.setProperty('--wz-c-x', `${x}px`);
+      p.style.setProperty('--wz-c-y', `${y}px`);
+      p.style.setProperty('--wz-c-r', `${(Math.random() * 720 - 360).toFixed(0)}deg`);
+      p.style.width = `${6 + Math.random() * 4}px`;
+      p.style.height = `${10 + Math.random() * 6}px`;
+      p.style.animationDelay = `${(Math.random() * .15).toFixed(2)}s`;
+      root.appendChild(p);
+    }
+  }
+  function hideSuccessModal(){
+    const overlay = document.getElementById('wzSuccessOverlay');
+    if(overlay) overlay.classList.remove('open');
+  }
+  function closeSuccessAndNew(){
+    hideSuccessModal();
+    currentStep = 1;
+    renderStep();
+    document.getElementById('wzOverlay').classList.add('open');
+  }
+  function goToProgramDetail(){
+    hideSuccessModal();
+    window.location.href = 'incentivo-05-programa-detalle.html?activated=1';
   }
 
   /* ══ Step-5 activate ══ */
   function activateProgram(){
+    // Validar rubro antes de activar
+    const rubro = parseMoney(document.getElementById('wzRubroTotal'));
+    const mode = (document.querySelector('[data-wz-name="codes-mode"]')?.dataset?.wzValue) || 'upload';
+    if(mode === 'manual' && rubro){
+      const unit = parseMoney(document.getElementById('wzValorUnit'));
+      const rows = [...document.querySelectorAll('#wzManualRows .manual-row')];
+      const sum = rows.reduce((acc, r) => {
+        const inputs = r.querySelectorAll('input[data-wz-input="money"], input[inputmode="numeric"]');
+        const v = parseMoney(inputs[inputs.length - 1]);
+        return acc + (v || unit);
+      }, 0);
+      if(sum > rubro){
+        updateBudget();
+        const body = document.getElementById('wzBody');
+        const bx = document.getElementById('wzBudget');
+        if(body && bx){
+          const bodyRect = body.getBoundingClientRect();
+          const bxRect = bx.getBoundingClientRect();
+          body.scrollTo({ top: body.scrollTop + (bxRect.top - bodyRect.top) - 24, behavior: 'smooth' });
+        }
+        return;
+      }
+    }
+    // Cerrar wizard y mostrar success modal
     const overlay = document.getElementById('wzOverlay');
     overlay.classList.remove('open');
-    if(typeof window.showToast === 'function'){
-      window.showToast('Programa creado. Listo para asignaciones.', 'positive');
-    }else{
-      alert('Programa creado. Listo para asignaciones.');
-    }
-    // If the host page exposes a refresh hook, call it.
+    showSuccessModal();
     if(typeof window.onProgramCreated === 'function') window.onProgramCreated();
   }
 
@@ -515,12 +1138,23 @@
   window.openWizard = openWizard;
   window.closeWizard = closeWizard;
   window.goStep = goStep;
+  window.tryGoStep = tryGoStep;
   window.nextStep = nextStep;
   window.prevStep = prevStep;
   window.saveDraft = saveDraft;
   window.activateProgram = activateProgram;
-  window.toggleIncType = toggleIncType;
+  window.setIncTypesMode = setIncTypesMode;
+  window.addIncentive = addIncentive;
+  window.removeIncentive = removeIncentive;
+  window.addConditionGroup = addConditionGroup;
+  window.removeConditionGroup = removeConditionGroup;
   window.addConditionRow = addConditionRow;
+  window.removeConditionRow = removeConditionRow;
+  window.addManualRow = addManualRow;
+  window.removeManualRow = removeManualRow;
+  window.resetWzFile = resetWzFile;
+  window.closeSuccessAndNew = closeSuccessAndNew;
+  window.goToProgramDetail = goToProgramDetail;
 
   /* ══ Auto-mount on load, auto-open if ?new=1 ══ */
   document.addEventListener('DOMContentLoaded', () => {
