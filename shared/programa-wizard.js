@@ -1139,22 +1139,17 @@
     const root = document.getElementById('wzConfetti');
     if(!root) return;
     root.innerHTML = '';
-    const colors = ['#d74009', '#ff9f3c', '#1f8923', '#1f78d1', '#7c3aed', '#f7b500', '#e53935'];
-    const pieces = 32;
+    // Patrón escenario-11: paleta mixta + falling confetti
+    const colors = ['#FF7500', '#d74009', '#1f8923', '#1f78d1', '#ffbf75', '#ffffff'];
+    const pieces = 42;
     for(let i = 0; i < pieces; i++){
-      const p = document.createElement('div');
+      const p = document.createElement('span');
       p.className = 'wz-confetti__piece';
-      const angle = (Math.random() * Math.PI) - Math.PI / 2; // -90 a +90 grados
-      const dist = 110 + Math.random() * 120;
-      const x = Math.cos(angle) * dist;
-      const y = -Math.abs(Math.sin(angle) * dist) - 30;
-      p.style.background = colors[i % colors.length];
-      p.style.setProperty('--wz-c-x', `${x}px`);
-      p.style.setProperty('--wz-c-y', `${y}px`);
-      p.style.setProperty('--wz-c-r', `${(Math.random() * 720 - 360).toFixed(0)}deg`);
-      p.style.width = `${6 + Math.random() * 4}px`;
-      p.style.height = `${10 + Math.random() * 6}px`;
-      p.style.animationDelay = `${(Math.random() * .15).toFixed(2)}s`;
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.animationDelay = (Math.random() * 0.6).toFixed(2) + 's';
+      p.style.animationDuration = (1.8 + Math.random() * 1.4).toFixed(2) + 's';
+      p.style.borderRadius = Math.random() > 0.5 ? '2px' : '50%';
       root.appendChild(p);
     }
   }

@@ -3,314 +3,364 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Naowee Incentivos — Buscar deportista</title>
+<title>SUID – Incentivos · Asignar incentivo</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
 <link rel="stylesheet" href="shared/shell.css"/>
 
 <style>
-  .page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:24px}
+  .page-header{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+    margin-bottom:24px;flex-wrap:wrap;
+  }
   .page-header__title-group{flex:1;min-width:0}
-  .page-title{font-size:24px;font-weight:700;line-height:1.2;margin-bottom:4px}
-  .page-sub{font-size:13.5px;color:var(--text-secondary);line-height:1.5;max-width:640px;margin:0}
-  .step-indicator{
-    display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;
-    text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);
-    padding:6px 12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-full);
+  .page-title{
+    font-size:24px;font-weight:700;line-height:1.2;letter-spacing:-.01em;margin-bottom:4px;
+    color:var(--naowee-color-text-primary,#282834);
   }
-  .step-indicator .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .page-sub{font-size:14px;color:var(--naowee-color-text-secondary,#646587);line-height:1.5;max-width:640px}
 
-  .stepper{
-    display:flex;align-items:center;gap:0;margin-bottom:28px;
-    padding:14px 20px;background:#fff;border:1px solid var(--border);
-    border-radius:var(--radius-lg);overflow-x:auto;
+  /* Stepper — sticky debajo del header (patrón digitación) */
+  .stepper-wrap{
+    position:sticky;top:0;z-index:10;
+    margin:-24px -24px 32px;padding:20px 24px 16px;
+    background:var(--bg,#f5f6fa);
   }
+  .stepper{
+    display:flex;align-items:center;gap:0;
+    padding:14px 20px;background:#fff;
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:14px;overflow-x:auto;
+    transition:box-shadow .2s;
+  }
+  .stepper-wrap.is-stuck .stepper{box-shadow:0 4px 16px rgba(40,40,52,.08)}
   .step{
     display:flex;align-items:center;gap:10px;flex-shrink:0;
-    font-size:12.5px;font-weight:600;color:var(--text-secondary);
+    font-size:12.5px;font-weight:600;color:var(--naowee-color-text-secondary,#646587);
   }
   .step .n{
-    width:24px;height:24px;border-radius:50%;
-    border:1.5px solid var(--border-dark);background:#fff;
+    width:26px;height:26px;border-radius:50%;
+    border:1.5px solid #d0d4e6;background:#fff;
     display:flex;align-items:center;justify-content:center;
-    font-size:11px;font-weight:700;color:var(--text-secondary);
+    font-size:11px;font-weight:700;color:var(--naowee-color-text-secondary,#646587);
+    transition:all .25s;
   }
-  .step.active .n{background:var(--accent);border-color:var(--accent);color:#fff}
-  .step.active{color:var(--text-primary)}
-  .step.done .n{background:var(--green);border-color:var(--green);color:#fff}
-  .step-sep{flex:1;height:1px;background:var(--border);min-width:20px;margin:0 12px}
+  .step.active .n{
+    background:var(--naowee-color-text-accent,#d74009);
+    border-color:var(--naowee-color-text-accent,#d74009);color:#fff;
+    animation:stepPulse 2s cubic-bezier(.4,0,.6,1) infinite;
+  }
+  @keyframes stepPulse{
+    0%,100%{ box-shadow:0 0 0 0 rgba(215,64,9,.35); }
+    50%{ box-shadow:0 0 0 6px rgba(215,64,9,0); }
+  }
+  .step.active{color:var(--naowee-color-text-primary,#282834)}
+  .step.done .n{
+    background:var(--naowee-color-feedback-fill-positive-loud,#1f8923);
+    border-color:var(--naowee-color-feedback-fill-positive-loud,#1f8923);color:#fff;
+  }
+  .step-sep{
+    flex:1;height:1.5px;background:var(--naowee-color-border-default,#e7e9f3);
+    min-width:20px;margin:0 12px;border-radius:1px;transition:background .3s;
+  }
+  .step.done + .step-sep{background:var(--naowee-color-feedback-fill-positive-loud,#1f8923)}
 
-  /* Search card */
+  /* Search card — DS tablet pattern */
   .search-card{
-    background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
-    box-shadow:var(--shadow-card);padding:28px;margin-bottom:20px;
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:16px;padding:24px 26px;margin-bottom:20px;
   }
-  .search-card h3{font-size:15px;font-weight:700;margin-bottom:4px}
-  .search-card p.hint{font-size:13px;color:var(--text-secondary);margin-bottom:18px}
+  .search-card__title{font-size:15px;font-weight:700;color:var(--naowee-color-text-primary,#282834);margin-bottom:4px}
+  .search-card__hint{font-size:13px;color:var(--naowee-color-text-secondary,#646587);margin-bottom:18px;line-height:1.5}
 
-  .search-row{display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:end}
-  .field{display:flex;flex-direction:column;gap:6px}
-  .field label{font-size:11.5px;font-weight:600;color:var(--text-primary)}
-  .field select,.field input{
-    height:46px;padding:0 14px;border:1px solid var(--border-dark);border-radius:var(--radius-md);
-    font:inherit;font-size:14px;color:var(--text-primary);background:#fff;
-    transition:border-color .15s,box-shadow .15s;
-  }
-  .field select{appearance:none;-webkit-appearance:none;padding-right:36px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'><path d='M2 4l4 4 4-4' stroke='%23282834' stroke-width='1.4' stroke-linecap='round'/></svg>");
-    background-repeat:no-repeat;background-position:right 12px center;
-  }
-  .field input:focus,.field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(215,64,9,.15)}
-  .btn-primary{
-    height:46px;padding:0 22px;border:none;border-radius:var(--radius-md);
-    background:var(--accent);color:#fff;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;
-    display:inline-flex;align-items:center;gap:8px;transition:transform .1s,box-shadow .15s;
-  }
-  .btn-primary:hover{box-shadow:0 6px 16px rgba(215,64,9,.22)}
-  .btn-primary:active{transform:scale(.98)}
-  .btn-outline{
-    height:46px;padding:0 22px;border:1px solid var(--border-dark);border-radius:var(--radius-md);
-    background:#fff;color:var(--text-primary);font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;
-    display:inline-flex;align-items:center;gap:8px;transition:background .15s,border-color .15s;
-  }
-  .btn-outline:hover{background:#fafbfd;border-color:var(--text-secondary)}
-  .btn-ghost{
-    height:40px;padding:0 14px;border:none;background:transparent;
-    color:var(--accent);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
-    display:inline-flex;align-items:center;gap:6px;border-radius:var(--radius-md);
-  }
-  .btn-ghost:hover{background:#fff3e6}
+  .search-row{display:grid;grid-template-columns:220px 1fr auto;gap:12px;align-items:end}
+  @media(max-width:760px){.search-row{grid-template-columns:1fr}}
 
-  /* Quick demo shortcuts */
-  .quick-row{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
-  .quick-label{font-size:11.5px;color:var(--text-secondary);font-weight:600}
+  /* Quick demo chips */
+  .quick-row{display:flex;align-items:center;gap:8px;margin-top:18px;flex-wrap:wrap}
+  .quick-label{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);font-weight:600}
   .quick-chip{
-    font-size:11.5px;font-weight:600;color:var(--text-primary);
-    padding:6px 12px;border-radius:var(--radius-full);
-    border:1px solid var(--border);background:#fff;cursor:pointer;
-    transition:all .15s;
+    font-size:11.5px;font-weight:600;color:var(--naowee-color-text-primary,#282834);
+    padding:6px 12px;border-radius:9999px;
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);background:#fff;cursor:pointer;
+    font-family:inherit;transition:all .15s;
   }
-  .quick-chip:hover{border-color:var(--accent);color:var(--accent);background:#fff3e6}
-  .quick-chip.dim{opacity:.55;cursor:not-allowed}
-  .quick-chip.dim:hover{border-color:var(--border);color:var(--text-primary);background:#fff}
+  .quick-chip:hover{border-color:var(--naowee-color-text-accent,#d74009);color:var(--naowee-color-text-accent,#d74009);background:#fff3e6}
   .quick-chip code{font-family:'SF Mono',monospace;font-size:11px;color:inherit}
 
-  /* States container */
+  /* State */
   .state-wrap{min-height:340px;display:flex;flex-direction:column;gap:16px}
 
   /* Empty state */
   .empty-state{
-    background:#fafbfd;border:1px dashed var(--border-dark);border-radius:var(--radius-xl);
+    background:#fafbfd;border:1px dashed #d0d4e6;border-radius:16px;
     padding:56px 32px;text-align:center;
   }
   .empty-state__icon{
     width:72px;height:72px;margin:0 auto 16px;border-radius:50%;
-    background:#fff;border:1px solid var(--border);
-    display:flex;align-items:center;justify-content:center;color:var(--text-secondary);
-    box-shadow:var(--shadow-sm);
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    display:flex;align-items:center;justify-content:center;color:var(--naowee-color-text-secondary,#646587);
   }
-  .empty-state h4{font-size:15px;font-weight:700;margin-bottom:6px}
-  .empty-state p{font-size:13px;color:var(--text-secondary);max-width:400px;margin:0 auto;line-height:1.5}
+  .empty-state h4{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--naowee-color-text-primary,#282834)}
+  .empty-state p{font-size:13px;color:var(--naowee-color-text-secondary,#646587);max-width:400px;margin:0 auto;line-height:1.5}
 
-  /* Result card — applies */
+  /* Result */
   .result-wrap{display:flex;flex-direction:column;gap:16px;animation:fadeInUp .4s cubic-bezier(.4,0,.2,1)}
   @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
+  /* Profile card — ahora es el único container (profile + programs + footer) */
   .profile-card{
-    background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
-    box-shadow:var(--shadow-card);overflow:hidden;
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:16px;overflow:hidden;
   }
   .profile-head{
     display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;
-    padding:24px 28px;border-bottom:1px solid var(--border);
+    padding:24px 28px;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
     background:linear-gradient(180deg,#fafbfd 0%,#fff 100%);
   }
+  /* Divider entre secciones dentro del mismo container */
+  .profile-card__divider{
+    border:none;border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
+    margin:0;
+  }
+  /* Programs section (dentro del profile-card) */
+  .programs-section{padding:24px 28px}
+  .programs-section__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .programs-section__head h4{font-size:15px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
+  /* Footer con nav (patrón wizard) */
+  .profile-card__footer{
+    padding:16px 28px;
+    border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    background:#fafbfd;
+  }
+  /* Avatar con gradient + borde blanco (preservado según pedido del usuario) */
   .profile-avatar{
     width:84px;height:84px;border-radius:50%;
     background:linear-gradient(135deg,#ffbf75,#d74009);
     display:flex;align-items:center;justify-content:center;
     color:#fff;font-size:28px;font-weight:800;
-    border:3px solid #fff;box-shadow:0 0 0 1px var(--border),0 8px 24px rgba(215,64,9,.2);
+    border:3px solid #fff;
+    box-shadow:0 0 0 1px var(--naowee-color-border-default,#e7e9f3),0 8px 24px rgba(215,64,9,.2);
   }
   .profile-meta{display:flex;flex-direction:column;gap:6px;min-width:0}
-  .profile-name{font-size:20px;font-weight:800;color:var(--text-primary);letter-spacing:-.01em;line-height:1.2}
-  .profile-sub{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12.5px;color:var(--text-secondary)}
-  .profile-sub .dot{width:3px;height:3px;background:var(--border-dark);border-radius:50%}
-  .profile-sub strong{color:var(--text-primary);font-weight:600}
+  .profile-name{font-size:20px;font-weight:800;color:var(--naowee-color-text-primary,#282834);letter-spacing:-.01em;line-height:1.2}
+  .profile-sub{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12.5px;color:var(--naowee-color-text-secondary,#646587)}
+  .profile-sub .dot{width:3px;height:3px;background:#d0d4e6;border-radius:50%}
+  .profile-sub strong{color:var(--naowee-color-text-primary,#282834);font-weight:600}
 
-  .elig-badge{
-    display:inline-flex;align-items:center;gap:6px;
-    padding:6px 12px;border-radius:var(--radius-full);
-    font-size:11.5px;font-weight:700;letter-spacing:.2px;
-    background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);
-    flex-shrink:0;
+  .profile-body{padding:28px;display:grid;grid-template-columns:1fr 1fr;gap:48px}
+  @media(max-width:760px){.profile-body{grid-template-columns:1fr;gap:28px}}
+  .data-block h5{
+    font-size:11px;font-weight:700;letter-spacing:.6px;color:#9c9ebf;
+    text-transform:uppercase;margin-bottom:12px;
   }
-  .elig-badge .check{width:14px;height:14px;flex-shrink:0}
+  /* Datos del deportista — con íconos outline */
+  .kv-list{display:flex;flex-direction:column;gap:0}
+  .kv-row{
+    display:grid;grid-template-columns:32px 1fr auto;gap:12px;align-items:center;
+    padding:12px 0;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
+  }
+  .kv-row:last-child{border-bottom:none}
+  .kv-row__ico{
+    width:32px;height:32px;border-radius:8px;
+    background:#f5f6fa;color:var(--naowee-color-text-secondary,#646587);
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .kv-row__ico svg{width:16px;height:16px}
+  .kv-row__lbl{font-size:12.5px;color:var(--naowee-color-text-secondary,#646587);font-weight:500}
+  .kv-row__val{
+    font-size:13px;color:var(--naowee-color-text-primary,#282834);
+    font-weight:700;text-align:right;
+  }
 
-  .profile-body{padding:24px 28px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
-  @media(max-width:760px){.profile-body{grid-template-columns:1fr}}
-  .data-block h5{font-size:10.5px;font-weight:700;letter-spacing:.6px;color:#b5b9d4;text-transform:uppercase;margin-bottom:10px}
-  .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
-  .kv{display:flex;flex-direction:column;gap:2px;min-width:0}
-  .kv dt{font-size:11px;color:var(--text-secondary);font-weight:500}
-  .kv dd{font-size:13.5px;color:var(--text-primary);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Condiciones — Propuesta A (checklist + progreso) */
+  .cond-block-head{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:10px;
+  }
+  .cond-block-head__title{
+    font-size:11px;font-weight:700;letter-spacing:.6px;
+    color:#9c9ebf;text-transform:uppercase;
+  }
+  .cond-count{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px;font-weight:700;
+    color:var(--naowee-color-feedback-fill-positive-loud,#1f8923);
+  }
+  .cond-count.err{color:#b42318}
+  .cond-progress{
+    height:6px;background:#f0f2f8;border-radius:9999px;overflow:hidden;
+    margin-bottom:14px;
+  }
+  .cond-progress__fill{
+    height:100%;border-radius:9999px;
+    background:var(--naowee-color-feedback-fill-positive-loud,#1f8923);
+    transition:width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .cond-progress.err .cond-progress__fill{background:#b42318}
 
-  /* Condiciones checklist */
   .cond-list{display:flex;flex-direction:column;gap:8px}
   .cond{
-    display:flex;align-items:center;gap:10px;
-    padding:8px 12px;border-radius:var(--radius-md);
-    background:#fafbfd;border:1px solid var(--border);
-    font-size:12.5px;color:var(--text-primary);
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px;
+    border-radius:10px;
+    background:#f6fbf6;
+    border:1px solid #c8e6c9;
+    font-size:13px;color:var(--naowee-color-text-primary,#282834);
+    transition:background .2s;
   }
-  .cond.ok{background:var(--green-bg);border-color:var(--green-border);color:#1b5e20}
-  .cond.ok .mk{color:var(--green)}
-  .cond .mk{width:16px;height:16px;flex-shrink:0;color:var(--text-secondary)}
-  .cond .txt{flex:1}
-  .cond .val{font-size:11.5px;font-weight:700;color:inherit;opacity:.9}
+  .cond.err{background:#fff5f3;border-color:#ffc4bb}
+  .cond .mk{
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--naowee-color-feedback-fill-positive-loud,#1f8923);color:#fff;
+    box-shadow:0 2px 6px rgba(31,137,35,.2);
+  }
+  .cond.err .mk{background:#b42318;box-shadow:0 2px 6px rgba(180,35,24,.2)}
+  .cond .mk svg{width:14px;height:14px;stroke-width:3}
+  .cond .txt{flex:1;font-weight:500;color:var(--naowee-color-text-primary,#282834)}
+  .cond .val{
+    font-size:12.5px;font-weight:700;
+    color:var(--naowee-color-feedback-fill-positive-loud,#1f8923);
+  }
+  .cond.err .val{color:#b42318}
 
   /* Programs applicable */
   .programs-card{
-    background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
-    box-shadow:var(--shadow-card);padding:24px 28px;
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:16px;padding:24px 28px;
   }
   .programs-card__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  .programs-card__head h4{font-size:14.5px;font-weight:700}
-  .programs-card__head .count{
-    font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-full);
-    background:var(--orange-bg);color:var(--accent);
-  }
+  .programs-card__head h4{font-size:15px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
   .prog-list{display:flex;flex-direction:column;gap:10px}
   .prog{
     display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;
-    padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius-lg);
-    transition:border-color .15s,box-shadow .15s;cursor:pointer;
+    padding:14px 16px;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:12px;transition:border-color .15s,background .15s;cursor:pointer;
   }
-  .prog:hover{border-color:var(--border-dark);box-shadow:var(--shadow-sm)}
+  .prog:hover{border-color:#d0d4e6;background:#fafbfd}
   .prog__icon{
-    width:40px;height:40px;border-radius:var(--radius-md);
-    background:#fff3e6;color:var(--accent);
-    display:flex;align-items:center;justify-content:center;
+    width:40px;height:40px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
   .prog__body{display:flex;flex-direction:column;gap:3px;min-width:0}
-  .prog__name{font-size:13.5px;font-weight:700;color:var(--text-primary)}
-  .prog__desc{font-size:11.5px;color:var(--text-secondary)}
-  .prog__value{font-size:14.5px;font-weight:800;color:var(--text-primary);font-variant-numeric:tabular-nums}
-  .prog__cta{
-    padding:8px 14px;border-radius:var(--radius-full);
-    background:var(--accent);color:#fff;border:none;font-size:11.5px;font-weight:700;cursor:pointer;
-    display:inline-flex;align-items:center;gap:4px;transition:background .15s;
+  .prog__name{font-size:13.5px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
+  .prog__desc{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587)}
+  .prog__value{
+    font-family:'Inter',sans-serif;
+    font-size:15px;font-weight:700;color:var(--naowee-color-text-primary,#282834);
   }
-  .prog__cta:hover{background:#b73509}
 
-  /* Not eligible state */
+  /* Not eligible */
   .no-elig{
-    background:#fff;border:1px solid var(--red-border);border-radius:var(--radius-xl);
-    padding:32px 28px;display:flex;gap:18px;align-items:flex-start;box-shadow:var(--shadow-card);
+    background:#fff;border:1px solid #ffc4bb;border-radius:16px;
+    padding:28px;display:flex;gap:18px;align-items:flex-start;
   }
   .no-elig__icon{
-    width:48px;height:48px;border-radius:50%;background:var(--red-bg);
+    width:48px;height:48px;border-radius:50%;background:#fff0ee;
     color:#b42318;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
   }
-  .no-elig__body h4{font-size:15px;font-weight:800;color:#912018;margin-bottom:6px}
-  .no-elig__body p{font-size:13px;color:#7a271a;line-height:1.5;margin-bottom:12px}
+  .no-elig__body h4{font-size:15px;font-weight:700;color:#912018;margin-bottom:6px}
+  .no-elig__body p{font-size:13px;color:#7a271a;line-height:1.5;margin-bottom:14px}
   .no-elig__actions{display:flex;gap:10px;flex-wrap:wrap}
 
   /* Not found */
   .not-found{
-    background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
-    padding:40px 28px;text-align:center;box-shadow:var(--shadow-card);
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:16px;padding:40px 28px;text-align:center;
   }
   .not-found__icon{
     width:64px;height:64px;border-radius:50%;
-    background:#fff3e6;color:var(--accent);margin:0 auto 12px;
+    background:#fff3e6;color:var(--naowee-color-text-accent,#d74009);margin:0 auto 14px;
     display:flex;align-items:center;justify-content:center;
   }
-  .not-found h4{font-size:15px;font-weight:700;margin-bottom:6px}
-  .not-found p{font-size:13px;color:var(--text-secondary);max-width:420px;margin:0 auto 14px;line-height:1.5}
+  .not-found h4{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--naowee-color-text-primary,#282834)}
+  .not-found p{font-size:13px;color:var(--naowee-color-text-secondary,#646587);max-width:420px;margin:0 auto 14px;line-height:1.5}
+  .not-found__actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
-  /* Spinner */
+  /* Loading banner */
   .spinner{
-    width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+    width:16px;height:16px;border:2px solid rgba(215,64,9,.2);border-top-color:var(--naowee-color-text-accent,#d74009);
     border-radius:50%;animation:spin .7s linear infinite;
   }
   @keyframes spin{to{transform:rotate(360deg)}}
   .loading-banner{
-    background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);border-radius:12px;
     padding:14px 18px;display:flex;align-items:center;gap:12px;
-    font-size:13px;color:var(--text-secondary);
+    font-size:13px;color:var(--naowee-color-text-secondary,#646587);
   }
-  .loading-banner .spinner{border-color:rgba(215,64,9,.2);border-top-color:var(--accent);width:16px;height:16px}
+
+  /* Native fields inside the search-row — force DS textfield/dropdown look via local classes */
+  .fld{display:flex;flex-direction:column;gap:6px}
+  .fld label{font-size:11.5px;font-weight:600;color:var(--naowee-color-text-primary,#282834)}
+  .fld select,.fld input{
+    height:44px;padding:0 14px;font:inherit;font-size:13.5px;
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:10px;background:#fff;color:var(--naowee-color-text-primary,#282834);
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .fld select{appearance:none;-webkit-appearance:none;padding-right:36px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'><path d='M2 4l4 4 4-4' stroke='%23282834' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;cursor:pointer;
+  }
+  .fld input:focus,.fld select:focus{outline:none;border-color:var(--naowee-color-text-accent,#d74009);box-shadow:0 0 0 3px rgba(215,64,9,.15)}
 </style>
 </head>
 <body>
 
 <div class="shell">
 
-  <!-- SIDEBAR -->
+  <!-- ═══ SIDEBAR ═══ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <button class="burger-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#282834" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
-      <svg class="naowee-logo" viewBox="0 0 180 34" fill="none"><text x="0" y="24" font-family="Inter" font-weight="800" font-size="22" fill="#002B5B">Naowee</text></svg>
+      <img src="shared/logos/ministerio.svg" alt="Ministerio del Deporte" class="sb-logo-img"/>
+      <div class="logo-sep"></div>
+      <img src="shared/logos/suid.png" alt="SUID" class="sb-logo-img"/>
     </div>
-
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS</div>
-      <div class="nav-row" onclick="fadeAndGo('index.html')">
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#646587" stroke-width="1.5"/></svg></div>
-        <span class="lbl">Índice</span>
-      </div>
-
       <div class="nav-row active">
         <div class="active-bar"></div>
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
         <span class="lbl">Asignar incentivo</span>
       </div>
-
       <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
-        <span class="lbl">Asignaciones</span>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
+        <span class="lbl">Mis asignaciones</span>
       </div>
     </nav>
-
     <div class="sidebar-bottom">
       <div class="nav-row" onclick="fadeAndGo('incentivo-01-login.html')">
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="#B5B9D4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" stroke="#B5B9D4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <span class="lbl">Cerrar sesión</span>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- ═══ MAIN ═══ -->
   <div class="main">
     <header class="top-header">
       <div class="profile-switcher" id="profileSwitcher">
         <div class="user-chip" onclick="toggleProfileDD(event)">
           <div class="ava"><div class="ava-ring" id="avaRing" style="background:#ffdfb5;color:#92400e">DV</div><div class="ava-dot"></div></div>
-          <div class="user-info">
-            <span class="user-name">Doug Vargas</span>
-            <span class="user-role" id="userRoleLabel">Operador</span>
-          </div>
-          <button class="user-chip__chevron" type="button" aria-label="Cambiar rol">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
+          <div class="user-info"><span class="user-name">Doug Vargas</span><span class="user-role" id="userRoleLabel">Operador</span></div>
+          <button class="user-chip__chevron" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
         <div class="profile-dd" id="profileDD">
           <div class="profile-dd__label">Cambiar de perfil</div>
           <div class="profile-dd__item" data-role="admin" onclick="switchRole('admin')">
-            <div class="ava"><div class="ava-ring" style="background:#c4b5fd;color:#4c1d95;width:28px;height:28px;font-size:11px">DV</div></div>
+            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#c4b5fd;color:#4c1d95">DV</span>
             <div class="role-meta"><strong>Gestor de incentivos</strong><small>Parametriza y audita</small></div>
             <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <div class="profile-dd__item active" data-role="gestor" onclick="switchRole('gestor')">
-            <div class="ava"><div class="ava-ring" style="background:#ffdfb5;color:#92400e;width:28px;height:28px;font-size:11px">DV</div></div>
+          <div class="profile-dd__item active" data-role="operador" onclick="switchRole('operador')">
+            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#ffdfb5;color:#92400e">DV</span>
             <div class="role-meta"><strong>Operador</strong><small>Asigna incentivos en campo</small></div>
             <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
@@ -320,33 +370,33 @@
 
     <div class="page">
 
-      <!-- Header -->
       <div class="page-header">
         <div class="page-header__title-group">
           <h1 class="page-title">Asignar incentivo</h1>
           <p class="page-sub">Busca al deportista por su documento. El sistema valida automáticamente si cumple las condiciones de los programas activos.</p>
         </div>
-        <div class="step-indicator"><span class="dot"></span> Paso 1 de 4</div>
       </div>
 
-      <!-- Stepper -->
-      <div class="stepper">
-        <div class="step active"><span class="n">1</span> Buscar deportista</div>
-        <span class="step-sep"></span>
-        <div class="step"><span class="n">2</span> Seleccionar incentivo</div>
-        <span class="step-sep"></span>
-        <div class="step"><span class="n">3</span> Evidencia de entrega</div>
-        <span class="step-sep"></span>
-        <div class="step"><span class="n">4</span> Confirmación</div>
+      <!-- Stepper sticky -->
+      <div class="stepper-wrap" id="stepperWrap">
+        <div class="stepper">
+          <div class="step active"><span class="n">1</span> Buscar deportista</div>
+          <span class="step-sep"></span>
+          <div class="step"><span class="n">2</span> Seleccionar incentivo</div>
+          <span class="step-sep"></span>
+          <div class="step"><span class="n">3</span> Evidencia de entrega</div>
+          <span class="step-sep"></span>
+          <div class="step"><span class="n">4</span> Confirmación</div>
+        </div>
       </div>
 
-      <!-- Search -->
+      <!-- Search card -->
       <div class="search-card">
-        <h3>Documento del deportista</h3>
-        <p class="hint">Ingresa el número de documento para validar elegibilidad.</p>
+        <div class="search-card__title">Documento del deportista</div>
+        <p class="search-card__hint">Ingresa el número de documento para validar elegibilidad.</p>
 
         <div class="search-row">
-          <div class="field">
+          <div class="fld">
             <label for="docType">Tipo de documento</label>
             <select id="docType">
               <option value="CC">Cédula de ciudadanía</option>
@@ -355,11 +405,11 @@
               <option value="PP">Pasaporte</option>
             </select>
           </div>
-          <div class="field">
+          <div class="fld">
             <label for="docNumber">Número</label>
             <input id="docNumber" type="text" inputmode="numeric" placeholder="Ej. 1001234567" autofocus/>
           </div>
-          <button class="btn-primary" id="btnSearch" onclick="doSearch()">
+          <button class="naowee-btn naowee-btn--loud naowee-btn--large" id="btnSearch" onclick="doSearch()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
             Buscar
           </button>
@@ -373,10 +423,8 @@
         </div>
       </div>
 
-      <!-- Result container -->
+      <!-- Result -->
       <div class="state-wrap" id="stateWrap">
-
-        <!-- EMPTY STATE -->
         <div class="empty-state" id="emptyState">
           <div class="empty-state__icon">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -384,14 +432,12 @@
           <h4>Ingresa un documento para empezar</h4>
           <p>El deportista debe acercarse con su documento de identidad. Puedes usar los ejemplos de demo arriba para ver los tres posibles resultados de búsqueda.</p>
         </div>
-
       </div>
 
     </div>
   </div>
 </div>
 
-<!-- Templates (duplicated result renderers) -->
 <script>
 const SAMPLE = {
   eligible: {
@@ -399,17 +445,16 @@ const SAMPLE = {
     docType:'CC', doc:'1001234567',
     age:19, category:'Prejuvenil', disc:'Atletismo · 400m',
     zone:'Atlántico · Barranquilla', strat:'Estrato 2', matricula:'Activa',
-    medal:'Oro · Juegos Nacionales 2025',
-    initials:'MC',
+    medal:'Oro · Juegos Nacionales 2025', initials:'MC',
     conditions:[
       { label:'Mayor de 18 años', val:'19 años', ok:true },
       { label:'Categoría prejuvenil o superior', val:'Prejuvenil', ok:true },
       { label:'Medalla de oro o plata', val:'Oro', ok:true },
-      { label:'Matrícula activa', val:'Activa', ok:true },
+      { label:'Matrícula activa', val:'Activa', ok:true }
     ],
     programs:[
-      { name:'Becas deportivas 2026 — Medallistas de oro', desc:'Beca educativa · condición única por beneficiario', value:'$1.000.000', icon:'trophy' },
-      { name:'Kit deportivo Atlántico', desc:'Dotación completa · disciplinas pista', value:'$350.000', icon:'bag' },
+      { name:'Becas deportivas 2026 — Medallistas de oro', desc:'Beca educativa · condición única por beneficiario', value:'$1.000.000', iconBg:'#fff3e6', iconColor:'#d74009', icon:'trophy' },
+      { name:'Kit deportivo Atlántico', desc:'Dotación completa · disciplinas pista', value:'$350.000', iconBg:'#eef5ff', iconColor:'#1f78d1', icon:'bag' }
     ]
   },
   'not-eligible':{
@@ -417,174 +462,206 @@ const SAMPLE = {
     docType:'CC', doc:'1003456789',
     age:16, category:'Juvenil', disc:'Fútbol · delantero',
     zone:'Cundinamarca · Bogotá', strat:'Estrato 3', matricula:'Activa',
-    medal:'Sin medallas registradas',
-    initials:'JD',
+    medal:'Sin medallas registradas', initials:'JD',
     conditions:[
       { label:'Mayor de 18 años', val:'16 años', ok:false },
       { label:'Medalla de oro o plata', val:'Sin medallas', ok:false },
-      { label:'Matrícula activa', val:'Activa', ok:true },
-    ],
+      { label:'Matrícula activa', val:'Activa', ok:true }
+    ]
   }
 };
-
-let currentState = 'empty';
 
 function doSearch(){
   const n = document.getElementById('docNumber').value.trim();
   if(!n){ document.getElementById('docNumber').focus(); return; }
-  // resolver contra muestras
   if(n === '1001234567') return runDemo('eligible');
   if(n === '1003456789') return runDemo('not-eligible');
   return runDemo('not-found');
 }
 
-function runDemo(kind){
+function runDemo(kind, skipLoading){
   const wrap = document.getElementById('stateWrap');
-  // spinner breve
-  wrap.innerHTML = `<div class="loading-banner"><div class="spinner"></div> Validando datos del deportista en la plataforma…</div>`;
-  setTimeout(() => {
+  const render = () => {
     if(kind === 'eligible') wrap.innerHTML = renderEligible(SAMPLE.eligible);
     else if(kind === 'not-eligible') wrap.innerHTML = renderNotEligible(SAMPLE['not-eligible']);
     else wrap.innerHTML = renderNotFound();
-  }, 500);
-  currentState = kind;
+  };
+  if(skipLoading){ render(); return; }
+  wrap.innerHTML = `<div class="loading-banner"><div class="spinner"></div> Validando datos del deportista en la plataforma…</div>`;
+  setTimeout(render, 500);
+}
+
+function saveProfileAndGo(doc, kind){
+  sessionStorage.setItem('inc-profile', JSON.stringify({ doc, kind, ts: Date.now() }));
+  fadeAndGo('incentivo-10-asignar-tipo.html?doc=' + doc);
+}
+
+/* Rehydratar si venimos del paso 2 con "Volver" */
+function tryRehydrate(){
+  try{
+    const saved = JSON.parse(sessionStorage.getItem('inc-profile') || '{}');
+    if(!saved.doc) return false;
+    const inp = document.getElementById('docNumber');
+    if(inp) inp.value = saved.doc;
+    runDemo(saved.kind || 'eligible', true);
+    return true;
+  }catch(e){ return false; }
+}
+
+const KV_ICONS = {
+  category:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+  strat:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>',
+  matricula: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>',
+  medal:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 22l5-3 5 3-1.21-8.12"/></svg>'
+};
+
+function renderProfileCard(p, opts){
+  const isNotEligible = opts?.notEligible === true;
+  const total = p.conditions.length;
+  const ok = p.conditions.filter(c => c.ok).length;
+  const pct = total ? Math.round((ok/total)*100) : 0;
+  const badgeClass = isNotEligible ? 'naowee-badge--negative' : 'naowee-badge--positive';
+  const badgeIcon = isNotEligible
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  const badgeText = isNotEligible ? 'No cumple condiciones' : `Aplica a ${p.programs?.length || 0} incentivos`;
+  const avatarStyle = isNotEligible ? 'background:linear-gradient(135deg,#b5b9d4,#646587)' : '';
+
+  const dataRows = `
+    <div class="kv-list">
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.category}</span>
+        <span class="kv-row__lbl">Categoría</span>
+        <span class="kv-row__val">${p.category}</span>
+      </div>
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.strat}</span>
+        <span class="kv-row__lbl">Estrato</span>
+        <span class="kv-row__val">${p.strat}</span>
+      </div>
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.matricula}</span>
+        <span class="kv-row__lbl">Matrícula</span>
+        <span class="kv-row__val">${p.matricula}</span>
+      </div>
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.medal}</span>
+        <span class="kv-row__lbl">Logro reciente</span>
+        <span class="kv-row__val">${p.medal}</span>
+      </div>
+    </div>`;
+
+  const condSection = `
+    <div class="cond-block-head">
+      <span class="cond-block-head__title">Condiciones evaluadas</span>
+      <span class="cond-count${ok < total ? ' err' : ''}">
+        ${ok < total
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>'
+          : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'}
+        ${ok} de ${total} cumplidas
+      </span>
+    </div>
+    <div class="cond-progress${ok < total ? ' err' : ''}"><div class="cond-progress__fill" style="width:${pct}%"></div></div>
+    <div class="cond-list">
+      ${p.conditions.map(c => `
+        <div class="cond ${c.ok ? '' : 'err'}">
+          <span class="mk">
+            ${c.ok
+              ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+              : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}
+          </span>
+          <span class="txt">${c.label}</span>
+          <span class="val">${c.val}</span>
+        </div>
+      `).join('')}
+    </div>`;
+
+  const programsBlock = (!isNotEligible && p.programs?.length) ? `
+    <hr class="profile-card__divider"/>
+    <div class="programs-section">
+      <div class="programs-section__head">
+        <h4>Incentivos aplicables</h4>
+        <span class="naowee-badge naowee-badge--caution naowee-badge--quiet naowee-badge--small">${p.programs.length} disponibles</span>
+      </div>
+      <div class="prog-list">
+        ${p.programs.map(pr => `
+          <div class="prog" style="cursor:default;pointer-events:none">
+            <div class="prog__icon" style="background:${pr.iconBg};color:${pr.iconColor}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                ${pr.icon === 'trophy'
+                  ? '<path d="M6 9H4a2 2 0 01-2-2V5h4M18 9h2a2 2 0 002-2V5h-4M6 5h12v6a6 6 0 01-12 0V5zM10 17h4l1 4H9z"/>'
+                  : '<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a3 3 0 016 0v3"/>'}
+              </svg>
+            </div>
+            <div class="prog__body">
+              <div class="prog__name">${pr.name}</div>
+              <div class="prog__desc">${pr.desc}</div>
+            </div>
+            <div class="prog__value">${pr.value}</div>
+            <span></span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const footer = isNotEligible ? '' : `
+    <div class="profile-card__footer">
+      <span></span>
+      <button class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="saveProfileAndGo('${p.doc}','eligible')">
+        Continuar
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  `;
+
+  return `
+    <div class="profile-card">
+      <div class="profile-head">
+        <div class="profile-avatar" style="${avatarStyle}">${p.initials}</div>
+        <div class="profile-meta">
+          <div class="profile-name">${p.name}</div>
+          <div class="profile-sub">
+            <span><strong>${p.docType}</strong> ${p.doc}</span><span class="dot"></span>
+            <span>${p.age} años</span><span class="dot"></span>
+            <span>${p.disc}</span><span class="dot"></span>
+            <span>${p.zone}</span>
+          </div>
+        </div>
+        <span class="naowee-badge ${badgeClass} naowee-badge--quiet naowee-badge--small" style="flex-shrink:0">
+          ${badgeIcon}${badgeText}
+        </span>
+      </div>
+      <div class="profile-body">
+        <div class="data-block">
+          <h5>Datos del deportista</h5>
+          ${dataRows}
+        </div>
+        <div class="data-block">
+          ${condSection}
+        </div>
+      </div>
+      ${programsBlock}
+      ${footer}
+    </div>
+  `;
 }
 
 function renderEligible(p){
-  return `
-    <div class="result-wrap">
-      <div class="profile-card">
-        <div class="profile-head">
-          <div class="profile-avatar">${p.initials}</div>
-          <div class="profile-meta">
-            <div class="profile-name">${p.name}</div>
-            <div class="profile-sub">
-              <span><strong>${p.docType}</strong> ${p.doc}</span><span class="dot"></span>
-              <span>${p.age} años</span><span class="dot"></span>
-              <span>${p.disc}</span><span class="dot"></span>
-              <span>${p.zone}</span>
-            </div>
-          </div>
-          <div class="elig-badge">
-            <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Aplica a 2 incentivos
-          </div>
-        </div>
-
-        <div class="profile-body">
-          <div class="data-block">
-            <h5>Datos del deportista</h5>
-            <dl class="kv-grid">
-              <div class="kv"><dt>Categoría</dt><dd>${p.category}</dd></div>
-              <div class="kv"><dt>Estrato</dt><dd>${p.strat}</dd></div>
-              <div class="kv"><dt>Matrícula</dt><dd>${p.matricula}</dd></div>
-              <div class="kv"><dt>Logro más reciente</dt><dd>${p.medal}</dd></div>
-            </dl>
-          </div>
-          <div class="data-block">
-            <h5>Condiciones evaluadas</h5>
-            <div class="cond-list">
-              ${p.conditions.map(c => `
-                <div class="cond ${c.ok ? 'ok':''}">
-                  ${c.ok
-                    ? '<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-                    : '<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>'}
-                  <span class="txt">${c.label}</span>
-                  <span class="val">${c.val}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="programs-card">
-        <div class="programs-card__head">
-          <h4>Incentivos aplicables</h4>
-          <span class="count">${p.programs.length} disponibles</span>
-        </div>
-        <div class="prog-list">
-          ${p.programs.map((pr,i) => `
-            <div class="prog" onclick="fadeAndGo('incentivo-10-asignar-tipo.html?doc=${p.doc}&prog=${i}')">
-              <div class="prog__icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  ${pr.icon === 'trophy'
-                    ? '<path d="M6 9H4a2 2 0 01-2-2V5h4M18 9h2a2 2 0 002-2V5h-4M6 5h12v6a6 6 0 01-12 0V5zM10 17h4l1 4H9z"/>'
-                    : '<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a3 3 0 016 0v3"/>'}
-                </svg>
-              </div>
-              <div class="prog__body">
-                <div class="prog__name">${pr.name}</div>
-                <div class="prog__desc">${pr.desc}</div>
-              </div>
-              <div class="prog__value">${pr.value}</div>
-              <button class="prog__cta">Asignar →</button>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    </div>
-  `;
+  return `<div class="result-wrap">${renderProfileCard(p, { notEligible: false })}</div>`;
 }
 
 function renderNotEligible(p){
   return `
     <div class="result-wrap">
-      <div class="profile-card">
-        <div class="profile-head">
-          <div class="profile-avatar" style="background:linear-gradient(135deg,#b5b9d4,#646587)">${p.initials}</div>
-          <div class="profile-meta">
-            <div class="profile-name">${p.name}</div>
-            <div class="profile-sub">
-              <span><strong>${p.docType}</strong> ${p.doc}</span><span class="dot"></span>
-              <span>${p.age} años</span><span class="dot"></span>
-              <span>${p.disc}</span><span class="dot"></span>
-              <span>${p.zone}</span>
-            </div>
+      ${renderProfileCard(p, { notEligible: true })}
+      <div class="naowee-message naowee-message--negative" style="margin-top:4px">
+        <div class="naowee-message__header">
+          <div class="naowee-message__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
           </div>
-          <div class="elig-badge" style="background:var(--red-bg);color:#b42318;border-color:var(--red-border)">
-            <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-            No cumple condiciones
-          </div>
-        </div>
-
-        <div class="profile-body">
-          <div class="data-block">
-            <h5>Datos del deportista</h5>
-            <dl class="kv-grid">
-              <div class="kv"><dt>Categoría</dt><dd>${p.category}</dd></div>
-              <div class="kv"><dt>Estrato</dt><dd>${p.strat}</dd></div>
-              <div class="kv"><dt>Matrícula</dt><dd>${p.matricula}</dd></div>
-              <div class="kv"><dt>Logro más reciente</dt><dd>${p.medal}</dd></div>
-            </dl>
-          </div>
-          <div class="data-block">
-            <h5>Condiciones evaluadas</h5>
-            <div class="cond-list">
-              ${p.conditions.map(c => `
-                <div class="cond ${c.ok ? 'ok':''}">
-                  ${c.ok
-                    ? '<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-                    : '<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#b42318"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'}
-                  <span class="txt">${c.label}</span>
-                  <span class="val">${c.val}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="no-elig">
-        <div class="no-elig__icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-        </div>
-        <div class="no-elig__body">
-          <h4>Este deportista no aplica para ningún incentivo activo</h4>
-          <p>Los programas actualmente activos requieren condiciones que no se cumplen en este perfil. No se puede asignar un incentivo en este momento.</p>
-          <div class="no-elig__actions">
-            <button class="btn-outline" onclick="document.getElementById('docNumber').value='';document.getElementById('docNumber').focus();resetState()">Buscar otro deportista</button>
-            <button class="btn-ghost" onclick="fadeAndGo('index.html')">Volver al índice</button>
+          <div class="naowee-message__text">
+            <strong>Este deportista no aplica para ningún incentivo activo.</strong> Los programas actualmente activos requieren condiciones que no se cumplen en este perfil.
           </div>
         </div>
       </div>
@@ -601,9 +678,9 @@ function renderNotFound(){
         </div>
         <h4>Documento no encontrado en la plataforma</h4>
         <p>El documento ingresado no está registrado en el SUID. Verifica el número o solicita que el deportista se registre antes de continuar.</p>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-          <button class="btn-outline" onclick="document.getElementById('docNumber').value='';document.getElementById('docNumber').focus();resetState()">Intentar otro</button>
-          <button class="btn-ghost">Contactar soporte</button>
+        <div class="not-found__actions">
+          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="document.getElementById('docNumber').value='';document.getElementById('docNumber').focus();resetState()">Intentar otro</button>
+          <button class="naowee-btn naowee-btn--link naowee-btn--small">Contactar soporte</button>
         </div>
       </div>
     </div>
@@ -622,14 +699,13 @@ function resetState(){
   `;
 }
 
-/* ═══ Profile switcher / shell helpers ═══ */
+/* Profile switcher */
 const ROLES = {
-  admin:  { name:'Doug Vargas', label:'Gestor de incentivos', initials:'DV', bg:'#c4b5fd', fg:'#4c1d95' },
-  gestor: { name:'Doug Vargas', label:'Operador', initials:'DV', bg:'#ffdfb5', fg:'#92400e' }
+  admin:    { name:'Doug Vargas', label:'Gestor de incentivos', initials:'DV', bg:'#c4b5fd', fg:'#4c1d95' },
+  operador: { name:'Doug Vargas', label:'Operador', initials:'DV', bg:'#ffdfb5', fg:'#92400e' }
 };
-function currentRole(){ return localStorage.getItem('naowee-incentivos-role') || 'gestor'; }
 function applyRole(role){
-  const r = ROLES[role] || ROLES.gestor;
+  const r = ROLES[role] || ROLES.operador;
   const ring = document.getElementById('avaRing');
   if(ring){ ring.textContent = r.initials; ring.style.background = r.bg; ring.style.color = r.fg; }
   document.getElementById('userRoleLabel').textContent = r.label;
@@ -639,7 +715,6 @@ function switchRole(role){
   localStorage.setItem('naowee-incentivos-role', role);
   applyRole(role);
   document.getElementById('profileSwitcher')?.classList.remove('open');
-  // Admin no debería estar en esta pantalla
   if(role === 'admin') setTimeout(() => fadeAndGo('incentivo-02-dashboard.html'), 180);
 }
 function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('profileSwitcher')?.classList.toggle('open'); }
@@ -647,12 +722,24 @@ document.addEventListener('click', (e) => {
   const sw = document.getElementById('profileSwitcher');
   if(sw && !sw.contains(e.target)) sw.classList.remove('open');
 });
-function fadeAndGo(url){
-  document.body.style.transition = 'opacity .25s ease';
-  document.body.style.opacity = '0';
-  setTimeout(() => { window.location.href = url; }, 260);
-}
-applyRole('gestor'); // esta pantalla es del responsable en campo
+function fadeAndGo(url){document.body.style.transition='opacity .25s ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url},260)}
+
+applyRole('operador');
+tryRehydrate();
+
+/* Sticky stepper shadow detection */
+(function(){
+  const wrap = document.getElementById('stepperWrap');
+  if(!wrap) return;
+  const scroller = document.querySelector('.page') || window;
+  const handler = () => {
+    const rect = wrap.getBoundingClientRect();
+    wrap.classList.toggle('is-stuck', rect.top <= 1);
+  };
+  (scroller === window ? window : scroller).addEventListener('scroll', handler, { passive: true });
+  handler();
+})();
 </script>
+
 </body>
 </html>

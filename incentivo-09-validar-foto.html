@@ -19,13 +19,21 @@
   .step-indicator{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-secondary);padding:6px 12px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-full)}
   .step-indicator .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
 
-  .stepper{display:flex;align-items:center;gap:0;margin-bottom:24px;padding:14px 20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto}
+  .stepper-wrap{
+    position:sticky;top:0;z-index:10;
+    margin:-24px -24px 32px;padding:20px 24px 16px;
+    background:var(--bg,#f5f6fa);
+  }
+  .stepper{display:flex;align-items:center;gap:0;padding:14px 20px;background:#fff;border:1px solid var(--border);border-radius:14px;overflow-x:auto;transition:box-shadow .2s}
+  .stepper-wrap.is-stuck .stepper{box-shadow:0 4px 16px rgba(40,40,52,.08)}
   .step{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--text-secondary)}
-  .step .n{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border-dark);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-secondary)}
-  .step.active .n{background:var(--accent);border-color:var(--accent);color:#fff}
+  .step .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border-dark);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-secondary);transition:all .25s}
+  .step.active .n{background:var(--accent);border-color:var(--accent);color:#fff;animation:stepPulse 2s cubic-bezier(.4,0,.6,1) infinite}
+  @keyframes stepPulse{0%,100%{box-shadow:0 0 0 0 rgba(215,64,9,.35)}50%{box-shadow:0 0 0 6px rgba(215,64,9,0)}}
   .step.active{color:var(--text-primary)}
   .step.done .n{background:var(--green);border-color:var(--green);color:#fff}
-  .step-sep{flex:1;height:1px;background:var(--border);min-width:20px;margin:0 12px}
+  .step-sep{flex:1;height:1.5px;background:var(--border);min-width:20px;margin:0 12px;border-radius:1px}
+  .step.done + .step-sep{background:var(--green)}
 
   .recap{
     display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
@@ -171,7 +179,9 @@
       <button class="burger-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#282834" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
-      <svg class="naowee-logo" viewBox="0 0 180 34" fill="none"><text x="0" y="24" font-family="Inter" font-weight="800" font-size="22" fill="#002B5B">Naowee</text></svg>
+      <img src="shared/logos/ministerio.svg" alt="Ministerio del Deporte" class="sb-logo-img"/>
+      <div class="logo-sep"></div>
+      <img src="shared/logos/suid.png" alt="SUID" class="sb-logo-img"/>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS</div>
