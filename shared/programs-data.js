@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════════════════════════
+   PROGRAMAS — data fuente de verdad
+   Consumida por incentivo-03 (lista) y incentivo-05 (detalle).
+   Cada programa tiene info completa: identidad visual, rubro,
+   tipos de incentivo, condiciones y historial.
+   ═══════════════════════════════════════════════════════════════ */
+window.PROGRAMS_DATA = [
+  {
+    id: 'PRG-2026-001',
+    name: 'Becas deportivas 2026',
+    shortDesc: 'Medallistas de oro · Nacional',
+    longDesc: 'Beca educativa dirigida a deportistas medallistas de oro y plata de los Juegos Nacionales 2025, para apoyar su formación profesional universitaria.',
+    iconBg: '#fff3e6',
+    iconColor: '#d74009',
+    status: 'active',
+    event: 'Juegos Nacionales 2025',
+    coverage: 'Nacional',
+    responsible: 'Doug Vargas',
+    rubro: 200000000,
+    exec: 182000000,
+    unit: 1000000,
+    codes: { total: 200, avail: 18, asig: 179, rev: 3 },
+    from: '01 ene 2026',
+    to: '31 dic 2026',
+    actoAdmin: 'Resolución 2026-115',
+    fuente: 'Ministerio del Deporte · 2026',
+    incentives: [
+      { name: 'Beca educativa · Medallistas de oro', category: 'Beca',
+        detail: 'Cualitativo + monetario · 200 cupos planeados',
+        value: 1000000, valueLabel: '$1.0M', valueFoot: 'por beneficiario',
+        badges: [{ text: 'Beca', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Edad', op: '≥', value: '18' },
+          { field: 'Categoría deportiva', op: '=', value: 'Prejuvenil o superior' }
+        ]},
+        { logic: 'AND', rules: [
+          { field: 'Logros', op: '∈', value: '{"medalla de oro", "medalla de plata"}' }
+        ]}
+      ],
+      summary: 'Aplica para deportistas <strong>mayores de 18 años con categoría prejuvenil o superior</strong>, o deportistas <strong>con medalla de oro o plata</strong> (sin importar la edad).'
+    }
+  },
+  {
+    id: 'PRG-2026-002',
+    name: 'Kit deportivo Atlántico',
+    shortDesc: 'Disciplinas de pista · Atlántico',
+    longDesc: 'Entrega de kits deportivos (uniforme, calzado y accesorios de entrenamiento) a atletas de disciplinas de pista del departamento del Atlántico.',
+    iconBg: '#eef5ff',
+    iconColor: '#1f78d1',
+    status: 'active',
+    event: 'Liga Departamental Atlántico 2026',
+    coverage: 'Atlántico',
+    responsible: 'Laura Meza',
+    rubro: 87500000,
+    exec: 37800000,
+    unit: 350000,
+    codes: { total: 250, avail: 142, asig: 108, rev: 0 },
+    from: '01 mar 2026',
+    to: '30 abr 2026',
+    actoAdmin: 'Convenio 2026-ATL-018',
+    fuente: 'Indeportes Atlántico · 2026',
+    incentives: [
+      { name: 'Kit uniforme · Atletismo pista', category: 'Kit',
+        detail: 'Camiseta, pantaloneta, medias y spikes · 250 unidades',
+        value: 350000, valueLabel: '$350K', valueFoot: 'por kit',
+        badges: [{ text: 'Kit', variant: 'caution' }, { text: 'En especie', variant: 'neutral' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Categoría deportiva', op: '=', value: 'Juvenil' },
+          { field: 'Edad', op: '≤', value: '21' }
+        ]}
+      ],
+      summary: 'Aplica para atletas <strong>juveniles con edad hasta 21 años</strong> inscritos en la liga departamental.'
+    }
+  },
+  {
+    id: 'PRG-2026-003',
+    name: 'Bono transporte intercolegiados',
+    shortDesc: 'Prejuveniles · Cundinamarca',
+    longDesc: 'Bono mensual de transporte para deportistas prejuveniles de Cundinamarca que participan en los juegos intercolegiados.',
+    iconBg: '#e6f4e7',
+    iconColor: '#15803d',
+    status: 'active',
+    event: 'Juegos Intercolegiados 2026',
+    coverage: 'Cundinamarca',
+    responsible: 'Carla Suárez',
+    rubro: 60000000,
+    exec: 14160000,
+    unit: 120000,
+    codes: { total: 500, avail: 382, asig: 118, rev: 0 },
+    from: '15 feb 2026',
+    to: '30 jun 2026',
+    actoAdmin: 'Acuerdo 2026-CUN-042',
+    fuente: 'Gobernación Cundinamarca · 2026',
+    incentives: [
+      { name: 'Bono transporte mensual', category: 'Transporte',
+        detail: 'Recarga TransMilenio/SITP · 500 cupos',
+        value: 120000, valueLabel: '$120K', valueFoot: 'por mes',
+        badges: [{ text: 'Bono', variant: 'informative' }, { text: 'Transporte', variant: 'positive' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Categoría deportiva', op: '=', value: 'Prejuvenil' },
+          { field: 'Edad', op: '≥', value: '13' },
+          { field: 'Edad', op: '≤', value: '17' }
+        ]}
+      ],
+      summary: 'Aplica para deportistas <strong>prejuveniles entre 13 y 17 años</strong> del departamento.'
+    }
+  },
+  {
+    id: 'PRG-2026-004',
+    name: 'Inscripción juegos universitarios',
+    shortDesc: 'Mayores de 18 · Nacional',
+    longDesc: 'Cobertura del costo de inscripción a los juegos universitarios 2026 para estudiantes-atletas activos en universidades públicas.',
+    iconBg: '#fff3e6',
+    iconColor: '#d74009',
+    status: 'paused',
+    event: 'Juegos Universitarios 2026',
+    coverage: 'Nacional',
+    responsible: 'Doug Vargas',
+    rubro: 20000000,
+    exec: 11000000,
+    unit: 250000,
+    codes: { total: 80, avail: 36, asig: 44, rev: 0 },
+    from: '01 feb 2026',
+    to: '15 jun 2026',
+    actoAdmin: 'Resolución 2026-UNI-007',
+    fuente: 'Mindeporte + ASCUN · 2026',
+    incentives: [
+      { name: 'Pago inscripción · Juegos Universitarios', category: 'Inscripción',
+        detail: 'Cubre cuota única de inscripción · 80 cupos',
+        value: 250000, valueLabel: '$250K', valueFoot: 'por inscrito',
+        badges: [{ text: 'Inscripción', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Edad', op: '≥', value: '18' },
+          { field: 'Categoría deportiva', op: '=', value: 'Mayores' }
+        ]}
+      ],
+      summary: 'Aplica para <strong>estudiantes-atletas mayores de 18 años</strong> inscritos en universidades públicas.'
+    }
+  },
+  {
+    id: 'PRG-2026-005',
+    name: 'Beca integral alto rendimiento',
+    shortDesc: 'Élite · Nacional',
+    longDesc: 'Beca integral (alimentación, alojamiento, entrenamiento y estímulos mensuales) para deportistas de alto rendimiento con proyección olímpica.',
+    iconBg: '#e6f4e7',
+    iconColor: '#15803d',
+    status: 'draft',
+    event: 'Proyección Panamericanos 2027',
+    coverage: 'Nacional',
+    responsible: 'Doug Vargas',
+    rubro: 500000000,
+    exec: 0,
+    unit: 5000000,
+    codes: { total: 0, avail: 0, asig: 0, rev: 0 },
+    from: '—',
+    to: '—',
+    actoAdmin: 'Borrador · pendiente aprobación',
+    fuente: 'Ministerio del Deporte · 2026',
+    incentives: [
+      { name: 'Beca integral alto rendimiento', category: 'Beca',
+        detail: 'Pendiente definir número de cupos',
+        value: 5000000, valueLabel: '$5.0M', valueFoot: 'por beneficiario mensual',
+        badges: [{ text: 'Beca', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }, { text: 'Borrador', variant: 'neutral' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Logros', op: '∈', value: 'Medalla de oro (internacional)' }
+        ]}
+      ],
+      summary: '<strong>Borrador.</strong> Las condiciones están pendientes de revisión por el comité técnico.'
+    }
+  },
+  {
+    id: 'PRG-2025-019',
+    name: 'Bonos olimpiadas indígenas',
+    shortDesc: 'Comunidades · Cauca',
+    longDesc: 'Bono único de participación para comunidades indígenas del Cauca inscritas en las primeras Olimpiadas Indígenas Nacionales.',
+    iconBg: '#eef5ff',
+    iconColor: '#1f78d1',
+    status: 'closed',
+    event: 'Olimpiadas Indígenas Nacionales 2025',
+    coverage: 'Cauca',
+    responsible: 'Andrés Polo',
+    rubro: 45000000,
+    exec: 45000000,
+    unit: 250000,
+    codes: { total: 180, avail: 0, asig: 180, rev: 0 },
+    from: '15 oct 2025',
+    to: '15 dic 2025',
+    actoAdmin: 'Convenio 2025-CAU-031',
+    fuente: 'Ministerio + Gobernación Cauca · 2025',
+    incentives: [
+      { name: 'Bono participación · Olimpiadas indígenas', category: 'Bono',
+        detail: 'Pago único de participación · 180 cupos',
+        value: 250000, valueLabel: '$250K', valueFoot: 'por deportista',
+        badges: [{ text: 'Bono', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Categoría deportiva', op: '=', value: 'Mayores' }
+        ]}
+      ],
+      summary: '<strong>Programa cerrado.</strong> Ejecutado al 100% con 180 asignaciones.'
+    }
+  },
+  {
+    id: 'PRG-2025-017',
+    name: 'Kit fútbol juveniles Valle',
+    shortDesc: 'Juveniles · Valle',
+    longDesc: 'Entrega de kits de fútbol (uniforme, guayos y balones) para categorías juveniles de clubes del Valle del Cauca.',
+    iconBg: '#eef5ff',
+    iconColor: '#1f78d1',
+    status: 'closed',
+    event: 'Liga Juvenil Valle 2025',
+    coverage: 'Valle del Cauca',
+    responsible: 'Laura Meza',
+    rubro: 32000000,
+    exec: 31840000,
+    unit: 320000,
+    codes: { total: 100, avail: 0, asig: 99, rev: 1 },
+    from: '01 sep 2025',
+    to: '30 nov 2025',
+    actoAdmin: 'Convenio 2025-VAL-022',
+    fuente: 'Indervalle · 2025',
+    incentives: [
+      { name: 'Kit fútbol juvenil', category: 'Kit',
+        detail: 'Uniforme + guayos + balón · 100 unidades',
+        value: 320000, valueLabel: '$320K', valueFoot: 'por kit',
+        badges: [{ text: 'Kit', variant: 'caution' }, { text: 'En especie', variant: 'neutral' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Categoría deportiva', op: '=', value: 'Juvenil' }
+        ]}
+      ],
+      summary: '<strong>Programa cerrado.</strong> 99 kits entregados, 1 reversión por retiro del deportista.'
+    }
+  },
+  {
+    id: 'PRG-2025-012',
+    name: 'Becas juegos nacionales 2025',
+    shortDesc: 'Oro/plata · Nacional',
+    longDesc: 'Beca educativa para medallistas de oro y plata de los Juegos Nacionales 2025. Cubre matrícula universitaria del semestre 2026-I.',
+    iconBg: '#fff3e6',
+    iconColor: '#d74009',
+    status: 'closed',
+    event: 'Juegos Nacionales 2025',
+    coverage: 'Nacional',
+    responsible: 'Doug Vargas',
+    rubro: 180000000,
+    exec: 180000000,
+    unit: 1000000,
+    codes: { total: 180, avail: 0, asig: 180, rev: 0 },
+    from: '01 jun 2025',
+    to: '15 sep 2025',
+    actoAdmin: 'Resolución 2025-116',
+    fuente: 'Ministerio del Deporte · 2025',
+    incentives: [
+      { name: 'Beca universitaria · Medallistas', category: 'Beca',
+        detail: 'Matrícula semestre 2026-I · 180 cupos',
+        value: 1000000, valueLabel: '$1.0M', valueFoot: 'por beneficiario',
+        badges: [{ text: 'Beca', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
+    ],
+    conditions: {
+      groups: [
+        { logic: 'AND', rules: [
+          { field: 'Logros', op: '∈', value: '{"medalla de oro", "medalla de plata"}' }
+        ]}
+      ],
+      summary: '<strong>Programa cerrado.</strong> 180 becas otorgadas. Ejecución 100%.'
+    }
+  }
+];
+
+window.getProgramById = function(id){
+  return window.PROGRAMS_DATA.find(p => p.id === id) || window.PROGRAMS_DATA[0];
+};

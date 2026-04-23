@@ -18,6 +18,7 @@
   let currentStep = 1;
   let isMounted = false;
   let pendingOpen = false;
+  let isDirty = false;
 
   const MONTHS_LONG = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   const MONTHS_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -56,6 +57,7 @@
     wireBudgetInputs();
     seedManualRows();
     seedFirstCondition();
+    wireDirtyTracking();
     // ESC
     document.addEventListener('keydown', e => {
       if(e.key === 'Escape' && document.getElementById('wzOverlay').classList.contains('open')){
@@ -203,6 +205,7 @@
     }
     document.getElementById('wzOverlay').classList.add('open');
     currentStep = 1;
+    isDirty = false;
     renderStep();
     // Recompute segment pill positions once modal is visible (needs layout)
     requestAnimationFrame(() => setTimeout(refreshSegmentPills, 50));
@@ -211,9 +214,85 @@
   function closeWizard(){
     const overlay = document.getElementById('wzOverlay');
     if(!overlay) return;
-    if(confirm('¿Salir? Los cambios no guardados se perderán.')){
+    // Solo pregunta si el usuario realmente editó algo
+    if(!isDirty){
       overlay.classList.remove('open');
+      return;
     }
+    // Cierra el wizard primero, luego abre el warning (nunca apilados)
+    overlay.classList.remove('open');
+    const warn = document.getElementById('wzWarnCloseOverlay');
+    if(warn){
+      setTimeout(() => warn.classList.add('open'), 180);
+    }
+  }
+  function confirmDiscardWizard(){
+    document.getElementById('wzWarnCloseOverlay')?.classList.remove('open');
+    isDirty = false;
+    showToast('Cambios descartados.', 'neutral');
+  }
+  function confirmSaveDraftWizard(){
+    document.getElementById('wzWarnCloseOverlay')?.classList.remove('open');
+    isDirty = false;
+    showToast('Borrador guardado. Puedes retomarlo desde la lista.', 'positive');
+  }
+
+  /* ══ Toast (naowee-message --positive/--negative/--informative/--neutral) ══ */
+  function getToastWrap(){
+    let w = document.getElementById('wzToastWrap');
+    if(!w){
+      w = document.createElement('div');
+      w.id = 'wzToastWrap';
+      w.className = 'wz-toast-wrap';
+      document.body.appendChild(w);
+    }
+    return w;
+  }
+  function showToast(text, variant = 'positive'){
+    const wrap = getToastWrap();
+    const el = document.createElement('div');
+    el.className = `wz-toast naowee-message naowee-message--${variant}`;
+    const icons = {
+      positive:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+      negative:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>',
+      informative: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+      neutral:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+    };
+    el.innerHTML = `
+      <div class="naowee-message__header">
+        <div class="naowee-message__icon">${icons[variant] || icons.positive}</div>
+        <div class="naowee-message__text">${text}</div>
+        <button type="button" class="wz-toast__dismiss" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+    const dismiss = () => {
+      el.style.transition = 'opacity .22s ease';
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 260);
+    };
+    el.querySelector('.wz-toast__dismiss').addEventListener('click', dismiss);
+    wrap.appendChild(el);
+    setTimeout(dismiss, 4000);
+  }
+  window.showToast = showToast;
+
+  /* Dirty tracking — marca como dirty solo cuando el usuario interactúa */
+  function wireDirtyTracking(){
+    const overlay = document.getElementById('wzOverlay');
+    if(!overlay || overlay.dataset.wzDirtyWired) return;
+    overlay.dataset.wzDirtyWired = '1';
+    const markDirty = () => { isDirty = true; };
+    overlay.addEventListener('input', markDirty, true);
+    overlay.addEventListener('change', markDirty, true);
+    // Dropdown option clicks
+    overlay.addEventListener('click', e => {
+      if(e.target.closest('.naowee-dropdown__option')) isDirty = true;
+      if(e.target.closest('.naowee-segment__item')) isDirty = true;
+      if(e.target.closest('.naowee-tag--choice')) isDirty = true;
+      if(e.target.closest('.toggle-card')) isDirty = true;
+      if(e.target.closest('.wz-dp__day')) isDirty = true;
+    }, true);
   }
 
   /* ══ Dropdown upgrade / behaviour ══ */
@@ -1122,6 +1201,7 @@
     // Cerrar wizard y mostrar success modal
     const overlay = document.getElementById('wzOverlay');
     overlay.classList.remove('open');
+    isDirty = false;
     showSuccessModal();
     if(typeof window.onProgramCreated === 'function') window.onProgramCreated();
   }
@@ -1155,6 +1235,8 @@
   window.resetWzFile = resetWzFile;
   window.closeSuccessAndNew = closeSuccessAndNew;
   window.goToProgramDetail = goToProgramDetail;
+  window.confirmDiscardWizard = confirmDiscardWizard;
+  window.confirmSaveDraftWizard = confirmSaveDraftWizard;
 
   /* ══ Auto-mount on load, auto-open if ?new=1 ══ */
   document.addEventListener('DOMContentLoaded', () => {

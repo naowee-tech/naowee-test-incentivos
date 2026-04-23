@@ -380,3 +380,31 @@
     </div>
   </div>
 </div>
+
+<!-- ═══ DIALOG: Guardar progreso (advertencia al cerrar) ═══ -->
+<div class="wz-warn-overlay" id="wzWarnCloseOverlay" role="dialog" aria-modal="true" aria-labelledby="wzWarnTitle">
+  <div class="wz-warn-card">
+    <div class="wz-warn-card__body">
+      <div class="wz-warn-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="8" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12" y2="17.01"/>
+        </svg>
+      </div>
+      <h2 class="wz-warn-card__title" id="wzWarnTitle">¿Deseas guardar tu progreso?</h2>
+      <p class="wz-warn-card__sub">Si sales sin guardar, los datos ingresados se perderán.</p>
+      <ul class="wz-warn-list">
+        <li class="wz-warn-list__item">
+          <span class="wz-warn-list__check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span>Puedes guardar como borrador y continuar el registro en otro momento.</span>
+        </li>
+      </ul>
+    </div>
+    <div class="wz-warn-card__footer">
+      <button type="button" class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="confirmDiscardWizard()">Descartar</button>
+      <button type="button" class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="confirmSaveDraftWizard()">Guardar borrador</button>
+    </div>
+  </div>
+</div>

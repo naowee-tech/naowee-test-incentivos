@@ -9,18 +9,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
 <link rel="stylesheet" href="shared/shell.css"/>
 <link rel="stylesheet" href="shared/programa-wizard.css"/>
+<script src="shared/programs-data.js"></script>
 
 <style>
-  /* Back link */
-  .back-link{
-    display:inline-flex;align-items:center;gap:6px;
-    font-size:13px;font-weight:700;
-    color:var(--naowee-color-text-accent,#d74009);
-    background:transparent;border:none;cursor:pointer;font-family:inherit;
-    padding:6px 10px 6px 0;margin-bottom:12px;
-    transition:opacity .15s;
-  }
-  .back-link:hover{opacity:.7}
+  /* Back link wrapper */
+  .back-link-wrap{margin-bottom:12px}
 
   /* Detail header card (no shadow) */
   .detail-head{
@@ -79,7 +72,7 @@
   .detail-card__tabs{
     position:relative;
     border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
-    padding:0 8px;
+    padding:12px 8px 0;
   }
   .detail-card__tabs .naowee-tabs{border-bottom:none;background:transparent}
   .detail-card__body{padding:32px 28px 28px}
@@ -541,31 +534,28 @@
     <div class="page">
 
       <!-- Regresar -->
-      <button class="back-link" onclick="fadeAndGo('incentivo-03-programas.html')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Regresar a la lista
-      </button>
+      <div class="back-link-wrap">
+        <button type="button" class="naowee-btn naowee-btn--link naowee-btn--small" onclick="fadeAndGo('incentivo-03-programas.html')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          Regresar a la lista
+        </button>
+      </div>
 
       <!-- Detail header -->
       <div class="detail-head">
-        <div class="detail-head__ico">
+        <div class="detail-head__ico" id="hdIco">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         </div>
         <div class="detail-head__body">
           <div class="detail-head__id-row">
-            <span class="detail-head__id">PRG-2026-001</span>
-            <span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">
+            <span class="detail-head__id" id="hdId">—</span>
+            <span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small" id="hdBadge">
               <span class="naowee-badge__dot"></span>
-              Activo
+              <span id="hdBadgeText">—</span>
             </span>
           </div>
-          <h1 class="detail-head__title">Becas deportivas 2026</h1>
-          <div class="detail-head__meta">
-            <span>Medallistas de oro · Juegos Nacionales 2025</span><span class="dot"></span>
-            <span>Vigencia: 01 ene — 31 dic 2026</span><span class="dot"></span>
-            <span>Cobertura: <strong>Nacional</strong></span><span class="dot"></span>
-            <span>Responsable: Doug Vargas</span>
-          </div>
+          <h1 class="detail-head__title" id="hdTitle">—</h1>
+          <div class="detail-head__meta" id="hdMeta"></div>
         </div>
         <div class="detail-head__actions">
           <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="openWizard()">
@@ -579,26 +569,26 @@
       <div class="kpi-strip">
         <div class="mini-kpi">
           <div class="mini-kpi__lbl">Rubro total</div>
-          <div class="mini-kpi__val">$200M</div>
-          <div class="mini-kpi__sub">200 códigos × $1M</div>
+          <div class="mini-kpi__val" id="kpiRubro">—</div>
+          <div class="mini-kpi__sub" id="kpiRubroSub">—</div>
         </div>
         <div class="mini-kpi">
           <div class="mini-kpi__lbl">Ejecutado</div>
-          <div class="mini-kpi__val">$182M</div>
+          <div class="mini-kpi__val" id="kpiExec">—</div>
           <div class="naowee-progress naowee-progress--positive" style="margin-top:8px">
-            <div class="naowee-progress__fill" style="width:91%"></div>
+            <div class="naowee-progress__fill" id="kpiExecFill" style="width:0%"></div>
           </div>
-          <div class="mini-kpi__sub" style="margin-top:4px">91% · 182 asignaciones</div>
+          <div class="mini-kpi__sub" style="margin-top:4px" id="kpiExecSub">—</div>
         </div>
         <div class="mini-kpi">
           <div class="mini-kpi__lbl">Inventario</div>
-          <div class="mini-kpi__val" style="color:var(--naowee-color-text-accent,#d74009)">18</div>
+          <div class="mini-kpi__val" id="kpiInv" style="color:var(--naowee-color-text-accent,#d74009)">—</div>
           <div class="mini-kpi__sub">códigos disponibles</div>
         </div>
         <div class="mini-kpi">
           <div class="mini-kpi__lbl">Revertidos</div>
-          <div class="mini-kpi__val">3</div>
-          <div class="mini-kpi__sub">1.6% del total</div>
+          <div class="mini-kpi__val" id="kpiRev">—</div>
+          <div class="mini-kpi__sub" id="kpiRevSub">—</div>
         </div>
       </div>
 
@@ -607,9 +597,9 @@
         <div class="detail-card__tabs">
           <div class="naowee-tabs naowee-tabs--animated" role="tablist" id="wzTabs">
             <button type="button" class="naowee-tab naowee-tab--selected" data-tab="resumen" role="tab" aria-selected="true" onclick="switchTab('resumen', this)">Resumen</button>
-            <button type="button" class="naowee-tab" data-tab="condiciones" role="tab" onclick="switchTab('condiciones', this)">Condiciones <span class="naowee-tab__count">3</span></button>
-            <button type="button" class="naowee-tab" data-tab="codigos" role="tab" onclick="switchTab('codigos', this)">Códigos <span class="naowee-tab__count">200</span></button>
-            <button type="button" class="naowee-tab" data-tab="asignaciones" role="tab" onclick="switchTab('asignaciones', this)">Asignaciones <span class="naowee-tab__count">182</span></button>
+            <button type="button" class="naowee-tab" data-tab="condiciones" role="tab" onclick="switchTab('condiciones', this)">Condiciones <span class="naowee-tab__count" id="tabCondCount">—</span></button>
+            <button type="button" class="naowee-tab" data-tab="codigos" role="tab" onclick="switchTab('codigos', this)">Códigos <span class="naowee-tab__count" id="tabCodCount">—</span></button>
+            <button type="button" class="naowee-tab" data-tab="asignaciones" role="tab" onclick="switchTab('asignaciones', this)">Asignaciones <span class="naowee-tab__count" id="tabAsigCount">—</span></button>
             <button type="button" class="naowee-tab" data-tab="historial" role="tab" onclick="switchTab('historial', this)">Historial</button>
             <span class="naowee-tabs__indicator"></span>
           </div>
@@ -618,39 +608,13 @@
         <div class="detail-card__body" id="tabBody">
           <!-- Tab: Resumen -->
           <div class="tab-pane" data-pane="resumen">
-            <!-- SECCIÓN 1: Tipos de incentivo (primero) -->
             <div class="section">
               <div class="section-label">Tipos de incentivo</div>
-              <div class="inc-card">
-                <div class="inc-card__ico">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                </div>
-                <div class="inc-card__body">
-                  <div class="inc-card__title">Beca educativa · Medallistas de oro</div>
-                  <div class="inc-card__desc">Cualitativo + monetario · 200 cupos planeados</div>
-                  <div class="inc-card__badges">
-                    <span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small">Beca</span>
-                    <span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Monetario</span>
-                  </div>
-                </div>
-                <div class="inc-card__val">
-                  <div class="inc-card__val-val">$1.0M</div>
-                  <div class="inc-card__val-lbl">por beneficiario</div>
-                </div>
-              </div>
+              <div id="incList"></div>
             </div>
-
-            <!-- SECCIÓN 2: Información general -->
             <div class="section">
               <div class="section-label">Información general</div>
-              <dl>
-                <div class="info-row-plain"><dt>Descripción</dt><dd>Beca educativa dirigida a deportistas medallistas de oro y plata de los Juegos Nacionales 2025, para apoyar su formación profesional.</dd></div>
-                <div class="info-row-plain"><dt>Código del programa</dt><dd><code>PRG-2026-001</code></dd></div>
-                <div class="info-row-plain"><dt>Fuente presupuestal</dt><dd>Ministerio del Deporte · 2026</dd></div>
-                <div class="info-row-plain"><dt>Acto administrativo</dt><dd>Resolución 2026-115</dd></div>
-                <div class="info-row-plain"><dt>Creado</dt><dd>22 abr 2026 · Doug Vargas</dd></div>
-                <div class="info-row-plain"><dt>Última edición</dt><dd>22 abr 2026 · hace 3 min</dd></div>
-              </dl>
+              <dl id="infoList"></dl>
             </div>
           </div>
 
@@ -664,14 +628,8 @@
                   Editar reglas
                 </button>
               </div>
-              <div class="cond-preview-box">
-                ( <b>edad</b> ≥ <em>18</em> <b>AND</b> <b>categoría</b> = <em>"Prejuvenil o superior"</em> )<br/>
-                <b>OR</b><br/>
-                ( <b>logros</b> ∈ <em>{"medalla de oro", "medalla de plata"}</em> )
-              </div>
-              <div class="cond-summary">
-                <strong>En lenguaje natural:</strong> aplica para deportistas <strong>mayores de 18 años con categoría prejuvenil o superior</strong>, o deportistas <strong>con medalla de oro o plata</strong> (sin importar la edad).
-              </div>
+              <div class="cond-preview-box" id="condPreview">—</div>
+              <div class="cond-summary" id="condSummary"><strong>En lenguaje natural:</strong> —</div>
             </div>
           </div>
 
@@ -900,8 +858,134 @@ document.addEventListener('click', (e) => {
 
 function fadeAndGo(url){document.body.style.transition='opacity .25s ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url},260)}
 
+/* ══ HYDRATE: llena la página según el ?id= del query string ══ */
+const STATUS_META = {
+  active: { label: 'Activo', variant: 'positive' },
+  draft:  { label: 'Borrador', variant: 'neutral' },
+  paused: { label: 'Pausado', variant: 'caution' },
+  closed: { label: 'Cerrado', variant: 'informative' }
+};
+const CAT_ICONS = {
+  'Beca':        '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  'Kit':         '<path d="M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1z"/><path d="M9 7V5h6v2"/>',
+  'Bono':        '<circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 010 5H9"/>',
+  'Transporte':  '<rect x="3" y="3" width="18" height="13" rx="2"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>',
+  'Inscripción': '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  'Descuento':   '<path d="M20 12V8H6a2 2 0 110-4h12v4M20 12V16a2 2 0 01-2 2H6a2 2 0 110-4h12a2 2 0 012 2z"/>',
+  'Pase':        '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 12h18"/>',
+  'Dinero':      '<circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 010 5H9"/>'
+};
+function formatMoney(n){ return '$' + n.toLocaleString('es-CO'); }
+function formatMoneyShort(n){
+  if(!n) return '$0';
+  if(n >= 1000000000) return '$' + (n/1000000000).toFixed(1).replace('.0','') + 'B';
+  if(n >= 1000000) return '$' + (n/1000000).toFixed(0) + 'M';
+  if(n >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
+  return '$' + n;
+}
+
+let CURRENT_PROGRAM = null;
+
+function hydrateProgram(){
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id') || (window.PROGRAMS_DATA && window.PROGRAMS_DATA[0]?.id);
+  const p = window.getProgramById(id);
+  if(!p) return;
+  CURRENT_PROGRAM = p;
+
+  // Detail head
+  const ico = document.getElementById('hdIco');
+  ico.style.background = p.iconBg;
+  ico.style.color = p.iconColor;
+  const mainCat = (p.incentives[0]?.category) || 'Beca';
+  const iconPath = CAT_ICONS[mainCat] || CAT_ICONS['Beca'];
+  ico.innerHTML = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>`;
+
+  document.getElementById('hdId').textContent = p.id;
+  document.getElementById('hdTitle').textContent = p.name;
+
+  const meta = STATUS_META[p.status] || STATUS_META.draft;
+  const badge = document.getElementById('hdBadge');
+  badge.className = `naowee-badge naowee-badge--${meta.variant} naowee-badge--quiet naowee-badge--small`;
+  badge.querySelector('#hdBadgeText').textContent = meta.label;
+
+  document.getElementById('hdMeta').innerHTML = `
+    <span>${p.shortDesc} · ${p.event}</span><span class="dot"></span>
+    <span>Vigencia: ${p.from} — ${p.to}</span><span class="dot"></span>
+    <span>Cobertura: <strong>${p.coverage}</strong></span><span class="dot"></span>
+    <span>Responsable: ${p.responsible}</span>
+  `;
+
+  // KPI strip
+  const execPct = p.rubro ? Math.round((p.exec/p.rubro)*100) : 0;
+  const unitM = p.unit >= 1000000 ? `$${(p.unit/1000000).toFixed(1).replace('.0','')}M` : `$${(p.unit/1000).toFixed(0)}K`;
+  document.getElementById('kpiRubro').textContent = formatMoneyShort(p.rubro);
+  document.getElementById('kpiRubroSub').textContent = p.codes.total > 0 ? `${p.codes.total} códigos × ${unitM}` : 'Pendiente configurar';
+  document.getElementById('kpiExec').textContent = formatMoneyShort(p.exec);
+  document.getElementById('kpiExecFill').style.width = execPct + '%';
+  document.getElementById('kpiExecSub').textContent = p.rubro ? `${execPct}% · ${p.codes.asig} asignaciones` : '—';
+  document.getElementById('kpiInv').textContent = p.codes.avail;
+  document.getElementById('kpiRev').textContent = p.codes.rev;
+  document.getElementById('kpiRevSub').textContent = p.codes.total ? `${((p.codes.rev/p.codes.total)*100).toFixed(1)}% del total` : '—';
+
+  // Tab counts
+  const totalConds = p.conditions.groups.reduce((acc, g) => acc + g.rules.length, 0);
+  document.getElementById('tabCondCount').textContent = totalConds;
+  document.getElementById('tabCodCount').textContent = p.codes.total;
+  document.getElementById('tabAsigCount').textContent = p.codes.asig;
+
+  // Resumen: tipos de incentivo
+  document.getElementById('incList').innerHTML = p.incentives.map(inc => {
+    const catIco = CAT_ICONS[inc.category] || CAT_ICONS['Beca'];
+    const badges = inc.badges.map(b => `<span class="naowee-badge naowee-badge--${b.variant} naowee-badge--quiet naowee-badge--small">${b.text}</span>`).join('');
+    return `
+      <div class="inc-card">
+        <div class="inc-card__ico" style="background:${p.iconBg};color:${p.iconColor}">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${catIco}</svg>
+        </div>
+        <div class="inc-card__body">
+          <div class="inc-card__title">${inc.name}</div>
+          <div class="inc-card__desc">${inc.detail}</div>
+          <div class="inc-card__badges">${badges}</div>
+        </div>
+        <div class="inc-card__val">
+          <div class="inc-card__val-val">${inc.valueLabel}</div>
+          <div class="inc-card__val-lbl">${inc.valueFoot}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  // Resumen: información general
+  document.getElementById('infoList').innerHTML = `
+    <div class="info-row-plain"><dt>Descripción</dt><dd>${p.longDesc}</dd></div>
+    <div class="info-row-plain"><dt>Código del programa</dt><dd><code>${p.id}</code></dd></div>
+    <div class="info-row-plain"><dt>Fuente presupuestal</dt><dd>${p.fuente}</dd></div>
+    <div class="info-row-plain"><dt>Acto administrativo</dt><dd>${p.actoAdmin}</dd></div>
+    <div class="info-row-plain"><dt>Evento asociado</dt><dd>${p.event}</dd></div>
+    <div class="info-row-plain"><dt>Cobertura</dt><dd>${p.coverage}</dd></div>
+    <div class="info-row-plain"><dt>Responsable</dt><dd>${p.responsible}</dd></div>
+  `;
+
+  // Condiciones
+  const groupBlocks = p.conditions.groups.map(g => {
+    const inner = g.rules.map(r => `<b>${r.field.toLowerCase()}</b> ${r.op} <em>${r.value}</em>`).join(' <b>AND</b> ');
+    return p.conditions.groups.length > 1 ? `( ${inner} )` : inner;
+  });
+  document.getElementById('condPreview').innerHTML = groupBlocks.join('<br/><b>OR</b><br/>');
+  document.getElementById('condSummary').innerHTML = `<strong>En lenguaje natural:</strong> ${p.conditions.summary}`;
+
+  // Modal cargar codigos — program name
+  const ccName = document.getElementById('ccProgramName');
+  if(ccName) ccName.textContent = p.name;
+
+  // Title del documento
+  document.title = `SUID – Incentivos · ${p.name}`;
+}
+
 // Init
 window.addEventListener('load', () => {
+  hydrateProgram();
   positionTabIndicator();
   setTimeout(positionTabIndicator, 100);
   seedCodigos();
@@ -1138,7 +1222,7 @@ function changeAsignPage(delta){
     <div class="cc-header">
       <div>
         <h2 class="cc-header__title" id="ccTitle">Cargar códigos al programa</h2>
-        <div class="cc-header__sub">Agrega códigos al inventario de <strong>Becas deportivas 2026</strong>. Puedes subir un archivo o ingresarlos manualmente.</div>
+        <div class="cc-header__sub">Agrega códigos al inventario de <strong id="ccProgramName">—</strong>. Puedes subir un archivo o ingresarlos manualmente.</div>
       </div>
       <button type="button" class="cc-close" onclick="closeCargarCodigos()" aria-label="Cerrar">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
