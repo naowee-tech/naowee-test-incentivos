@@ -1,0 +1,344 @@
+/* ═══════════════════════════════════════════════════════════════
+   PROGRAMA · WIZARD (5 pasos) — estilos compartidos
+   Usa naowee-modal + naowee-textfield + naowee-dropdown + naowee-btn
+   del design system. Este archivo sólo agrega layout y refinamientos.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Dimensiones del modal — mismo ancho que escenarios (576/680) */
+.naowee-modal.wz-modal{
+  width: 680px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 48px);
+  border-radius: 16px;
+  box-shadow: 0 24px 48px rgba(0,0,0,.25);
+  /* Spring overshoot como escenarios */
+  animation: wzScaleIn .35s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes wzScaleIn{
+  from{ opacity: 0; transform: scale(.92) translateY(24px); }
+  to{ opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Backdrop con blur (escenarios-style) */
+.naowee-modal-overlay{
+  background: rgba(0, 43, 91, .45);
+  backdrop-filter: blur(2px);
+}
+
+/* Sin scroll horizontal en el modal */
+.wz-modal,
+.wz-modal .naowee-modal__body{
+  overflow-x: hidden;
+}
+
+/* Quitar shadow/border del header sticky sobre el stepper */
+.wz-modal.naowee-modal--fixed-header .naowee-modal__header{
+  box-shadow: none;
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+/* Divider top en footer */
+.wz-modal.naowee-modal--fixed-footer .naowee-modal__footer{
+  border-top: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  box-shadow: none;
+  padding-top: 16px;
+}
+
+/* Stepper — sin fondo gris ni divider arriba/abajo (escenarios-style) */
+.wz-stepper-wrap{
+  padding: 16px 24px;
+  background: #fff;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+/* Transición suave entre paneles — fadeInUp */
+.wz-pane{ animation: wzFadeInUp .4s cubic-bezier(.4,0,.2,1); }
+@keyframes wzFadeInUp{
+  from{ opacity: 0; transform: translateY(12px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse sutil en step activo del stepper */
+.wz-modal .naowee-stepper__step--active .naowee-stepper__number{
+  animation: wzStepperPulse 2s cubic-bezier(.4,0,.6,1) infinite;
+}
+@keyframes wzStepperPulse{
+  0%, 100%{ box-shadow: 0 0 0 0 rgba(215,64,9,.35); }
+  50%{ box-shadow: 0 0 0 6px rgba(215,64,9,0); }
+}
+
+.wz-pane__title{
+  font-size: 18px; font-weight: 600; letter-spacing: -.005em;
+  margin-bottom: 4px; color: var(--naowee-color-text-primary, #282834);
+}
+.wz-pane__sub{
+  font-size: 13px; color: var(--naowee-color-text-secondary, #646587);
+  margin-bottom: 20px; line-height: 1.5; font-weight: 400;
+}
+
+/* Grid + field groups */
+.wz-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px){ .wz-grid{ grid-template-columns: 1fr; } }
+.wz-field-group{ display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+/* Section title — gris claro, sin dividers (escenarios pattern) */
+.wz-subtitle{
+  font-size: 12px; font-weight: 600; line-height: 16px; letter-spacing: .2px;
+  color: #9c9ebf; text-transform: uppercase;
+  margin: 8px 0 4px;
+  padding: 0; border: none;
+}
+
+/* Placeholder — gris más claro en todo el wizard */
+.wz-modal .naowee-textfield__input::placeholder,
+.wz-modal .naowee-textfield__input::-webkit-input-placeholder{
+  color: #9c9ebf; opacity: 1;
+}
+/* Readonly inputs que funcionan como display (ej. Responsable) — mismo gris suave */
+.wz-modal .naowee-textfield__input[readonly]:not([data-wz-iso]){
+  color: var(--naowee-color-text-primary, #282834);
+}
+
+/* Required-field wiggle + highlight */
+@keyframes wzShake{
+  0%, 100%{ transform: translateX(0); }
+  15%{ transform: translateX(-6px); }
+  30%{ transform: translateX(5px); }
+  45%{ transform: translateX(-4px); }
+  60%{ transform: translateX(3px); }
+  75%{ transform: translateX(-2px); }
+  90%{ transform: translateX(1px); }
+}
+.wz-shake{ animation: wzShake .45s cubic-bezier(.36,.07,.19,.97); }
+
+/* Toggle cards (tipo de incentivo) */
+.toggle-cards{ display: flex; flex-direction: column; gap: 8px; }
+.toggle-card{
+  display: flex; gap: 12px; padding: 14px 16px;
+  border: 1.5px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 12px; cursor: pointer; align-items: flex-start; transition: all .15s;
+}
+.toggle-card:hover{ border-color: var(--naowee-color-border-strong, #d0d4e6); }
+.toggle-card.active{ background: #fff3e6; border-color: var(--naowee-color-text-accent, #d74009); }
+.toggle-card__check{
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--naowee-color-border-strong, #d0d4e6);
+  flex-shrink: 0; margin-top: 1px; position: relative;
+}
+.toggle-card.active .toggle-card__check{
+  border-color: var(--naowee-color-text-accent, #d74009);
+  background: var(--naowee-color-text-accent, #d74009);
+}
+.toggle-card.active .toggle-card__check::after{
+  content: ""; position: absolute; top: 5px; left: 5px;
+  width: 6px; height: 6px; background: #fff; border-radius: 50%;
+}
+.toggle-card__title{ font-size: 13px; font-weight: 700; color: var(--naowee-color-text-primary, #282834); margin-bottom: 2px; }
+.toggle-card__desc{ font-size: 11.5px; color: var(--naowee-color-text-secondary, #646587); line-height: 1.4; }
+
+/* Chip picker (cobertura territorial) */
+.chip-picker{ display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Condition builder */
+.cond-group{
+  border: 1.5px dashed var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 12px; padding: 14px; margin-bottom: 10px; background: #fafbfd;
+}
+.cond-group__head{
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  font-size: 11px; font-weight: 700; color: var(--naowee-color-text-secondary, #646587);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.cond-row{
+  display: grid; grid-template-columns: 160px 130px 1fr auto; gap: 8px;
+  align-items: center; padding: 8px; background: #fff;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 8px; margin-bottom: 6px;
+}
+.cond-row select, .cond-row input{
+  height: 36px; padding: 0 10px;
+  border: 1px solid transparent; background: #f5f6fa;
+  border-radius: 6px; font: inherit; font-size: 12.5px;
+}
+.cond-row select{
+  padding-right: 26px; appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12' fill='none'><path d='M2 4l4 4 4-4' stroke='%23282834' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+.cond-row select:focus, .cond-row input:focus{
+  outline: none; border-color: var(--naowee-color-text-accent, #d74009); background: #fff;
+}
+.x-btn{
+  width: 30px; height: 30px; border-radius: 6px;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--naowee-color-text-secondary, #646587);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.x-btn:hover{ background: #fff0ee; color: #b42318; }
+
+.add-cond{
+  font-size: 12px; font-weight: 700; color: var(--naowee-color-text-accent, #d74009);
+  background: transparent; border: 1px dashed #ffbf75;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; margin-top: 4px;
+  display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+}
+.add-cond:hover{ background: #fff3e6; }
+
+.cond-preview{
+  margin-top: 14px; padding: 12px 14px; background: #fafbfd; border-radius: 8px;
+  font-size: 12px; line-height: 1.6; color: var(--naowee-color-text-secondary, #646587);
+}
+.cond-preview code{
+  font-family: 'SF Mono', monospace; font-size: 11.5px;
+  color: var(--naowee-color-text-accent, #d74009);
+}
+
+/* Spacing para segments del DS dentro del wizard */
+.wz-modal .naowee-segment{ margin-bottom: 14px; }
+.cond-group__head .naowee-segment{ margin: 0; }
+
+/* Drag & drop zone — dashed naranja sutil */
+.wz-dropzone{
+  position: relative;
+  border: 1.5px dashed rgba(215, 64, 9, .38);
+  border-radius: 14px;
+  padding: 36px 20px;
+  text-align: center;
+  background: linear-gradient(180deg, #fffaf5 0%, #fff 100%);
+  cursor: pointer;
+  transition: border-color .18s, background .18s, transform .18s;
+}
+.wz-dropzone:hover,
+.wz-dropzone.is-dragover{
+  border-color: rgba(215, 64, 9, .85);
+  background: #fff6ee;
+}
+.wz-dropzone.is-dragover{ transform: scale(1.005); }
+.wz-dropzone__ico{
+  width: 52px; height: 52px; margin: 0 auto 12px;
+  border-radius: 50%; background: #fff;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  color: var(--naowee-color-text-accent, #d74009);
+  display: flex; align-items: center; justify-content: center;
+}
+.wz-dropzone__title{ font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.wz-dropzone__sub{
+  font-size: 12px; color: var(--naowee-color-text-secondary, #646587);
+  line-height: 1.4; max-width: 420px; margin: 0 auto;
+}
+.wz-dropzone__sub code{
+  font-family: 'SF Mono', monospace; font-size: 11px;
+  color: var(--naowee-color-text-accent, #d74009);
+  background: #fff; padding: 1px 5px; border-radius: 4px;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.wz-dropzone__fmts{ display: flex; gap: 5px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+.fmt{
+  font-size: 9.5px; font-weight: 700; padding: 2px 7px;
+  border-radius: 4px; background: #fff;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  color: var(--naowee-color-text-secondary, #646587);
+  text-transform: uppercase; letter-spacing: .3px;
+}
+
+/* Manual code row */
+.manual-row{
+  display: grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: 8px;
+  align-items: center; padding: 10px; background: #fafbfd;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 8px; margin-bottom: 6px;
+}
+.manual-row input, .manual-row select{
+  height: 36px; padding: 0 10px; border: 1px solid transparent;
+  background: #fff; border-radius: 6px; font: inherit; font-size: 12px;
+  color: var(--naowee-color-text-primary, #282834);
+}
+.manual-row input[type="text"]:first-child{ font-family: 'SF Mono', monospace; }
+.manual-row input:focus, .manual-row select:focus{
+  outline: none; border-color: var(--naowee-color-text-accent, #d74009);
+}
+.manual-row select{
+  appearance: none; -webkit-appearance: none; padding-right: 26px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12' fill='none'><path d='M2 4l4 4 4-4' stroke='%23282834' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+
+/* Summary chip */
+.summary-chip{
+  display: flex; gap: 14px; padding: 14px 18px;
+  background: linear-gradient(90deg, #fff3e6, #fff);
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 12px; margin-bottom: 16px;
+}
+.summary-chip__ico{
+  width: 40px; height: 40px; border-radius: 10px; background: #fff;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  color: var(--naowee-color-text-accent, #d74009);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.summary-chip__title{ font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.summary-chip__desc{ font-size: 11.5px; color: var(--naowee-color-text-secondary, #646587); line-height: 1.4; }
+
+/* Custom date-picker popup — fixed, ancho seteado por JS al ancho del input */
+.wz-datepicker{
+  position: fixed; z-index: 1500;
+  background: #fff; border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 12px; box-shadow: 0 12px 32px rgba(40,40,52,.14);
+  padding: 14px;
+  min-width: 240px;
+  opacity: 0; transform: translateY(-6px); pointer-events: none;
+  transition: opacity .18s, transform .18s;
+}
+.wz-datepicker.open{ opacity: 1; transform: translateY(0); pointer-events: auto; }
+.wz-dp__head{
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.wz-dp__month{ font-size: 13px; font-weight: 700; color: var(--naowee-color-text-primary, #282834); text-transform: capitalize; }
+.wz-dp__nav{
+  width: 28px; height: 28px; border-radius: 6px; border: none;
+  background: transparent; cursor: pointer;
+  color: var(--naowee-color-text-secondary, #646587);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.wz-dp__nav:hover{ background: #f5f6fa; color: var(--naowee-color-text-accent, #d74009); }
+.wz-dp__weekdays, .wz-dp__days{
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+}
+.wz-dp__weekdays{ margin-bottom: 4px; }
+.wz-dp__weekday{
+  font-size: 10px; font-weight: 700; text-align: center;
+  color: var(--naowee-color-text-secondary, #646587);
+  padding: 6px 0; text-transform: uppercase; letter-spacing: .3px;
+}
+.wz-dp__day{
+  height: 32px; border-radius: 6px; border: none;
+  background: transparent; cursor: pointer; font: inherit;
+  font-size: 12px; color: var(--naowee-color-text-primary, #282834);
+  transition: background .12s, color .12s;
+}
+.wz-dp__day:hover{ background: #fff3e6; color: var(--naowee-color-text-accent, #d74009); }
+.wz-dp__day--muted{ color: #b5b9d4; }
+.wz-dp__day--today{ font-weight: 800; color: var(--naowee-color-text-accent, #d74009); }
+.wz-dp__day--selected{
+  background: var(--naowee-color-text-accent, #d74009);
+  color: #fff;
+}
+.wz-dp__day--selected:hover{ background: var(--naowee-color-text-accent, #d74009); color: #fff; }
+
+.naowee-textfield.has-datepicker .naowee-textfield__input-wrap{ cursor: pointer; }
+.naowee-textfield.has-datepicker input{ cursor: pointer; caret-color: transparent; }
+.naowee-textfield.has-datepicker .naowee-textfield__suffix{
+  color: #9c9ebf;
+  padding: 0; margin-right: 2px;
+  display: flex; align-items: center;
+}
+.naowee-textfield.has-datepicker .naowee-textfield__suffix svg{ display: block; }
+
+/* Dropdown menu dentro del wizard: fixed para no clipearse por el modal body */
+.wz-modal .naowee-dropdown--open .naowee-dropdown__menu{
+  position: fixed;
+  max-height: 260px;
+  z-index: 1500;
+}

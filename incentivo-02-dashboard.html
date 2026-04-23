@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
 <link rel="stylesheet" href="shared/shell.css"/>
+<link rel="stylesheet" href="shared/programa-wizard.css"/>
 
 <style>
   .page-header{
@@ -184,7 +185,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
             Ver programas
           </button>
-          <button class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="fadeAndGo('incentivo-03-programas.html?new=1')">
+          <button class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="openWizard()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nuevo programa
           </button>
@@ -523,5 +524,6 @@ document.addEventListener('click', (e) => { const sw = document.getElementById('
 function fadeAndGo(url){document.body.style.transition='opacity .25s ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url},260)}
 </script>
 
+<script src="shared/programa-wizard.js" defer></script>
 </body>
 </html>
