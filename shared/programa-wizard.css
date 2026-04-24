@@ -70,6 +70,10 @@
   padding: 4px 8px;
   flex-shrink: 0;
 }
+/* Step 1 sin padding izquierdo — alinea con el título del header.
+   Step 5 sin padding derecho — el wrap ya aporta 32px, evitamos doble espacio. */
+.wz-modal .naowee-stepper__step:first-child{ padding-left: 0; }
+.wz-modal .naowee-stepper__step:last-child{ padding-right: 0; }
 
 /* Transición suave entre paneles — fadeInUp */
 .wz-pane{ animation: wzFadeInUp .4s cubic-bezier(.4,0,.2,1); }
