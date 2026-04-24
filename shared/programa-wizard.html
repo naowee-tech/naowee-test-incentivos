@@ -115,6 +115,7 @@
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </span>
               </div>
+              <div class="naowee-textfield__helper wz-range-helper">Debe ser posterior a la vigencia desde.</div>
             </div>
           </div>
 
@@ -207,7 +208,13 @@
             </div>
           </div>
 
-          <div id="wzIncList" class="wz-inc-list">
+          <!-- Hint contextual — cambia según modo seleccionado -->
+          <div class="wz-types-hint" id="wzTypesHint" data-mode="single">
+            <svg class="wz-types-hint__ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="wz-types-hint__text" data-single="Todo el rubro se destinará a este único tipo de incentivo. Más adelante podrás agregar otros tipos si cambias a modo &quot;Varios tipos&quot;." data-multi="Divide el rubro entre varios tipos. Usa el botón &laquo;Agregar otro tipo&raquo; abajo para sumar cada categoría adicional.">Todo el rubro se destinará a este único tipo de incentivo. Más adelante podrás agregar otros tipos si cambias a modo "Varios tipos".</span>
+          </div>
+
+          <div id="wzIncList" class="wz-inc-list wz-inc-list--single">
             <!-- Primera tarjeta — siempre visible -->
             <div class="wz-inc-card" data-idx="1">
               <div class="wz-inc-card__head">

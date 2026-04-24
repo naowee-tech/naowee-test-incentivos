@@ -494,7 +494,8 @@
             pop.classList.remove('open');
             clearError(field);
 
-            // Si este es "from", validar que "to" no quede antes; si es así, limpiar "to".
+            // Si este es "from", validar que "to" no quede antes; si es así, limpiar
+            // "to" y mostrar feedback visual (flash rojo + mensaje explicativo).
             if(rangeRole === 'from' && rangeName){
               const toField = document.querySelector(`[data-wz-datepicker][data-wz-range="to"][data-wz-range-name="${rangeName}"]`);
               const toInput = toField?.querySelector('input');
@@ -505,6 +506,19 @@
                 if(toDate < c.d){
                   toInput.value = '';
                   delete toInput.dataset.wzIso;
+                  const helper = toField.querySelector('.wz-range-helper');
+                  toField.classList.add('wz-flash-error');
+                  if(helper){
+                    helper.classList.add('is-error');
+                    helper.textContent = 'Se limpió porque quedaba antes de la vigencia desde.';
+                  }
+                  setTimeout(() => {
+                    toField.classList.remove('wz-flash-error');
+                    if(helper){
+                      helper.classList.remove('is-error');
+                      helper.textContent = 'Debe ser posterior a la vigencia desde.';
+                    }
+                  }, 2800);
                 }
               }
             }
@@ -769,10 +783,23 @@
     el.classList.add('active');
     const addBtn = document.getElementById('wzAddInc');
     if(addBtn) addBtn.hidden = (mode !== 'multi');
-    // Si cambió a single: dejar sólo la primera tarjeta
-    if(mode === 'single'){
-      const list = document.getElementById('wzIncList');
-      if(list){
+    // Actualizar hint contextual (texto + estilo)
+    const hint = document.getElementById('wzTypesHint');
+    if(hint){
+      hint.dataset.mode = mode;
+      const text = hint.querySelector('.wz-types-hint__text');
+      if(text){
+        const newText = mode === 'multi' ? text.dataset.multi : text.dataset.single;
+        if(newText) text.innerHTML = newText;
+      }
+    }
+    // Toggle clase en la lista → CSS oculta badge/remove en single
+    const list = document.getElementById('wzIncList');
+    if(list){
+      list.classList.toggle('wz-inc-list--single', mode === 'single');
+      list.classList.toggle('wz-inc-list--multi', mode === 'multi');
+      // Si cambió a single: dejar sólo la primera tarjeta
+      if(mode === 'single'){
         [...list.querySelectorAll('.wz-inc-card')].slice(1).forEach(c => c.remove());
         incCounter = 1;
       }
