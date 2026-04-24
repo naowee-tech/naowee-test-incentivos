@@ -54,17 +54,20 @@
   border-bottom: 1px solid var(--naowee-color-border-default, #e7e9f3);
 }
 
-/* Override DS: acortar conectores para que los números no queden muy separados.
-   Default DS usa flex:1 creciendo ilimitadamente. Con max-width limitamos
-   el crecimiento pero permitimos shrink cuando el modal es angosto y
-   los 5 steps + labels son anchos. */
+/* Stepper llena todo el ancho del wrap: .naowee-stepper con width:100%
+   + flex:1 en cada connector → se reparten el espacio restante
+   equitativamente entre pasos (idéntico al patrón del DS por default). */
+.wz-modal .naowee-stepper{
+  width: 100%;
+}
 .wz-modal .naowee-stepper__connector{
   flex: 1 1 0;
-  max-width: 32px;
-  min-width: 12px;
+  min-width: 16px;
+  margin: 0 8px;
 }
 .wz-modal .naowee-stepper__step{
   padding: 4px 8px;
+  flex-shrink: 0;
 }
 
 /* Transición suave entre paneles — fadeInUp */
