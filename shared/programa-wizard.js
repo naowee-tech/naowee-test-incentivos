@@ -804,7 +804,10 @@
         const r = item.getBoundingClientRect();
         const pr = seg.getBoundingClientRect();
         if(r.width === 0 || pr.width === 0) return; // pane hidden
-        const offset = r.left - pr.left - 4; /* padding-xnano */
+        // Leer el padding real del segment en vez de hardcodear xnano (4px).
+        // Así toleramos overrides como .wz-codes-seg con padding: 6px.
+        const padLeft = parseFloat(getComputedStyle(seg).paddingLeft) || 4;
+        const offset = r.left - pr.left - padLeft;
         if(!animated) pill.classList.add('naowee-segment__pill--no-anim');
         pill.style.width = r.width + 'px';
         pill.style.setProperty('--segment-pill-x', offset + 'px');
