@@ -54,16 +54,29 @@
     });
   }
 
+  // Mapeo de páginas por rol: en qué vive cada perfil por default.
+  // Si el rol seleccionado no corresponde al tipo de página actual,
+  // se redirige al "home" del perfil para que la UX refleje el cambio.
+  const OPERATOR_PAGES = /incentivo-(08|09|10|11|14)/;
+  const ADMIN_PAGES    = /incentivo-(02|03|04|05|06|07|12|13)/;
+  const OPERATOR_HOME  = 'incentivo-08-asignar-buscar.html';
+  const ADMIN_HOME     = 'incentivo-02-dashboard.html';
+
   function switchRole(role){
     localStorage.setItem(STORAGE_KEY, role);
     applyRole(role);
     closeAllSwitchers();
-    // Operador: redirigir al flujo de operador si la página no es del operador
-    if(role === 'operador'){
-      const onOperadorPage = /incentivo-(08|09|10|11)/.test(location.pathname);
-      if(!onOperadorPage){
-        setTimeout(() => { window.location.href = 'incentivo-08-asignar-buscar.html'; }, 180);
-      }
+
+    const path = location.pathname;
+    const onOperadorPage = OPERATOR_PAGES.test(path);
+    const onAdminPage    = ADMIN_PAGES.test(path);
+
+    if(role === 'operador' && !onOperadorPage){
+      setTimeout(() => { window.location.href = OPERATOR_HOME; }, 180);
+    } else if((role === 'admin' || role === 'gestor') && !onAdminPage){
+      // Gestor de incentivos (admin) vive en el dashboard; si estoy en
+      // pages del operador, redirijo.
+      setTimeout(() => { window.location.href = ADMIN_HOME; }, 180);
     }
   }
 
