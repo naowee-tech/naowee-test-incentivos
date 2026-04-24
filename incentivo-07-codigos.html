@@ -171,6 +171,49 @@
   .cod-revert-btn{white-space:nowrap}
   .cod-noaction{color:#b5b9d4;font-size:13px}
 
+  /* Asterisco de campo obligatorio + helper text */
+  .rv-req{color:var(--naowee-color-text-accent,#d74009);font-weight:700;margin-left:2px}
+  .rv-helper{
+    font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);
+    margin-top:6px;line-height:1.4;
+  }
+  .naowee-dropdown--error .rv-helper,
+  .naowee-dropdown--error .naowee-textfield__helper{
+    color:var(--naowee-color-feedback-text-negative-loud,#b42318);
+  }
+
+  /* Wiggle animation al fallar validación */
+  @keyframes rvShake{
+    0%, 100%{ transform: translateX(0); }
+    15%{ transform: translateX(-6px); }
+    30%{ transform: translateX(5px); }
+    45%{ transform: translateX(-4px); }
+    60%{ transform: translateX(3px); }
+    75%{ transform: translateX(-2px); }
+    90%{ transform: translateX(1px); }
+  }
+  .rv-shake{ animation: rvShake .45s cubic-bezier(.36,.07,.19,.97); }
+
+  /* Error states */
+  .naowee-dropdown--error .naowee-dropdown__trigger{
+    border-color:var(--naowee-color-feedback-border-negative-loud,#ed314a);
+    box-shadow:0 0 0 3px rgba(237,49,74,.15);
+  }
+
+  /* CTA del toast de éxito */
+  .rv-toast__cta{
+    display:inline-flex;align-items:center;gap:4px;
+    margin-top:8px;
+    font-size:12px;font-weight:700;
+    color:var(--naowee-color-text-accent,#d74009);
+    background:transparent;border:none;padding:4px 0;cursor:pointer;
+    text-decoration:underline;text-underline-offset:3px;
+    font-family:'Inter',sans-serif;
+  }
+  .rv-toast__cta:hover{color:#b8340a}
+  .rv-toast__cta svg{width:12px;height:12px}
+  .rv-toast .naowee-message__text{display:flex;flex-direction:column;gap:2px}
+
   .rv-overlay{
     position:fixed;inset:0;z-index:1000;
     background:rgba(0,43,91,.45);backdrop-filter:blur(3px);
@@ -604,7 +647,7 @@ function renderCodigos(){
       const mutedValor = c.estado === 'rev';
       // Sólo asignados se pueden revertir
       const actionCell = c.estado === 'asig'
-        ? `<button type="button" class="naowee-btn naowee-btn--quiet naowee-btn--small cod-revert-btn" onclick="event.stopPropagation(); openRevertModal('${c.code}')">
+        ? `<button type="button" class="naowee-btn naowee-btn--mute naowee-btn--small cod-revert-btn" onclick="event.stopPropagation(); openRevertModal('${c.code}')">
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
              Revertir
            </button>`
@@ -695,6 +738,8 @@ function openRevertModal(code){
   const c = findCod(code);
   if(!c) return;
   rvTargetCode = code;
+  // Wire listeners on first open (el script se ejecuta antes del HTML del modal)
+  wireRevertModalListeners();
   // Llenar summary
   document.getElementById('rvCode').textContent = c.code;
   document.getElementById('rvProg').textContent = c.prg.name;
@@ -731,10 +776,16 @@ function resetRevertForm(){
   });
 }
 
-/* Wire simple del dropdown de motivo */
-(function wireRvDropdown(){
+/* Wire lazy — se ejecuta en el primer openRevertModal ya que el modal
+   HTML vive al final del body, después de este script. */
+let rvListenersWired = false;
+function wireRevertModalListeners(){
+  if(rvListenersWired) return;
   const dd = document.getElementById('rvCatDD');
   if(!dd) return;
+  rvListenersWired = true;
+
+  // Trigger del dropdown
   const trigger = dd.querySelector('.naowee-dropdown__trigger');
   trigger.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -742,6 +793,8 @@ function resetRevertForm(){
     if(open) dd.classList.remove('naowee-dropdown--open');
     else dd.classList.add('naowee-dropdown--open');
   });
+
+  // Options
   dd.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
     opt.addEventListener('click', () => {
       dd.querySelectorAll('.naowee-dropdown__option').forEach(o => o.classList.remove('naowee-dropdown__option--selected'));
@@ -755,42 +808,67 @@ function resetRevertForm(){
       dd.classList.remove('naowee-dropdown--open', 'naowee-dropdown--error');
     });
   });
+
+  // Cerrar dropdown al clickear fuera
   document.addEventListener('click', (e) => {
     if(!e.target.closest('#rvCatDD')) dd.classList.remove('naowee-dropdown--open');
   });
-})();
 
-/* Cerrar modal con Escape o click en overlay */
-document.getElementById('rvOverlay')?.addEventListener('click', (e) => {
-  if(e.target.id === 'rvOverlay') closeRevertModal();
-});
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape' && document.getElementById('rvOverlay')?.classList.contains('open')) closeRevertModal();
-});
+  // Cerrar modal con click en overlay o Escape
+  document.getElementById('rvOverlay').addEventListener('click', (e) => {
+    if(e.target.id === 'rvOverlay') closeRevertModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && document.getElementById('rvOverlay')?.classList.contains('open')) closeRevertModal();
+  });
+
+  // Limpia errores al escribir
+  ['rvSolicitante','rvJust'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', function(){
+      this.closest('.naowee-textfield')?.classList.remove('naowee-textfield--error');
+    });
+  });
+}
 
 function doRevert(){
   if(!rvTargetCode) return;
   const c = findCod(rvTargetCode);
   if(!c) return;
-  // Validaciones
+  // Validaciones: motivo, solicitante y justificación son obligatorios.
   const motivo = document.getElementById('rvCatDD').dataset.val;
   const solicitante = document.getElementById('rvSolicitante').value.trim();
   const just = document.getElementById('rvJust').value.trim();
-  let firstInvalid = null;
+  const invalid = [];
   if(!motivo){
     document.getElementById('rvCatDD').classList.add('naowee-dropdown--error');
-    if(!firstInvalid) firstInvalid = document.getElementById('rvCatDD');
+    invalid.push(document.getElementById('rvCatDD'));
   }
   if(!solicitante){
     document.getElementById('rvSolicitanteField').classList.add('naowee-textfield--error');
-    if(!firstInvalid) firstInvalid = document.getElementById('rvSolicitanteField');
+    invalid.push(document.getElementById('rvSolicitanteField'));
   }
   if(!just){
     document.getElementById('rvJustField').classList.add('naowee-textfield--error');
-    if(!firstInvalid) firstInvalid = document.getElementById('rvJustField');
+    invalid.push(document.getElementById('rvJustField'));
   }
-  if(firstInvalid){
-    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if(invalid.length){
+    // Wiggle a todos los campos inválidos + scroll al primero
+    invalid.forEach(el => {
+      el.classList.remove('rv-shake');
+      void el.offsetWidth; // force reflow para reiniciar animación
+      el.classList.add('rv-shake');
+      setTimeout(() => el.classList.remove('rv-shake'), 500);
+    });
+    const body = document.querySelector('.rv-body');
+    const first = invalid[0];
+    if(body && first){
+      const bodyRect = body.getBoundingClientRect();
+      const fieldRect = first.getBoundingClientRect();
+      const targetTop = body.scrollTop + (fieldRect.top - bodyRect.top) - 16;
+      body.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+    } else {
+      first?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     return;
   }
 
@@ -827,11 +905,21 @@ function doRevert(){
   updateKPIs();
   renderCodigos();
   const valM = '$' + (c.valor/1000).toLocaleString('es-CO') + 'K';
-  showRvToast(`Código ${c.code} revertido. ${valM} volvió al rubro del programa. Registro disponible en el historial.`, 'positive');
+  showRvToast({
+    variant: 'positive',
+    text: `<strong>Código ${c.code} revertido con éxito.</strong><br/>${valM} volvió al rubro de <em>${c.prg.name}</em>. Registro disponible en el historial.`,
+    cta: {
+      label: 'Ver programa',
+      url: `incentivo-05-programa-detalle.html?id=${c.prg.id}`
+    }
+  });
 }
 
-/* Toast estilo naowee-message */
-function showRvToast(text, variant = 'positive'){
+/* Toast estilo naowee-message con CTA opcional */
+function showRvToast(opts){
+  // Compat: si viene un string, tratarlo como text simple
+  if(typeof opts === 'string') opts = { text: opts, variant: 'positive' };
+  const { variant = 'positive', text, cta } = opts;
   const wrap = document.getElementById('rvToastWrap');
   if(!wrap) return;
   const el = document.createElement('div');
@@ -839,12 +927,21 @@ function showRvToast(text, variant = 'positive'){
   const ico = variant === 'positive'
     ? '<polyline points="20 6 9 17 4 12"/>'
     : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+  const ctaHTML = cta
+    ? `<button type="button" class="rv-toast__cta" data-cta-url="${cta.url}">
+         ${cta.label}
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+       </button>`
+    : '';
   el.innerHTML = `
     <div class="naowee-message__header">
       <div class="naowee-message__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${ico}</svg>
       </div>
-      <div class="naowee-message__text">${text}</div>
+      <div class="naowee-message__text">
+        <span>${text}</span>
+        ${ctaHTML}
+      </div>
       <button type="button" class="rv-toast__dismiss" aria-label="Cerrar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
@@ -852,15 +949,17 @@ function showRvToast(text, variant = 'positive'){
   wrap.appendChild(el);
   const dismiss = () => { el.style.transition = 'opacity .2s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 220); };
   el.querySelector('.rv-toast__dismiss').addEventListener('click', dismiss);
-  setTimeout(dismiss, 5000);
+  const ctaBtn = el.querySelector('.rv-toast__cta');
+  if(ctaBtn){
+    ctaBtn.addEventListener('click', () => {
+      const url = ctaBtn.dataset.ctaUrl;
+      if(url) window.location.href = url;
+    });
+  }
+  // Dismiss auto a los 7s (más tiempo si hay CTA)
+  setTimeout(dismiss, cta ? 7000 : 5000);
 }
 
-// Limpia errores al escribir
-['rvSolicitante','rvJust'].forEach(id => {
-  document.getElementById(id)?.addEventListener('input', function(){
-    this.closest('.naowee-textfield')?.classList.remove('naowee-textfield--error');
-  });
-});
 </script>
 <script src="shared/profile-switcher.js" defer></script>
 
@@ -901,9 +1000,9 @@ function showRvToast(text, variant = 'positive'){
         <div class="rv-summary__val" id="rvValor">—</div>
       </div>
 
-      <!-- Categoría de reversión -->
+      <!-- Motivo de la reversión -->
       <div class="naowee-dropdown" id="rvCatDD" data-rv-dropdown>
-        <label class="naowee-dropdown__label naowee-dropdown__label--required">Motivo de la reversión</label>
+        <label class="naowee-dropdown__label naowee-dropdown__label--required">Motivo de la reversión <span class="rv-req">*</span></label>
         <div class="naowee-dropdown__trigger" tabindex="0">
           <span class="naowee-dropdown__placeholder">Selecciona un motivo</span>
           <div class="naowee-dropdown__controls">
@@ -919,23 +1018,25 @@ function showRvToast(text, variant = 'positive'){
           <div class="naowee-dropdown__option" data-val="cancelacion">Cancelación del programa</div>
           <div class="naowee-dropdown__option" data-val="otro">Otro motivo</div>
         </div>
+        <div class="rv-helper">Campo obligatorio — indica por qué se reversa.</div>
       </div>
 
       <!-- Solicitante -->
       <div class="naowee-textfield" id="rvSolicitanteField">
-        <label class="naowee-textfield__label naowee-textfield__label--required">Solicitante</label>
+        <label class="naowee-textfield__label naowee-textfield__label--required">Solicitante <span class="rv-req">*</span></label>
         <div class="naowee-textfield__input-wrap">
           <input class="naowee-textfield__input" id="rvSolicitante" type="text" placeholder="Nombre de quien solicita la reversión" maxlength="100"/>
         </div>
-        <div class="naowee-textfield__helper">Persona que solicitó la reversión (beneficiario, coordinador, etc).</div>
+        <div class="naowee-textfield__helper">Campo obligatorio — persona que solicitó la reversión (beneficiario, coordinador, etc).</div>
       </div>
 
       <!-- Justificación -->
       <div class="naowee-textfield naowee-textfield--textarea" id="rvJustField">
-        <label class="naowee-textfield__label naowee-textfield__label--required">Justificación</label>
+        <label class="naowee-textfield__label naowee-textfield__label--required">Justificación <span class="rv-req">*</span></label>
         <div class="naowee-textfield__input-wrap">
           <textarea class="naowee-textfield__input" id="rvJust" rows="3" placeholder="Describe los detalles de la reversión (evidencia, contexto, acción de seguimiento)..." maxlength="400"></textarea>
         </div>
+        <div class="naowee-textfield__helper">Campo obligatorio — describe la evidencia y el contexto.</div>
       </div>
 
       <!-- Autor (readonly) -->
