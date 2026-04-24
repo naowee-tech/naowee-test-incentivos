@@ -71,9 +71,11 @@
   flex-shrink: 0;
 }
 /* Step 1 sin padding izquierdo — alinea con el título del header.
-   Step 5 sin padding derecho — el wrap ya aporta 32px, evitamos doble espacio. */
+   Step 5 con padding-right extra — la X close del header tiene un ícono
+   centrado en un botón de ~40px, el ícono queda visualmente ~20px más
+   adentro del padding del header. Damos el mismo "interior" al step 5. */
 .wz-modal .naowee-stepper__step:first-child{ padding-left: 0; }
-.wz-modal .naowee-stepper__step:last-child{ padding-right: 0; }
+.wz-modal .naowee-stepper__step:last-child{ padding-right: 20px; }
 
 /* Transición suave entre paneles — fadeInUp */
 .wz-pane{ animation: wzFadeInUp .4s cubic-bezier(.4,0,.2,1); }
