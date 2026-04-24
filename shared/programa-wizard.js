@@ -336,8 +336,43 @@
       trigger.addEventListener('keydown', e => {
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); trigger.click(); }
       });
+      const isMulti = dd.hasAttribute('data-wz-multi');
+
+      function updateMultiTrigger(){
+        const selected = [...menu.querySelectorAll('.naowee-dropdown__option--selected')];
+        if(!valueEl){
+          valueEl = document.createElement('span');
+          valueEl.className = 'naowee-dropdown__value';
+          trigger.insertBefore(valueEl, trigger.firstChild);
+        }
+        if(selected.length === 0){
+          if(placeholderEl) placeholderEl.style.display = '';
+          valueEl.style.display = 'none';
+          dd.dataset.wzValue = '';
+        } else {
+          if(placeholderEl) placeholderEl.style.display = 'none';
+          valueEl.style.display = '';
+          if(selected.length === 1){
+            valueEl.textContent = selected[0].textContent.trim();
+          } else if(selected.length <= 3){
+            valueEl.textContent = selected.map(o => o.textContent.trim()).join(', ');
+          } else {
+            valueEl.textContent = selected.length + ' seleccionadas';
+          }
+          dd.dataset.wzValue = selected.map(o => o.dataset.val || '').join(',');
+        }
+      }
+
       menu.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
-        opt.addEventListener('click', () => {
+        opt.addEventListener('click', (e) => {
+          if(isMulti){
+            e.stopPropagation();
+            opt.classList.toggle('naowee-dropdown__option--selected');
+            updateMultiTrigger();
+            clearError(dd);
+            // No cerrar el menú en multi — el user puede seguir seleccionando
+            return;
+          }
           menu.querySelectorAll('.naowee-dropdown__option').forEach(o => o.classList.remove('naowee-dropdown__option--selected'));
           opt.classList.add('naowee-dropdown__option--selected');
           const text = opt.textContent.trim();
@@ -412,6 +447,27 @@
           const d = cells.length - (startWeekday + daysInMonth) + 1;
           cells.push({ day: d, muted: true, d: new Date(viewYear, viewMonth + 1, d) });
         }
+        // Rango: calcular límite mínimo si este campo es "to" y ya hay un "from"
+        const rangeRole = field.dataset.wzRange;      // "from" | "to" | undefined
+        const rangeName = field.dataset.wzRangeName;  // nombre compartido
+        let minDate = null, maxDate = null;
+        if(rangeRole === 'to' && rangeName){
+          const fromField = document.querySelector(`[data-wz-datepicker][data-wz-range="from"][data-wz-range-name="${rangeName}"]`);
+          const fromIso = fromField?.querySelector('input')?.dataset.wzIso;
+          if(fromIso){
+            const [fy, fm, fd] = fromIso.split('-').map(Number);
+            minDate = new Date(fy, fm - 1, fd);
+          }
+        } else if(rangeRole === 'from' && rangeName){
+          // from puede tener max si ya hay un "to" (opcional, no bloqueante)
+          const toField = document.querySelector(`[data-wz-datepicker][data-wz-range="to"][data-wz-range-name="${rangeName}"]`);
+          const toIso = toField?.querySelector('input')?.dataset.wzIso;
+          if(toIso){
+            const [ty, tm, td] = toIso.split('-').map(Number);
+            maxDate = new Date(ty, tm - 1, td);
+          }
+        }
+
         cells.forEach(c => {
           const b = document.createElement('button');
           b.type = 'button';
@@ -419,9 +475,16 @@
           if(c.muted) b.classList.add('wz-dp__day--muted');
           if(sameDay(c.d, today)) b.classList.add('wz-dp__day--today');
           if(hasSelection && sameDay(c.d, selected)) b.classList.add('wz-dp__day--selected');
+          // Disable días fuera del rango permitido
+          const outOfRange = (minDate && c.d < minDate) || (maxDate && c.d > maxDate);
+          if(outOfRange){
+            b.classList.add('wz-dp__day--disabled');
+            b.disabled = true;
+          }
           b.textContent = c.day;
           b.addEventListener('click', e => {
             e.stopPropagation();
+            if(outOfRange) return;
             selected = c.d;
             hasSelection = true;
             viewYear = c.d.getFullYear();
@@ -430,6 +493,21 @@
             input.dataset.wzIso = toIso(c.d);
             pop.classList.remove('open');
             clearError(field);
+
+            // Si este es "from", validar que "to" no quede antes; si es así, limpiar "to".
+            if(rangeRole === 'from' && rangeName){
+              const toField = document.querySelector(`[data-wz-datepicker][data-wz-range="to"][data-wz-range-name="${rangeName}"]`);
+              const toInput = toField?.querySelector('input');
+              const toIsoVal = toInput?.dataset.wzIso;
+              if(toIsoVal){
+                const [ty, tm, td] = toIsoVal.split('-').map(Number);
+                const toDate = new Date(ty, tm - 1, td);
+                if(toDate < c.d){
+                  toInput.value = '';
+                  delete toInput.dataset.wzIso;
+                }
+              }
+            }
           });
           grid.appendChild(b);
         });
