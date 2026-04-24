@@ -83,7 +83,11 @@
     width:88px;height:88px;border-radius:50%;
     background:linear-gradient(135deg,#ffbf75,#d74009);
     display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;font-weight:800;
-    border:3px solid #fff;box-shadow:0 0 0 1px var(--border);
+    border:3px solid #fff;
+    box-shadow:
+      0 0 0 1px var(--border),
+      0 12px 32px rgba(215,64,9,.32),
+      0 3px 8px rgba(215,64,9,.18);
   }
   .receipt__person{display:flex;flex-direction:column;gap:4px}
   .receipt__person-name{font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--text-primary)}
