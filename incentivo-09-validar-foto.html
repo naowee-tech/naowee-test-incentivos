@@ -21,11 +21,25 @@
 
   .stepper-wrap{
     position:sticky;top:0;z-index:10;
-    margin:-24px -24px 32px;padding:20px 24px 16px;
-    background:var(--bg,#f5f6fa);
+    margin:0 0 24px;padding:0;
+    background:transparent;
+    transition:margin .22s ease,padding .22s ease,background .22s ease;
   }
-  .stepper{display:flex;align-items:center;gap:0;padding:14px 20px;background:#fff;border:1px solid var(--border);border-radius:14px;overflow-x:auto;transition:box-shadow .2s}
-  .stepper-wrap.is-stuck .stepper{box-shadow:0 4px 16px rgba(40,40,52,.08)}
+  .stepper{
+    display:flex;align-items:center;gap:0;padding:14px 20px;background:#fff;
+    border:1px solid var(--border);border-radius:14px;overflow-x:auto;
+    transition:box-shadow .22s,border-radius .22s,border-color .22s,border-top-width .22s;
+  }
+  .stepper-wrap.is-stuck{
+    margin:-28px -32px 24px;
+    padding:0 32px;
+    background:#fff;
+  }
+  .stepper-wrap.is-stuck .stepper{
+    border-top-left-radius:0;border-top-right-radius:0;
+    border-top-color:transparent;
+    box-shadow:0 4px 16px rgba(40,40,52,.08);
+  }
   .step{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--text-secondary)}
   .step .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border-dark);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-secondary);transition:all .25s}
   .step.active .n{background:var(--accent);border-color:var(--accent);color:#fff;animation:stepPulse 2s cubic-bezier(.4,0,.6,1) infinite}
@@ -38,7 +52,7 @@
   .recap{
     display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
     background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
-    padding:14px 18px;margin-bottom:20px;box-shadow:var(--shadow-card);
+    padding:14px 18px;margin-bottom:20px;
   }
   .recap__ava{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ffbf75,#d74009);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1px var(--border)}
   .recap__info{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -51,11 +65,89 @@
   @media(max-width:1100px){ .layout{grid-template-columns:1fr} }
 
   .panel{
-    background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
-    box-shadow:var(--shadow-card);padding:28px;
+    background:#fff;border:1px solid var(--border);border-radius:16px;
+    overflow:hidden;
   }
+  .panel__body{padding:28px}
   .panel h3{font-size:15px;font-weight:700;margin-bottom:4px}
   .panel p.desc{font-size:12.5px;color:var(--text-secondary);margin-bottom:20px;line-height:1.55;max-width:640px}
+
+  /* Flow footer (consistencia con paso 2) — fondo blanco, no gris */
+  .flow-footer{
+    padding:16px 26px;background:#fff;
+    border-top:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+  }
+
+  /* Section heading con step-num (consistente con paso 2) */
+  .section-head{
+    font-size:13px;font-weight:700;color:var(--text-primary);
+    display:flex;align-items:center;gap:8px;margin-bottom:6px;
+  }
+  .section-head .step-num{
+    width:22px;height:22px;border-radius:50%;
+    background:var(--accent);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:700;flex-shrink:0;
+  }
+
+  /* Drop zone — portado desde programa-wizard (paso 5 códigos) */
+  .wz-dropzone{
+    position:relative;
+    border:1.5px dashed rgba(215,64,9,.38);
+    border-radius:14px;
+    padding:36px 20px;
+    text-align:center;
+    background:linear-gradient(180deg,#fffaf5 0%,#fff 100%);
+    cursor:pointer;
+    transition:border-color .18s,background .18s,transform .18s;
+  }
+  .wz-dropzone:hover,
+  .wz-dropzone.is-dragover{
+    border-color:rgba(215,64,9,.85);
+    background:#fff6ee;
+  }
+  .wz-dropzone.is-dragover{transform:scale(1.005)}
+  .wz-dropzone__ico{
+    width:52px;height:52px;margin:0 auto 12px;
+    border-radius:50%;background:#fff;
+    border:1px solid var(--border);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .wz-dropzone__title{font-size:14px;font-weight:700;margin-bottom:4px}
+  .wz-dropzone__sub{
+    font-size:12px;color:var(--text-secondary);
+    line-height:1.4;max-width:420px;margin:0 auto;
+  }
+  .wz-dropzone__fmts{display:flex;gap:5px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+  .fmt{
+    font-size:9.5px;font-weight:700;padding:2px 7px;
+    border-radius:4px;background:#fff;
+    border:1px solid var(--border);
+    color:var(--text-secondary);
+    text-transform:uppercase;letter-spacing:.3px;
+  }
+  /* File chip cuando ya se subió */
+  .wz-file-chip{
+    display:flex;align-items:center;gap:10px;
+    margin-top:14px;padding:12px 14px;
+    border:1px solid var(--green-border, #c8e6c9);
+    border-radius:10px;background:#f6fbf6;
+    font-size:12.5px;
+  }
+  .wz-file-chip__ico{
+    width:34px;height:34px;border-radius:8px;
+    background:var(--green-bg, #e6f4e7);color:var(--green);
+    display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .wz-file-chip__body{flex:1;min-width:0}
+  .wz-file-chip__name{font-weight:700;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wz-file-chip__meta{font-size:11.5px;color:var(--text-secondary)}
+  .wz-file-chip__remove{
+    border:none;background:transparent;cursor:pointer;
+    color:var(--text-secondary);padding:6px;border-radius:6px;
+  }
+  .wz-file-chip__remove:hover{background:#fff0ee;color:#b42318}
 
   /* Tabs */
   .mode-tabs{display:inline-flex;gap:2px;background:#f5f6fa;padding:4px;border-radius:var(--radius-full);margin-bottom:20px}
@@ -142,20 +234,33 @@
   .btn-outline:hover{background:#fafbfd}
   .btn-small{height:36px;padding:0 14px;border-radius:var(--radius-md);font-size:12.5px}
 
-  /* Observation */
+  /* Observation — alineado con DS textfield */
   .obs-field{margin-top:22px}
-  .obs-field label{font-size:11.5px;font-weight:600;color:var(--text-primary);display:block;margin-bottom:6px}
-  .obs-field textarea{
-    width:100%;min-height:80px;padding:12px 14px;border:1px solid var(--border-dark);
-    border-radius:var(--radius-md);font:inherit;font-size:13px;resize:vertical;
+  .obs-field label{
+    font-size:12px;font-weight:600;color:var(--text-primary);
+    display:block;margin-bottom:6px;letter-spacing:.01em;
   }
-  .obs-field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(215,64,9,.15)}
+  .obs-field textarea{
+    width:100%;min-height:88px;padding:12px 14px;
+    font:inherit;font-size:13px;font-family:inherit;line-height:1.5;
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:10px;background:#fff;
+    color:var(--naowee-color-text-primary,#282834);
+    resize:vertical;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .obs-field textarea::placeholder{color:var(--naowee-color-text-secondary,#646587)}
+  .obs-field textarea:focus{
+    outline:none;
+    border-color:var(--naowee-color-text-accent,#d74009);
+    box-shadow:0 0 0 3px rgba(215,64,9,.15);
+  }
 
   /* Summary sidebar (reused pattern) */
   .summary{
     background:linear-gradient(180deg,#fff 0%,#fafbfd 100%);
     border:1px solid var(--border);border-radius:var(--radius-xl);
-    box-shadow:var(--shadow-card);padding:24px;position:sticky;top:20px;
+    padding:24px;position:sticky;top:20px;
     display:flex;flex-direction:column;gap:14px;
   }
   .summary h4{font-size:11.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#b5b9d4}
@@ -220,22 +325,17 @@
 
     <div class="page">
 
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Evidencia de entrega</h1>
-          <p class="page-sub">Registra una foto del momento de entrega o sube un archivo (ej. certificado, documento firmado). Es el respaldo oficial de que el incentivo fue entregado al deportista.</p>
+      <!-- Stepper sticky (patrón unificado paso 2) -->
+      <div class="stepper-wrap" id="stepperWrap">
+        <div class="stepper">
+          <div class="step done"><span class="n"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Buscar deportista</div>
+          <span class="step-sep"></span>
+          <div class="step done"><span class="n"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Seleccionar incentivo</div>
+          <span class="step-sep"></span>
+          <div class="step active"><span class="n">3</span> Evidencia de entrega</div>
+          <span class="step-sep"></span>
+          <div class="step"><span class="n">4</span> Confirmación</div>
         </div>
-        <div class="step-indicator"><span class="dot"></span> Paso 3 de 4</div>
-      </div>
-
-      <div class="stepper">
-        <div class="step done"><span class="n">✓</span> Buscar deportista</div>
-        <span class="step-sep"></span>
-        <div class="step done"><span class="n">✓</span> Seleccionar incentivo</div>
-        <span class="step-sep"></span>
-        <div class="step active"><span class="n">3</span> Evidencia de entrega</div>
-        <span class="step-sep"></span>
-        <div class="step"><span class="n">4</span> Confirmación</div>
       </div>
 
       <div class="recap">
@@ -254,46 +354,39 @@
         <div>
 
           <div class="panel">
-            <h3>Registra la evidencia</h3>
-            <p class="desc">Puedes tomar una foto en vivo del momento de la entrega o subir un archivo si la entrega requiere respaldo documental (ej. certificado de beca firmado).</p>
+            <div class="panel__body">
+            <h3 class="section-head"><span class="step-num">1</span> Subir archivo de respaldo</h3>
+            <p class="desc">Adjunta un archivo que sirva como evidencia de la entrega: certificado firmado, comprobante o documento de respaldo.</p>
 
-            <div class="mode-tabs" role="tablist">
-              <button class="mode-tab active" data-mode="photo" onclick="switchMode('photo', this)">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                Tomar foto
-              </button>
-              <button class="mode-tab" data-mode="file" onclick="switchMode('file', this)">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-                Subir archivo
-              </button>
-            </div>
-
-            <!-- Photo mode -->
-            <div class="capture-area" id="captureArea">
-              <div class="capture-icon" id="captureIcon">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" hidden onchange="onFileChosen(event)"/>
+            <div class="wz-dropzone" id="dropZone" tabindex="0" role="button" aria-label="Cargar archivo de evidencia"
+                 onclick="document.getElementById('fileInput').click()">
+              <div class="wz-dropzone__ico">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
               </div>
-              <div class="capture-title" id="captureTitle">Tomar foto de la entrega</div>
-              <div class="capture-hint" id="captureHint">Captura el momento en el que entregas el incentivo al deportista. La foto queda asociada a la asignación como evidencia.</div>
-              <div class="capture-actions">
-                <button class="btn-primary" onclick="simulateCapture()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M2 12h2M20 12h2M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-                  Capturar con cámara
-                </button>
-                <button class="btn-outline" onclick="document.getElementById('fileInput').click()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                  Desde galería
-                </button>
-                <input type="file" id="fileInput" accept="image/*,.pdf" hidden onchange="onFileChosen(event)"/>
+              <div class="wz-dropzone__title">Arrastra tu archivo aquí o haz clic para seleccionarlo</div>
+              <div class="wz-dropzone__sub">
+                Sube el documento que respalda la entrega del incentivo (certificado, comprobante firmado o foto).
               </div>
-              <div class="file-formats">
-                <span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">PDF</span><span class="fmt">Máx 10MB</span>
+              <div class="wz-dropzone__fmts">
+                <span class="fmt">PDF</span><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">Máx 10MB</span>
               </div>
             </div>
-
             <div class="obs-field">
-              <label for="obs">Observaciones del operador (opcional)</label>
-              <textarea id="obs" placeholder="Ej. Entrega realizada al finalizar la jornada del evento. Deportista acompañado por su entrenador."></textarea>
+              <label for="obs" class="naowee-textfield__label">Observaciones del operador (opcional)</label>
+              <textarea id="obs" class="naowee-textfield__input" rows="3" placeholder="Ej. Entrega realizada al finalizar la jornada del evento. Deportista acompañado por su entrenador."></textarea>
+            </div>
+            </div><!-- /.panel__body -->
+
+            <div class="flow-footer">
+              <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="fadeAndGo('incentivo-10-asignar-tipo.html?doc=1001234567')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                Volver al paso anterior
+              </button>
+              <button class="naowee-btn naowee-btn--loud naowee-btn--large" id="btnConfirmMain" disabled onclick="confirmDelivery()">
+                Completar entrega
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
             </div>
           </div>
 
@@ -311,19 +404,13 @@
           <hr/>
           <div class="summary-row"><span class="lbl">Evidencia</span><span class="val" id="sumEvidence" style="color:var(--text-secondary);font-weight:500;font-style:italic">Pendiente</span></div>
 
-          <div class="summary-note">
-            <strong>Último paso:</strong> registra la evidencia para completar la asignación. El código se marcará como <strong>Asignado</strong> y el inventario se actualizará.
-          </div>
-
-          <div class="summary-actions">
-            <button class="btn-primary" id="btnConfirm" disabled onclick="confirmDelivery()">
-              Completar entrega
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-            <button class="btn-outline" onclick="fadeAndGo('incentivo-10-asignar-tipo.html')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              Volver
-            </button>
+          <div class="naowee-message naowee-message--informative">
+            <div class="naowee-message__header">
+              <div class="naowee-message__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              </div>
+              <div class="naowee-message__text"><strong>Último paso:</strong> registra la evidencia para completar la asignación. El código se marcará como <strong>Asignado</strong> y el inventario se actualizará.</div>
+            </div>
           </div>
         </aside>
       </div>
@@ -333,61 +420,49 @@
 </div>
 
 <script>
-let mode = 'photo'; // photo | file
 let evidenceReady = false;
+let evidenceFileName = null;
 
-function switchMode(m, btn){
-  mode = m;
-  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t === btn));
-  resetCapture();
-  const ico = document.getElementById('captureIcon');
-  const tit = document.getElementById('captureTitle');
-  const hint = document.getElementById('captureHint');
-  if(m === 'photo'){
-    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>';
-    tit.textContent = 'Tomar foto de la entrega';
-    hint.textContent = 'Captura el momento en el que entregas el incentivo al deportista. La foto queda asociada a la asignación como evidencia.';
-  }else{
-    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>';
-    tit.textContent = 'Subir documento de respaldo';
-    hint.textContent = 'Arrastra un archivo o haz click para seleccionarlo. Útil para becas o incentivos que requieren certificado firmado.';
-  }
+function onFileChosen(ev){
+  const f = ev.target.files?.[0];
+  if(!f) return;
+  showFileChip(f);
 }
 
-function resetCapture(){
-  const area = document.getElementById('captureArea');
-  area.classList.remove('filled');
-  area.innerHTML = `
-    <div class="capture-icon" id="captureIcon"></div>
-    <div class="capture-title" id="captureTitle"></div>
-    <div class="capture-hint" id="captureHint"></div>
-    <div class="capture-actions">
-      ${mode === 'photo'
-        ? `<button class="btn-primary" onclick="simulateCapture()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M2 12h2M20 12h2M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> Capturar con cámara</button>
-           <button class="btn-outline" onclick="document.getElementById('fileInput').click()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> Desde galería</button>`
-        : `<button class="btn-primary" onclick="document.getElementById('fileInput').click()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> Seleccionar archivo</button>`
-      }
-      <input type="file" id="fileInput" accept="image/*,.pdf" hidden onchange="onFileChosen(event)"/>
-    </div>
-    <div class="file-formats">
-      <span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">PDF</span><span class="fmt">Máx 10MB</span>
-    </div>
-  `;
-  // re-bind title/icon
-  const ico = document.getElementById('captureIcon');
-  const tit = document.getElementById('captureTitle');
-  const hint = document.getElementById('captureHint');
-  if(mode === 'photo'){
-    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>';
-    tit.textContent = 'Tomar foto de la entrega';
-    hint.textContent = 'Captura el momento en el que entregas el incentivo al deportista. La foto queda asociada a la asignación como evidencia.';
-  }else{
-    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>';
-    tit.textContent = 'Subir documento de respaldo';
-    hint.textContent = 'Selecciona un archivo (certificado, documento firmado) que sirva como evidencia de entrega.';
+function showFileChip(f){
+  evidenceFileName = f.name;
+  const zone = document.getElementById('dropZone');
+  zone.style.display = 'none';
+  let chip = document.getElementById('fileChip');
+  if(!chip){
+    chip = document.createElement('div');
+    chip.id = 'fileChip';
+    chip.className = 'wz-file-chip';
+    zone.parentNode.insertBefore(chip, zone.nextSibling);
   }
+  chip.innerHTML = `
+    <div class="wz-file-chip__ico">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 14l2 2 4-4"/></svg>
+    </div>
+    <div class="wz-file-chip__body">
+      <div class="wz-file-chip__name">${f.name}</div>
+      <div class="wz-file-chip__meta">${(f.size/1024).toFixed(1)} KB · ${f.type || 'archivo'}</div>
+    </div>
+    <button class="wz-file-chip__remove" onclick="resetUpload()" aria-label="Quitar archivo">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  `;
+  markReady(`${f.name} · ${(f.size/1024).toFixed(1)} KB`);
+}
+
+function resetUpload(){
   evidenceReady = false;
-  document.getElementById('btnConfirm').disabled = true;
+  evidenceFileName = null;
+  document.getElementById('dropZone').style.display = '';
+  const chip = document.getElementById('fileChip');
+  if(chip) chip.remove();
+  const btnMain = document.getElementById('btnConfirmMain');
+  if(btnMain) btnMain.disabled = true;
   const sum = document.getElementById('sumEvidence');
   sum.textContent = 'Pendiente';
   sum.style.color = 'var(--text-secondary)';
@@ -395,60 +470,10 @@ function resetCapture(){
   sum.style.fontWeight = '500';
 }
 
-function simulateCapture(){
-  const area = document.getElementById('captureArea');
-  area.classList.add('filled');
-  area.innerHTML = `
-    <div class="preview">
-      <div class="preview__fallback">
-        <div style="text-align:center;padding:20px">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;opacity:.7;display:block"><circle cx="12" cy="13" r="4"/><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/></svg>
-          <div style="font-size:16px;font-weight:700">Foto capturada</div>
-          <div style="font-size:11.5px;opacity:.75;margin-top:4px">14/11/2026 · 15:42 · GPS activo</div>
-        </div>
-      </div>
-      <div class="preview__meta">
-        <div class="left">
-          <span class="preview__badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Capturada</span>
-          <span style="font-size:11.5px;opacity:.9">evidencia-entrega-MC-2026BEC-00042.jpg · 1.2 MB</span>
-        </div>
-        <div class="preview__actions">
-          <button class="preview-btn" onclick="resetCapture()">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
-            Retomar
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-  markReady('Foto capturada · 1.2 MB');
-}
-
-function onFileChosen(ev){
-  const f = ev.target.files?.[0];
-  if(!f) return;
-  const area = document.getElementById('captureArea');
-  area.classList.add('filled');
-  area.innerHTML = `
-    <div class="file-chip">
-      <div class="file-chip__ico">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 14l2 2 4-4"/></svg>
-      </div>
-      <div class="file-chip__body">
-        <div class="file-chip__name">${f.name}</div>
-        <div class="file-chip__meta">${(f.size/1024).toFixed(1)} KB · ${f.type || 'archivo'}</div>
-      </div>
-      <button class="file-chip__close" onclick="resetCapture()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-  `;
-  markReady(`${f.name} · ${(f.size/1024).toFixed(1)} KB`);
-}
-
 function markReady(text){
   evidenceReady = true;
-  document.getElementById('btnConfirm').disabled = false;
+  const btnMain = document.getElementById('btnConfirmMain');
+  if(btnMain) btnMain.disabled = false;
   const sum = document.getElementById('sumEvidence');
   sum.textContent = text;
   sum.style.color = 'var(--green)';
@@ -456,6 +481,25 @@ function markReady(text){
   sum.style.fontWeight = '700';
   sum.style.fontSize = '11.5px';
 }
+
+/* Drag & drop bindings */
+(function wireDnd(){
+  const zone = document.getElementById('dropZone');
+  if(!zone) return;
+  ['dragenter','dragover'].forEach(ev => zone.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); zone.classList.add('is-dragover');
+  }));
+  ['dragleave','drop'].forEach(ev => zone.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); zone.classList.remove('is-dragover');
+  }));
+  zone.addEventListener('drop', e => {
+    const f = e.dataTransfer?.files?.[0];
+    if(f) showFileChip(f);
+  });
+  zone.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); document.getElementById('fileInput').click(); }
+  });
+})();
 
 function confirmDelivery(){
   // persistir la info final
@@ -466,7 +510,7 @@ function confirmDelivery(){
     code:'2026BEC-00042',
     value:1000000,
     observation: document.getElementById('obs').value || null,
-    evidence: mode === 'photo' ? 'Foto capturada' : 'Archivo subido',
+    evidence: evidenceFileName ? `Archivo subido · ${evidenceFileName}` : 'Archivo subido',
     ts: Date.now()
   }));
   fadeAndGo('incentivo-11-asignar-exito.html');
@@ -490,12 +534,35 @@ function confirmDelivery(){
 })();
 
 function fadeAndGo(url){
+  if('startViewTransition' in document || CSS.supports('view-transition-name: x')){
+    window.location.href = url;
+    return;
+  }
   document.body.style.transition = 'opacity .25s ease';
   document.body.style.opacity = '0';
   setTimeout(() => { window.location.href = url; }, 260);
 }
 function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('profileSwitcher')?.classList.toggle('open'); }
 document.addEventListener('click', (e) => { const sw = document.getElementById('profileSwitcher'); if(sw && !sw.contains(e.target)) sw.classList.remove('open'); });
+
+/* Sticky stepper — detecta scroll del .page */
+(function(){
+  const wrap = document.getElementById('stepperWrap');
+  if(!wrap) return;
+  const scroller = document.querySelector('.page');
+  if(!scroller) return;
+  const handler = () => { wrap.classList.toggle('is-stuck', scroller.scrollTop > 4); };
+  scroller.addEventListener('scroll', handler, { passive: true });
+  handler();
+})();
 </script>
+
+<!-- Footer flotante Naowee -->
+<div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
+  <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
+  <div class="naowee-floating-footer__sep"></div>
+  <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
+</div>
+
 </body>
 </html>

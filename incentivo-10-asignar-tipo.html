@@ -14,20 +14,31 @@
   .page-title{font-size:24px;font-weight:700;line-height:1.2;letter-spacing:-.01em;margin-bottom:4px;color:var(--naowee-color-text-primary,#282834)}
   .page-sub{font-size:14px;color:var(--naowee-color-text-secondary,#646587);line-height:1.5;max-width:640px}
 
-  /* Stepper sticky */
+  /* Stepper sticky — paridad con shell.css (.page padding 28/32/40) */
   .stepper-wrap{
     position:sticky;top:0;z-index:10;
-    margin:-24px -24px 32px;padding:20px 24px 16px;
-    background:var(--bg,#f5f6fa);
+    margin:0 0 24px;padding:0;
+    background:transparent;
+    transition:margin .22s ease,padding .22s ease,background .22s ease;
   }
   .stepper{
     display:flex;align-items:center;gap:0;
     padding:14px 20px;background:#fff;
     border:1px solid var(--naowee-color-border-default,#e7e9f3);
     border-radius:14px;overflow-x:auto;
-    transition:box-shadow .2s;
+    transition:box-shadow .22s,border-radius .22s,border-color .22s,border-top-width .22s;
   }
-  .stepper-wrap.is-stuck .stepper{box-shadow:0 4px 16px rgba(40,40,52,.08)}
+  /* Stuck: full-bleed, pegado al header, pierde radios superiores */
+  .stepper-wrap.is-stuck{
+    margin:-28px -32px 24px;
+    padding:0 32px;
+    background:#fff;
+  }
+  .stepper-wrap.is-stuck .stepper{
+    border-top-left-radius:0;border-top-right-radius:0;
+    border-top-color:transparent;
+    box-shadow:0 4px 16px rgba(40,40,52,.08);
+  }
   .step{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--naowee-color-text-secondary,#646587)}
   .step .n{
     width:26px;height:26px;border-radius:50%;
@@ -113,9 +124,9 @@
   .flow-recap__meta{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   .flow-recap__meta .dot{width:3px;height:3px;background:#d0d4e6;border-radius:50%}
 
-  /* Footer nav consistente con wizard */
+  /* Footer nav consistente con wizard — fondo blanco */
   .flow-footer{
-    padding:16px 26px;background:#fafbfd;
+    padding:16px 26px;background:#fff;
     display:flex;justify-content:space-between;align-items:center;gap:12px;
   }
 
@@ -271,8 +282,8 @@
               </div>
             </div>
             <button class="naowee-btn naowee-btn--link naowee-btn--small" onclick="fadeAndGo('incentivo-08-asignar-buscar.html')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              Cambiar
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+              Cambiar beneficiario
             </button>
           </div>
 
@@ -333,8 +344,8 @@
 
           <!-- Footer nav (consistente) -->
           <div class="flow-footer">
-            <button class="naowee-btn naowee-btn--link naowee-btn--small" onclick="fadeAndGo('incentivo-08-asignar-buscar.html')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="fadeAndGo('incentivo-08-asignar-buscar.html')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
               Volver al paso anterior
             </button>
             <button class="naowee-btn naowee-btn--loud naowee-btn--large" id="btnNext" disabled onclick="fadeAndGo('incentivo-09-validar-foto.html')">
@@ -477,6 +488,18 @@ function updateSummary(){
 document.getElementById('nowLabel').textContent = new Date().toLocaleString('es-CO', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 renderCodes();
 
+/* Persistir el perfil si se accede con ?doc=XXX sin pasar por paso 1 — evita perder el perfil al hacer "Volver" */
+(function ensureProfileSession(){
+  try{
+    const existing = JSON.parse(sessionStorage.getItem('inc-profile') || '{}');
+    if(existing.doc) return;
+    const urlDoc = new URLSearchParams(location.search).get('doc');
+    if(urlDoc){
+      sessionStorage.setItem('inc-profile', JSON.stringify({ doc: urlDoc, kind: 'eligible', ts: Date.now() }));
+    }
+  }catch(e){}
+})();
+
 function fadeAndGo(url){
   if(selectedInc && selectedCode){
     sessionStorage.setItem('inc-assignment', JSON.stringify({
@@ -485,21 +508,33 @@ function fadeAndGo(url){
       incentive: selectedInc, code: selectedCode, ts: Date.now()
     }));
   }
+  if('startViewTransition' in document || CSS.supports('view-transition-name: x')){
+    window.location.href = url;
+    return;
+  }
   document.body.style.transition='opacity .25s ease';
   document.body.style.opacity='0';
   setTimeout(() => { window.location.href = url; }, 260);
 }
 
-/* Sticky stepper shadow */
+/* Sticky stepper — detecta scroll del contenedor .page (no window) */
 (function(){
   const wrap = document.getElementById('stepperWrap');
   if(!wrap) return;
-  const scroller = document.querySelector('.page') || window;
-  const handler = () => { wrap.classList.toggle('is-stuck', wrap.getBoundingClientRect().top <= 1); };
-  (scroller === window ? window : scroller).addEventListener('scroll', handler, { passive: true });
+  const scroller = document.querySelector('.page');
+  if(!scroller) return;
+  const handler = () => { wrap.classList.toggle('is-stuck', scroller.scrollTop > 4); };
+  scroller.addEventListener('scroll', handler, { passive: true });
   handler();
 })();
 </script>
+
+<!-- Footer flotante Naowee -->
+<div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
+  <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
+  <div class="naowee-floating-footer__sep"></div>
+  <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
+</div>
 
 </body>
 </html>

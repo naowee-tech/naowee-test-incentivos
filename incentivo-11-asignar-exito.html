@@ -13,15 +13,8 @@
 <link rel="stylesheet" href="shared/shell.css"/>
 
 <style>
-  .stepper{display:flex;align-items:center;gap:0;margin-bottom:24px;padding:14px 20px;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto}
-  .step{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--text-secondary)}
-  .step .n{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border-dark);background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-secondary)}
-  .step.done .n{background:var(--green);border-color:var(--green);color:#fff}
-  .step.done{color:var(--text-primary)}
-  .step-sep{flex:1;height:1px;background:var(--border);min-width:20px;margin:0 12px}
-
   .success-wrap{
-    max-width:760px;margin:0 auto;padding:28px 0;
+    max-width:760px;margin:0 auto;padding:0 0 28px;
     animation:fadeInUp .4s cubic-bezier(.4,0,.2,1);
   }
   @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -29,7 +22,7 @@
   .success-hero{
     background:linear-gradient(180deg,#fff 0%,#fafbfd 100%);
     border:1px solid var(--border);border-radius:var(--radius-xl);
-    box-shadow:var(--shadow-card);padding:40px 36px;text-align:center;
+    padding:40px 36px;text-align:center;
     margin-bottom:20px;position:relative;overflow:hidden;
   }
   .success-hero::before{
@@ -72,7 +65,7 @@
   /* Receipt card */
   .receipt{
     background:#fff;border:1px solid var(--border);border-radius:var(--radius-xl);
-    box-shadow:var(--shadow-card);overflow:hidden;margin-bottom:20px;
+    overflow:hidden;margin-bottom:20px;
   }
   .receipt__head{
     display:flex;justify-content:space-between;align-items:center;
@@ -96,19 +89,28 @@
   .receipt__person-name{font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--text-primary)}
   .receipt__person-meta{font-size:12.5px;color:var(--text-secondary)}
 
-  .receipt__details{
-    padding:0 28px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;
+  /* Receipt details — kv-row pattern del paso 1 con íconos */
+  .receipt__details{padding:8px 28px 20px;display:flex;flex-direction:column;gap:0}
+  .kv-row{
+    display:grid;grid-template-columns:36px 1fr auto;gap:14px;align-items:center;
+    padding:14px 0;border-bottom:1px solid var(--border);
   }
-  @media(max-width:640px){ .receipt__details{grid-template-columns:1fr} }
-  .detail{
-    display:flex;flex-direction:column;gap:2px;padding:12px 14px;
-    background:#fafbfd;border:1px solid var(--border);border-radius:var(--radius-md);
+  .kv-row:last-child{border-bottom:none}
+  .kv-row__ico{
+    width:36px;height:36px;border-radius:10px;
+    background:#f5f6fa;color:var(--text-secondary);
+    display:inline-flex;align-items:center;justify-content:center;
+    flex-shrink:0;
   }
-  .detail dt{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:#b5b9d4;text-transform:uppercase}
-  .detail dd{font-size:13px;color:var(--text-primary);font-weight:700}
-  .detail.highlight{background:var(--green-bg);border-color:var(--green-border)}
-  .detail.highlight dd{color:#0c4d10;font-size:15px}
-  .detail code{font-family:'SF Mono',monospace;font-size:12px;color:var(--accent);font-weight:700}
+  .kv-row__ico svg{width:18px;height:18px}
+  .kv-row__lbl{font-size:12.5px;color:var(--text-secondary);font-weight:500}
+  .kv-row__val{
+    font-size:13px;color:var(--text-primary);
+    font-weight:700;text-align:right;
+  }
+  .kv-row--highlight .kv-row__ico{background:var(--green-bg);color:var(--green)}
+  .kv-row--highlight .kv-row__val{color:var(--green);font-size:15px}
+  .kv-row__val code{font-family:'SF Mono',monospace;font-size:12px;color:var(--accent);font-weight:700}
 
   .receipt__footer{
     padding:18px 28px;border-top:1px dashed var(--border);
@@ -117,24 +119,14 @@
   }
   .receipt__footer strong{color:var(--text-primary)}
 
-  /* Actions */
+  /* Actions row */
   .actions{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:24px}
   @media(max-width:640px){ .actions{grid-template-columns:1fr} }
-  .btn{
-    height:48px;padding:0 20px;border-radius:var(--radius-md);font:inherit;font-size:13.5px;font-weight:700;
-    cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;
-    border:none;
-  }
-  .btn-primary{background:var(--accent);color:#fff}
-  .btn-primary:hover{box-shadow:0 6px 16px rgba(215,64,9,.22)}
-  .btn-outline{background:#fff;color:var(--text-primary);border:1px solid var(--border-dark)}
-  .btn-outline:hover{background:#fafbfd;border-color:var(--text-secondary)}
 
   /* Status change banner */
   .status-banner{
     background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
     padding:14px 20px;display:flex;gap:14px;align-items:center;margin-bottom:20px;
-    box-shadow:var(--shadow-card);
   }
   .status-banner__ico{
     width:40px;height:40px;border-radius:var(--radius-md);
@@ -144,10 +136,9 @@
   .status-banner__body{flex:1;min-width:0}
   .status-banner__title{font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:2px}
   .status-banner__sub{font-size:12px;color:var(--text-secondary)}
-  .status-transition{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700}
-  .status-chip{padding:3px 10px;border-radius:var(--radius-full);font-family:'Inter',sans-serif}
-  .status-chip.otorgado{background:var(--orange-bg);color:var(--accent);border:1px solid var(--orange-border);text-decoration:line-through;opacity:.7}
-  .status-chip.asignado{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+  .status-transition{display:inline-flex;align-items:center;gap:8px}
+  .status-transition .naowee-badge{text-decoration:none}
+  .status-transition .is-prev{opacity:.55;text-decoration:line-through}
 
   /* Help footer */
   .help{
@@ -165,7 +156,9 @@
       <button class="burger-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" aria-label="Toggle sidebar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#282834" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
-      <svg class="naowee-logo" viewBox="0 0 180 34" fill="none"><text x="0" y="24" font-family="Inter" font-weight="800" font-size="22" fill="#002B5B">Naowee</text></svg>
+      <img src="shared/logos/ministerio.svg" alt="Ministerio del Deporte" class="sb-logo-img"/>
+      <div class="logo-sep"></div>
+      <img src="shared/logos/suid.png" alt="SUID" class="sb-logo-img"/>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS</div>
@@ -204,16 +197,6 @@
 
     <div class="page">
 
-      <div class="stepper">
-        <div class="step done"><span class="n">✓</span> Buscar deportista</div>
-        <span class="step-sep"></span>
-        <div class="step done"><span class="n">✓</span> Seleccionar incentivo</div>
-        <span class="step-sep"></span>
-        <div class="step done"><span class="n">✓</span> Evidencia de entrega</div>
-        <span class="step-sep"></span>
-        <div class="step done"><span class="n">✓</span> Confirmación</div>
-      </div>
-
       <div class="success-wrap">
 
         <div class="success-hero">
@@ -236,9 +219,12 @@
             <div class="status-banner__sub">El cambio quedó registrado en el historial con timestamp y datos del gestor.</div>
           </div>
           <div class="status-transition">
-            <span class="status-chip otorgado">Otorgado</span>
+            <span class="naowee-badge naowee-badge--caution naowee-badge--quiet naowee-badge--small is-prev">Otorgado</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            <span class="status-chip asignado">Asignado</span>
+            <span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Asignado
+            </span>
           </div>
         </div>
 
@@ -255,32 +241,50 @@
               <div class="receipt__person-meta"><span id="receiptDoc">CC 1.001.234.567</span> · 19 años · Atletismo</div>
             </div>
           </div>
-          <dl class="receipt__details">
-            <div class="detail">
-              <dt>Incentivo</dt>
-              <dd id="receiptInc">Beca educativa · Medallistas de oro</dd>
+          <div class="receipt__details">
+            <div class="kv-row">
+              <span class="kv-row__ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 01-2-2V5h4M18 9h2a2 2 0 002-2V5h-4M6 5h12v6a6 6 0 01-12 0V5zM10 17h4l1 4H9z"/></svg>
+              </span>
+              <span class="kv-row__lbl">Incentivo</span>
+              <span class="kv-row__val" id="receiptInc">Beca educativa · Medallistas de oro</span>
             </div>
-            <div class="detail highlight">
-              <dt>Valor entregado</dt>
-              <dd id="receiptValue">$1.000.000</dd>
+            <div class="kv-row kv-row--highlight">
+              <span class="kv-row__ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </span>
+              <span class="kv-row__lbl">Valor entregado</span>
+              <span class="kv-row__val" id="receiptValue">$1.000.000</span>
             </div>
-            <div class="detail">
-              <dt>Código asignado</dt>
-              <dd><code id="receiptCode">2026BEC-00042</code></dd>
+            <div class="kv-row">
+              <span class="kv-row__ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8M19 8v8"/></svg>
+              </span>
+              <span class="kv-row__lbl">Código asignado</span>
+              <span class="kv-row__val"><code id="receiptCode">2026BEC-00042</code></span>
             </div>
-            <div class="detail">
-              <dt>Programa</dt>
-              <dd>Becas deportivas 2026</dd>
+            <div class="kv-row">
+              <span class="kv-row__ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+              </span>
+              <span class="kv-row__lbl">Programa</span>
+              <span class="kv-row__val">Becas deportivas 2026</span>
             </div>
-            <div class="detail">
-              <dt>Gestor en campo</dt>
-              <dd>Doug Vargas</dd>
+            <div class="kv-row">
+              <span class="kv-row__ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <span class="kv-row__lbl">Gestor en campo</span>
+              <span class="kv-row__val">Doug Vargas</span>
             </div>
-            <div class="detail">
-              <dt>Fecha y hora</dt>
-              <dd id="receiptDate">—</dd>
+            <div class="kv-row">
+              <span class="kv-row__ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </span>
+              <span class="kv-row__lbl">Fecha y hora</span>
+              <span class="kv-row__val" id="receiptDate">—</span>
             </div>
-          </dl>
+          </div>
           <div class="receipt__footer">
             <span>Evidencia registrada: <strong id="evidenceLabel">Foto de entrega · 1.2 MB</strong></span>
             <span>Zona: <strong>Atlántico · Barranquilla</strong></span>
@@ -289,15 +293,15 @@
 
         <!-- Actions -->
         <div class="actions">
-          <button class="btn btn-primary" onclick="fadeAndGo('incentivo-08-asignar-buscar.html')">
+          <button class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="fadeAndGo('incentivo-08-asignar-buscar.html')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nueva asignación
           </button>
-          <button class="btn btn-outline" onclick="window.print()">
+          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="window.print()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
             Imprimir
           </button>
-          <button class="btn btn-outline" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
+          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg>
             Ver historial
           </button>
@@ -355,12 +359,25 @@ try{
 
 /* Helpers */
 function fadeAndGo(url){
+  if('startViewTransition' in document || CSS.supports('view-transition-name: x')){
+    window.location.href = url;
+    return;
+  }
   document.body.style.transition = 'opacity .25s ease';
   document.body.style.opacity = '0';
   setTimeout(() => { window.location.href = url; }, 260);
 }
 function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('profileSwitcher')?.classList.toggle('open'); }
 document.addEventListener('click', (e) => { const sw = document.getElementById('profileSwitcher'); if(sw && !sw.contains(e.target)) sw.classList.remove('open'); });
+
 </script>
+
+<!-- Footer flotante Naowee -->
+<div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
+  <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
+  <div class="naowee-floating-footer__sep"></div>
+  <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
+</div>
+
 </body>
 </html>
