@@ -54,6 +54,17 @@
   border-bottom: 1px solid var(--naowee-color-border-default, #e7e9f3);
 }
 
+/* Override DS: acortar conectores para que los números no queden muy separados.
+   Default DS usa flex:1 y crece ilimitadamente entre steps. */
+.wz-modal .naowee-stepper{
+  justify-content: flex-start;
+  gap: 0;
+}
+.wz-modal .naowee-stepper__connector{
+  flex: 0 0 32px;
+  margin: 0 6px;
+}
+
 /* Transición suave entre paneles — fadeInUp */
 .wz-pane{ animation: wzFadeInUp .4s cubic-bezier(.4,0,.2,1); }
 @keyframes wzFadeInUp{
