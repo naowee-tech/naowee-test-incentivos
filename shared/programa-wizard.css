@@ -55,14 +55,16 @@
 }
 
 /* Override DS: acortar conectores para que los números no queden muy separados.
-   Default DS usa flex:1 y crece ilimitadamente entre steps. */
-.wz-modal .naowee-stepper{
-  justify-content: flex-start;
-  gap: 0;
-}
+   Default DS usa flex:1 creciendo ilimitadamente. Con max-width limitamos
+   el crecimiento pero permitimos shrink cuando el modal es angosto y
+   los 5 steps + labels son anchos. */
 .wz-modal .naowee-stepper__connector{
-  flex: 0 0 32px;
-  margin: 0 6px;
+  flex: 1 1 0;
+  max-width: 32px;
+  min-width: 12px;
+}
+.wz-modal .naowee-stepper__step{
+  padding: 4px 8px;
 }
 
 /* Transición suave entre paneles — fadeInUp */
