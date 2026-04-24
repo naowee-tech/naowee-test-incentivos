@@ -421,11 +421,7 @@ document.addEventListener('click', (e) => {
 });
 
 /* ═══ Logout ═══ */
-function fadeAndGo(url){
-  document.body.style.transition = 'opacity .25s ease';
-  document.body.style.opacity = '0';
-  setTimeout(() => { window.location.href = url; }, 260);
-}
+function fadeAndGo(url){ window.location.href = url; }
 document.getElementById('btnLogout')?.addEventListener('click', () => {
   fadeAndGo('incentivo-01-login.html');
 });

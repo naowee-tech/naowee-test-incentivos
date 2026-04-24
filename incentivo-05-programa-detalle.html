@@ -856,7 +856,7 @@ document.addEventListener('click', (e) => {
   if(sw && !sw.contains(e.target)) document.getElementById('profileDD').classList.remove('open');
 });
 
-function fadeAndGo(url){document.body.style.transition='opacity .25s ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url},260)}
+function fadeAndGo(url){window.location.href=url}
 
 /* ══ HYDRATE: llena la página según el ?id= del query string ══ */
 const STATUS_META = {

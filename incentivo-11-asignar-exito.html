@@ -354,11 +354,7 @@ try{
 }catch(e){}
 
 /* Helpers */
-function fadeAndGo(url){
-  document.body.style.transition = 'opacity .25s ease';
-  document.body.style.opacity = '0';
-  setTimeout(() => { window.location.href = url; }, 260);
-}
+function fadeAndGo(url){ window.location.href = url; }
 function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('profileSwitcher')?.classList.toggle('open'); }
 document.addEventListener('click', (e) => { const sw = document.getElementById('profileSwitcher'); if(sw && !sw.contains(e.target)) sw.classList.remove('open'); });
 </script>

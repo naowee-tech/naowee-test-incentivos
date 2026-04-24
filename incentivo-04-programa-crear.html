@@ -774,15 +774,11 @@ function confirmCancel(){
   }
 }
 function activateProgram(){
-  document.body.style.transition = 'opacity .3s ease';
-  document.body.style.opacity = '0';
-  setTimeout(() => {
-    sessionStorage.setItem('program-activated', 'true');
-    window.location.href = 'incentivo-05-programa-detalle.html?id=NEW&activated=1';
-  }, 300);
+  sessionStorage.setItem('program-activated', 'true');
+  window.location.href = 'incentivo-05-programa-detalle.html?id=NEW&activated=1';
 }
 
-function fadeAndGo(url){document.body.style.transition='opacity .25s ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url},260)}
+function fadeAndGo(url){window.location.href=url}
 
 render();
 </script>
