@@ -160,6 +160,72 @@
   .profile-sub{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12.5px;color:var(--naowee-color-text-secondary,#646587)}
   .profile-sub .dot{width:3px;height:3px;background:#d0d4e6;border-radius:50%}
   .profile-sub strong{color:var(--naowee-color-text-primary,#282834);font-weight:600}
+  /* Stack derecho del header: badge cumplimiento + medallero (deportista) */
+  .profile-side{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex-shrink:0}
+
+  /* ═════ Badges por tipo de perfil ═════ */
+  .profile-tag{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:4px 10px;border-radius:9999px;
+    font-family:'Inter',sans-serif;font-size:11px;font-weight:700;
+    letter-spacing:.3px;text-transform:uppercase;
+    border:1px solid transparent;line-height:1;
+  }
+  .profile-tag svg{width:12px;height:12px;flex-shrink:0}
+  /* Atleta — niveles */
+  .profile-tag--amateur{background:#f5f6fa;color:#646587;border-color:#e7e9f3}
+  .profile-tag--profesional{background:#eef5ff;color:#1d4ed8;border-color:#c7defa}
+  .profile-tag--olimpico{
+    background:linear-gradient(135deg,#fff8d6,#ffe082);
+    color:#8a5a00;border-color:#ffd166;
+    box-shadow:0 2px 6px rgba(255,179,0,.18);
+  }
+  .profile-tag--juvenil{background:#f3e8ff;color:#7c3aed;border-color:#dcc5ff}
+  /* Personal de apoyo — roles */
+  .profile-tag--entrenador{background:#eef5ff;color:#1d4ed8;border-color:#c7defa}
+  .profile-tag--medico{background:#e6f4e7;color:#15803d;border-color:#b7dfb9}
+  .profile-tag--mecanico{background:#fff3e6;color:#d74009;border-color:#ffd9b3}
+  .profile-tag--preparador{background:#f3e8ff;color:#7c3aed;border-color:#dcc5ff}
+  .profile-tag--coach{background:#eef5ff;color:#1d4ed8;border-color:#c7defa}
+
+  /* ═════ Medal strip — historial compacto de medallas ═════ */
+  .medal-strip{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 10px 6px 6px;
+    background:linear-gradient(180deg,#fff,#fafbfd);
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:9999px;
+  }
+  .medal-strip__items{display:flex;align-items:center;gap:-6px}
+  .medal-strip__chip{
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:13px;line-height:1;
+    border:2px solid #fff;margin-left:-8px;
+    box-shadow:0 1px 2px rgba(40,40,52,.1);
+    cursor:default;
+    position:relative;
+  }
+  .medal-strip__chip:first-child{margin-left:0}
+  .medal-strip__chip--oro{background:linear-gradient(135deg,#fff8d6,#f5b400);color:#8a5a00}
+  .medal-strip__chip--plata{background:linear-gradient(135deg,#f1f3f7,#9aa0b0);color:#3b3f4e}
+  .medal-strip__chip--bronce{background:linear-gradient(135deg,#f6d4a8,#b06b2f);color:#5b3217}
+  .medal-strip__chip--more{
+    background:#f5f6fa;color:#646587;
+    font-size:10.5px;font-weight:700;
+  }
+  .medal-strip__count{
+    font-size:11px;font-weight:700;color:var(--naowee-color-text-secondary,#646587);
+    letter-spacing:.3px;text-transform:uppercase;
+    padding-left:2px;
+  }
+  .medal-strip__count strong{color:var(--naowee-color-text-primary,#282834);font-weight:700}
+  .medal-strip__empty{
+    font-size:11px;color:#9c9ebf;font-style:italic;padding:4px 4px 4px 8px;
+  }
+
+  /* Tooltip nativo en hover */
+  .medal-strip__chip[title]{cursor:help}
 
   .profile-body{padding:28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:72px;position:relative}
   .profile-body::before{
@@ -352,7 +418,7 @@
         <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
         <span class="lbl">Asignar incentivo</span>
       </div>
-      <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
+      <div class="nav-row" onclick="fadeAndGo('incentivo-14-mis-asignaciones.html')">
         <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
         <span class="lbl">Mis asignaciones</span>
       </div>
@@ -473,12 +539,18 @@
 <script>
 const SAMPLE = {
   eligible: {
-    role:'athlete',
+    role:'athlete', level:'olimpico',
     name:'María Camila Herrera Rojas',
     docType:'CC', doc:'1001234567',
     age:19, category:'Prejuvenil', disc:'Atletismo · 400m',
     zone:'Atlántico · Barranquilla', strat:'Estrato 2', matricula:'Activa',
     medal:'Oro · Juegos Nacionales 2025', initials:'MC',
+    medals:[
+      { type:'oro',    event:'Juegos Nacionales 2025', year:2025 },
+      { type:'oro',    event:'Sudamericano sub-20',     year:2024 },
+      { type:'plata',  event:'Bolivarianos',            year:2023 },
+      { type:'bronce', event:'Nacional juvenil',        year:2022 }
+    ],
     conditions:[
       { label:'Mayor de 18 años', val:'19 años', ok:true },
       { label:'Categoría prejuvenil o superior', val:'Prejuvenil', ok:true },
@@ -491,12 +563,13 @@ const SAMPLE = {
     ]
   },
   'not-eligible':{
-    role:'athlete',
+    role:'athlete', level:'amateur',
     name:'Juan David Castaño Pérez',
     docType:'CC', doc:'1003456789',
     age:16, category:'Juvenil', disc:'Fútbol · delantero',
     zone:'Cundinamarca · Bogotá', strat:'Estrato 3', matricula:'Activa',
     medal:'Sin medallas registradas', initials:'JD',
+    medals:[],
     conditions:[
       { label:'Mayor de 18 años', val:'16 años', ok:false },
       { label:'Medalla de oro o plata', val:'Sin medallas', ok:false },
@@ -504,7 +577,7 @@ const SAMPLE = {
     ]
   },
   'eligible-coach':{
-    role:'coach',
+    role:'coach', supportType:'entrenador',
     name:'Carlos Alberto Ruiz Mendoza',
     docType:'CC', doc:'1050987654',
     age:42, coachRole:'Entrenador principal', years:12,
@@ -524,7 +597,7 @@ const SAMPLE = {
     ]
   },
   'not-eligible-coach':{
-    role:'coach',
+    role:'coach', supportType:'entrenador',
     name:'Laura Patricia Gómez Valencia',
     docType:'CC', doc:'1067543210',
     age:36, coachRole:'Entrenadora alto rendimiento', years:4,
@@ -598,6 +671,52 @@ const KV_ICONS = {
   status:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
 };
 
+/* ═════ Helpers de presentación: badges + medallero ═════ */
+const PROFILE_BADGES = {
+  // Atletas
+  olimpico:    { cls:'profile-tag--olimpico',    label:'Olímpico',     ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="9" r="3.5"/><circle cx="12" cy="9" r="3.5"/><circle cx="18" cy="9" r="3.5"/><circle cx="9" cy="15" r="3.5"/><circle cx="15" cy="15" r="3.5"/></svg>' },
+  profesional: { cls:'profile-tag--profesional', label:'Profesional',  ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' },
+  amateur:     { cls:'profile-tag--amateur',     label:'Amateur',      ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>' },
+  juvenil:     { cls:'profile-tag--juvenil',     label:'Juvenil',      ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>' },
+  // Personal de apoyo
+  entrenador:  { cls:'profile-tag--entrenador',  label:'Entrenador',   ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>' },
+  medico:      { cls:'profile-tag--medico',      label:'Médico',       ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5L12 21z"/></svg>' },
+  mecanico:    { cls:'profile-tag--mecanico',    label:'Mecánico',     ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>' },
+  preparador:  { cls:'profile-tag--preparador',  label:'Preparador físico', ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12M6 20h12M9 4v16M15 4v16M3 8h3M3 12h3M3 16h3M18 8h3M18 12h3M18 16h3"/></svg>' },
+  coach:       { cls:'profile-tag--coach',       label:'Coach',        ico:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>' }
+};
+
+function renderProfileTypeBadge(p){
+  const isCoach = p.role === 'coach';
+  const key = isCoach ? (p.supportType || 'entrenador') : (p.level || 'amateur');
+  const def = PROFILE_BADGES[key] || PROFILE_BADGES[isCoach ? 'coach' : 'amateur'];
+  return `<div style="display:inline-flex;margin-bottom:2px"><span class="profile-tag ${def.cls}">${def.ico}${def.label}</span></div>`;
+}
+
+const MEDAL_GLYPH = { oro:'🥇', plata:'🥈', bronce:'🥉' };
+const MEDAL_LABEL = { oro:'Oro', plata:'Plata', bronce:'Bronce' };
+
+function renderMedalStrip(p){
+  if(!Array.isArray(p.medals)) return '';
+  if(p.medals.length === 0){
+    return `<div class="medal-strip"><span class="medal-strip__empty">Sin medallas registradas</span></div>`;
+  }
+  // Mostrar máx 3 chips, el resto como "+N"
+  const visible = p.medals.slice(0, 3);
+  const extra = p.medals.length - visible.length;
+  const chips = visible.map(m => {
+    const lbl = `${MEDAL_LABEL[m.type] || m.type} · ${m.event} (${m.year})`;
+    return `<span class="medal-strip__chip medal-strip__chip--${m.type}" title="${lbl}" aria-label="${lbl}">${MEDAL_GLYPH[m.type] || '•'}</span>`;
+  }).join('');
+  const more = extra > 0 ? `<span class="medal-strip__chip medal-strip__chip--more" title="${extra} medalla${extra>1?'s':''} más" aria-label="${extra} medallas más">+${extra}</span>` : '';
+  const totalLbl = p.medals.length === 1 ? '1 medalla' : `${p.medals.length} medallas`;
+  return `
+    <div class="medal-strip" title="${p.medals.map(m => `${MEDAL_LABEL[m.type]} · ${m.event} ${m.year}`).join(' · ')}">
+      <div class="medal-strip__items">${chips}${more}</div>
+      <span class="medal-strip__count"><strong>${totalLbl.split(' ')[0]}</strong> ${totalLbl.split(' ').slice(1).join(' ')}</span>
+    </div>`;
+}
+
 function renderProfileCard(p, opts){
   const isNotEligible = opts?.notEligible === true;
   const isCoach = p.role === 'coach';
@@ -620,9 +739,7 @@ function renderProfileCard(p, opts){
     ? (isNotEligible ? 'not-eligible-coach' : 'eligible-coach')
     : (isNotEligible ? 'not-eligible' : 'eligible');
 
-  const profileTypeBadge = isCoach
-    ? '<div style="display:inline-flex;margin-bottom:2px"><span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Personal de apoyo</span></div>'
-    : '';
+  const profileTypeBadge = renderProfileTypeBadge(p);
 
   const subMeta = isCoach ? `
     <span><strong>${p.docType}</strong> ${p.doc}</span><span class="dot"></span>
@@ -753,6 +870,15 @@ function renderProfileCard(p, opts){
     </div>
   `;
 
+  const sideBlock = `
+    <div class="profile-side">
+      <span class="naowee-badge ${badgeClass} naowee-badge--quiet naowee-badge--small">
+        ${badgeIcon}${badgeText}
+      </span>
+      ${!isCoach ? renderMedalStrip(p) : ''}
+    </div>
+  `;
+
   return `
     <div class="profile-card">
       <div class="profile-head">
@@ -762,9 +888,7 @@ function renderProfileCard(p, opts){
           <div class="profile-name">${p.name}</div>
           <div class="profile-sub">${subMeta}</div>
         </div>
-        <span class="naowee-badge ${badgeClass} naowee-badge--quiet naowee-badge--small" style="flex-shrink:0">
-          ${badgeIcon}${badgeText}
-        </span>
+        ${sideBlock}
       </div>
       <div class="profile-body">
         <div class="data-block">
@@ -1022,6 +1146,8 @@ tryRehydrate();
   onScroll();
 })();
 </script>
+
+<script src="shared/profile-switcher.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

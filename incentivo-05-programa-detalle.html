@@ -411,23 +411,10 @@
   .cc-manual__rows{display:flex;flex-direction:column;gap:6px}
   .cc-manual__row{
     display:grid;grid-template-columns:1.3fr 1fr 1fr 30px;gap:8px;
-    align-items:center;padding:10px;background:#fafbfd;
-    border:1px solid var(--naowee-color-border-default,#e7e9f3);border-radius:8px;
+    align-items:center;
   }
-  .cc-manual__row > input, .cc-manual__row > select{
-    height:36px;padding:0 10px;
-    border:1px solid transparent;background:#fff;border-radius:6px;
-    font:inherit;font-size:12px;color:var(--naowee-color-text-primary,#282834);
-  }
-  .cc-manual__row > input[type="text"]:first-child{font-family:'SF Mono',monospace}
-  .cc-manual__row > input:focus, .cc-manual__row > select:focus{
-    outline:none;border-color:var(--naowee-color-text-accent,#d74009);
-  }
-  .cc-manual__row > select{
-    appearance:none;-webkit-appearance:none;padding-right:26px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12' fill='none'><path d='M2 4l4 4 4-4' stroke='%23282834' stroke-width='1.4' stroke-linecap='round'/></svg>");
-    background-repeat:no-repeat;background-position:right 8px center;
-  }
+  /* El código usa font mono para los identificadores */
+  .cc-manual__row .cc-manual__code input{font-family:'SF Mono',monospace}
   .cc-manual__x{
     width:30px;height:30px;border:none;background:transparent;cursor:pointer;
     border-radius:6px;color:var(--naowee-color-text-secondary,#646587);
@@ -435,13 +422,8 @@
   }
   .cc-manual__x:hover{background:#fff0ee;color:#b42318}
   .cc-manual__add{
-    margin-top:8px;font-size:12px;font-weight:700;
-    color:var(--naowee-color-text-accent,#d74009);
-    background:transparent;border:1px dashed #ffbf75;
-    padding:8px 14px;border-radius:8px;cursor:pointer;
-    display:inline-flex;align-items:center;gap:6px;font-family:inherit;
+    margin-top:10px;align-self:flex-start;
   }
-  .cc-manual__add:hover{background:#fff3e6}
 
   /* Summary info */
   .cc-summary{
@@ -1267,8 +1249,8 @@ function changeAsignPage(delta){
           <span>Código</span><span>Categoría</span><span>Valor (opcional)</span><span></span>
         </div>
         <div class="cc-manual__rows" id="ccManualRows"></div>
-        <button type="button" class="cc-manual__add" onclick="addCCRow()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <button type="button" class="naowee-btn naowee-btn--mute naowee-btn--small cc-manual__add" onclick="addCCRow()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Agregar código
         </button>
       </div>
@@ -1327,23 +1309,76 @@ function addCCRow(){
   const row = document.createElement('div');
   row.className = 'cc-manual__row';
   row.innerHTML = `
-    <input type="text" placeholder="2026BEC-${String(idx).padStart(5, '0')}"/>
-    <select>
-      <option value="">Selecciona…</option>
-      <option value="beca">Beca</option>
-      <option value="bono">Bono</option>
-      <option value="kit">Kit</option>
-      <option value="transporte">Transporte</option>
-      <option value="inscripcion">Inscripción</option>
-      <option value="descuento">Descuento</option>
-      <option value="pase">Pase / acceso</option>
-    </select>
-    <input type="text" inputmode="numeric" placeholder="1.000.000"/>
+    <div class="naowee-textfield cc-manual__code">
+      <div class="naowee-textfield__input-wrap">
+        <input class="naowee-textfield__input" type="text" placeholder="2026BEC-${String(idx).padStart(5, '0')}"/>
+      </div>
+    </div>
+    <div class="naowee-dropdown cc-manual__cat" data-cc-dropdown>
+      <div class="naowee-dropdown__trigger" tabindex="0">
+        <span class="naowee-dropdown__placeholder">Selecciona…</span>
+        <div class="naowee-dropdown__controls">
+          <span class="naowee-dropdown__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </div>
+      </div>
+      <div class="naowee-dropdown__menu" role="listbox">
+        <div class="naowee-dropdown__option" data-val="beca">Beca</div>
+        <div class="naowee-dropdown__option" data-val="bono">Bono</div>
+        <div class="naowee-dropdown__option" data-val="kit">Kit</div>
+        <div class="naowee-dropdown__option" data-val="transporte">Transporte</div>
+        <div class="naowee-dropdown__option" data-val="inscripcion">Inscripción</div>
+        <div class="naowee-dropdown__option" data-val="descuento">Descuento</div>
+        <div class="naowee-dropdown__option" data-val="pase">Pase / acceso</div>
+      </div>
+    </div>
+    <div class="naowee-textfield cc-manual__value">
+      <div class="naowee-textfield__input-wrap">
+        <span class="naowee-textfield__prefix">$</span>
+        <input class="naowee-textfield__input" type="text" inputmode="numeric" placeholder="1.000.000"/>
+      </div>
+    </div>
     <button type="button" class="cc-manual__x" onclick="removeCCRow(this)" aria-label="Eliminar">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>`;
   rows.appendChild(row);
+  wireCCDropdown(row.querySelector('[data-cc-dropdown]'));
 }
+
+/* Wire-up simple del .naowee-dropdown en las filas manuales */
+function wireCCDropdown(dd){
+  if(!dd || dd.dataset.wired) return;
+  dd.dataset.wired = '1';
+  const trigger = dd.querySelector('.naowee-dropdown__trigger');
+  const menu    = dd.querySelector('.naowee-dropdown__menu');
+  const valEl   = dd.querySelector('.naowee-dropdown__placeholder');
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = dd.classList.contains('naowee-dropdown--open');
+    document.querySelectorAll('.naowee-dropdown--open').forEach(d => d.classList.remove('naowee-dropdown--open'));
+    if(!isOpen) dd.classList.add('naowee-dropdown--open');
+  });
+  dd.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      dd.querySelectorAll('.naowee-dropdown__option').forEach(o => o.classList.remove('naowee-dropdown__option--selected'));
+      opt.classList.add('naowee-dropdown__option--selected');
+      dd.dataset.val = opt.dataset.val;
+      // Reemplaza placeholder por value
+      if(valEl){
+        valEl.className = 'naowee-dropdown__value';
+        valEl.textContent = opt.textContent;
+      }
+      dd.classList.remove('naowee-dropdown--open');
+    });
+  });
+}
+
+// Cierra dropdowns al clickear fuera
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.naowee-dropdown')){
+    document.querySelectorAll('.naowee-dropdown--open').forEach(d => d.classList.remove('naowee-dropdown--open'));
+  }
+});
 function removeCCRow(btn){
   const row = btn.closest('.cc-manual__row');
   const rows = document.getElementById('ccManualRows');
@@ -1382,6 +1417,8 @@ function clearSearch(inputId){
 </script>
 
 <script src="shared/programa-wizard.js" defer></script>
+
+<script src="shared/profile-switcher.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

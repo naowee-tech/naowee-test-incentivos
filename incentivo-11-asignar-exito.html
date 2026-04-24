@@ -175,7 +175,7 @@
         <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg></div>
         <span class="lbl">Asignar incentivo</span>
       </div>
-      <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
+      <div class="nav-row" onclick="fadeAndGo('incentivo-14-mis-asignaciones.html')">
         <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
         <span class="lbl">Asignaciones</span>
       </div>
@@ -305,7 +305,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
             Imprimir
           </button>
-          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
+          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="fadeAndGo('incentivo-14-mis-asignaciones.html')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg>
             Ver historial
           </button>
@@ -313,7 +313,7 @@
 
         <div class="help">
           ¿Necesitas revertir esta asignación? Solicita al gestor de incentivos desde
-          <a href="incentivo-12-asignaciones.html">el historial de asignaciones</a>.
+          <a href="incentivo-14-mis-asignaciones.html">el historial de asignaciones</a>.
         </div>
 
       </div>
@@ -375,6 +375,8 @@ function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('pro
 document.addEventListener('click', (e) => { const sw = document.getElementById('profileSwitcher'); if(sw && !sw.contains(e.target)) sw.classList.remove('open'); });
 
 </script>
+
+<script src="shared/profile-switcher.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

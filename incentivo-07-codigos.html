@@ -166,6 +166,93 @@
     display:flex;justify-content:space-between;align-items:center;
     font-size:12.5px;color:var(--naowee-color-text-secondary,#646587);
   }
+
+  /* ═════ Revertir: botón en tabla + modal ═════ */
+  .cod-revert-btn{white-space:nowrap}
+  .cod-noaction{color:#b5b9d4;font-size:13px}
+
+  .rv-overlay{
+    position:fixed;inset:0;z-index:1000;
+    background:rgba(0,43,91,.45);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:24px;
+  }
+  .rv-overlay.open{display:flex;animation:rvFade .2s ease}
+  @keyframes rvFade{from{opacity:0}to{opacity:1}}
+  .rv-modal{
+    width:540px;max-width:100%;background:#fff;border-radius:16px;
+    box-shadow:0 24px 48px rgba(0,0,0,.25);
+    display:flex;flex-direction:column;max-height:calc(100vh - 48px);
+    animation:rvScale .3s cubic-bezier(.175,.885,.32,1.275);
+    overflow:hidden;
+  }
+  @keyframes rvScale{from{opacity:0;transform:scale(.95) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+  .rv-header{padding:20px 24px 4px;border-bottom:none;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .rv-header__title{font-size:18px;font-weight:700;color:var(--naowee-color-text-primary,#282834);line-height:1.2;margin:0 0 4px}
+  .rv-header__sub{font-size:13px;color:var(--naowee-color-text-secondary,#646587);line-height:1.45}
+  .rv-close{
+    width:32px;height:32px;border-radius:8px;border:none;background:transparent;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+    color:var(--naowee-color-text-secondary,#646587);flex-shrink:0;
+  }
+  .rv-close:hover{background:#f5f6fa;color:var(--naowee-color-text-primary,#282834)}
+  .rv-close svg{width:18px;height:18px}
+
+  .rv-body{padding:8px 24px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+
+  /* Summary card del código que se va a revertir */
+  .rv-summary{
+    display:flex;align-items:center;gap:14px;padding:14px;
+    background:linear-gradient(160deg,#fff 0%,#fff8f2 100%);
+    border-radius:12px;
+    box-shadow:inset 0 0 0 1px rgba(215,64,9,.14);
+  }
+  .rv-summary__ico{
+    width:40px;height:40px;border-radius:11px;flex-shrink:0;
+    background:linear-gradient(135deg,#ffe7cc 0%,#fff3e6 100%);
+    color:var(--naowee-color-text-accent,#d74009);
+    display:inline-flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 0 0 1px rgba(215,64,9,.10);
+  }
+  .rv-summary__body{flex:1;min-width:0}
+  .rv-summary__code{
+    font-family:'SF Mono',monospace;font-size:13px;font-weight:700;
+    color:var(--naowee-color-text-primary,#282834);
+  }
+  .rv-summary__meta{
+    font-size:12px;color:var(--naowee-color-text-secondary,#646587);margin-top:2px;
+    display:flex;gap:8px;flex-wrap:wrap;
+  }
+  .rv-summary__meta strong{color:var(--naowee-color-text-primary,#282834);font-weight:600}
+  .rv-summary__val{
+    font-size:15px;font-weight:700;color:var(--naowee-color-text-accent,#d74009);
+    font-variant-numeric:tabular-nums;flex-shrink:0;
+  }
+
+  .rv-footer{
+    padding:16px 24px;border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
+    display:flex;gap:10px;justify-content:flex-end;
+  }
+
+  /* Toast patrón naowee-message — bottom-right */
+  .rv-toast-wrap{
+    position:fixed;bottom:24px;right:24px;z-index:1500;
+    display:flex;flex-direction:column;gap:8px;
+    pointer-events:none;max-width:calc(100vw - 48px);
+  }
+  .rv-toast-wrap .rv-toast{
+    pointer-events:auto;min-width:320px;max-width:420px;
+    box-shadow:0 12px 32px rgba(40,40,52,.18);padding:12px 14px;
+  }
+  .rv-toast .naowee-message__header{display:flex;align-items:center;gap:10px;width:100%}
+  .rv-toast .naowee-message__text{flex:1;min-width:0;font-size:13px;line-height:1.4}
+  .rv-toast__dismiss{
+    width:24px;height:24px;border-radius:6px;border:none;background:transparent;
+    cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+    color:var(--naowee-color-text-secondary,#646587);flex-shrink:0;
+  }
+  .rv-toast__dismiss:hover{background:rgba(0,0,0,.05)}
+  .rv-toast__dismiss svg{width:14px;height:14px}
 </style>
 </head>
 <body>
@@ -359,6 +446,7 @@
               <th>Operador</th>
               <th>Fecha</th>
               <th>Valor</th>
+              <th style="width:130px">Acciones</th>
             </tr>
           </thead>
           <tbody id="codBody"></tbody>
@@ -509,11 +597,18 @@ function renderCodigos(){
 
   const body = document.getElementById('codBody');
   if(!slice.length){
-    body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px;color:#9c9ebf">Sin códigos con estos filtros.</td></tr>`;
+    body.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:48px;color:#9c9ebf">Sin códigos con estos filtros.</td></tr>`;
   } else {
     body.innerHTML = slice.map(c => {
       const mutedBenef = !c.benef;
       const mutedValor = c.estado === 'rev';
+      // Sólo asignados se pueden revertir
+      const actionCell = c.estado === 'asig'
+        ? `<button type="button" class="naowee-btn naowee-btn--quiet naowee-btn--small cod-revert-btn" onclick="event.stopPropagation(); openRevertModal('${c.code}')">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+             Revertir
+           </button>`
+        : `<span class="cod-noaction">—</span>`;
       return `
         <tr onclick="fadeAndGo('incentivo-05-programa-detalle.html?id=${c.prg.id}')">
           <td><code>${c.code}</code></td>
@@ -533,6 +628,7 @@ function renderCodigos(){
           <td><span class="op-cell">${c.op || '—'}</span></td>
           <td><span class="fecha-cell">${c.fecha || '—'}</span></td>
           <td><span class="valor-cell${mutedValor ? ' muted' : ''}">$${(c.valor/1000).toLocaleString('es-CO')}K</span></td>
+          <td>${actionCell}</td>
         </tr>
       `;
     }).join('');
@@ -574,7 +670,199 @@ populateProgramDD();
 renderCodigos();
 
 function fadeAndGo(url){window.location.href=url}
+
+/* ═══════════════════════════════════════════════════════════════
+   REVERTIR CÓDIGO — modal + lógica
+   Flujo: click Revertir → abre modal con detalles → valida campos →
+   cambia estado del código a 'rev' + ajusta contadores del programa
+   + registra en trazabilidad (historial via localStorage) + toast.
+   ═══════════════════════════════════════════════════════════════ */
+let rvTargetCode = null;
+
+function findCod(code){ return ALL.find(c => c.code === code); }
+
+const RV_MOTIVOS = {
+  'devolucion': 'Devolución del beneficiario',
+  'error': 'Error en la asignación',
+  'no-elegible': 'Beneficiario no elegible',
+  'fraude': 'Sospecha de fraude',
+  'cambio-categoria': 'Cambio de categoría / programa',
+  'cancelacion': 'Cancelación del programa',
+  'otro': 'Otro motivo'
+};
+
+function openRevertModal(code){
+  const c = findCod(code);
+  if(!c) return;
+  rvTargetCode = code;
+  // Llenar summary
+  document.getElementById('rvCode').textContent = c.code;
+  document.getElementById('rvProg').textContent = c.prg.name;
+  document.getElementById('rvBenef').textContent = c.benef || '—';
+  document.getElementById('rvValor').textContent = '$' + (c.valor/1000).toLocaleString('es-CO') + 'K';
+  // Reset form
+  resetRevertForm();
+  // Abrir overlay
+  document.getElementById('rvOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('rvSolicitante')?.focus(), 180);
+}
+
+function closeRevertModal(){
+  document.getElementById('rvOverlay').classList.remove('open');
+  rvTargetCode = null;
+}
+
+function resetRevertForm(){
+  // Dropdown motivo
+  const dd = document.getElementById('rvCatDD');
+  dd.classList.remove('naowee-dropdown--open', 'naowee-dropdown--error');
+  delete dd.dataset.val;
+  dd.querySelectorAll('.naowee-dropdown__option').forEach(o => o.classList.remove('naowee-dropdown__option--selected'));
+  const valEl = dd.querySelector('.naowee-dropdown__value, .naowee-dropdown__placeholder');
+  if(valEl){
+    valEl.className = 'naowee-dropdown__placeholder';
+    valEl.textContent = 'Selecciona un motivo';
+  }
+  // Textfields
+  document.getElementById('rvSolicitante').value = '';
+  document.getElementById('rvJust').value = '';
+  ['rvSolicitanteField','rvJustField'].forEach(id => {
+    document.getElementById(id)?.classList.remove('naowee-textfield--error');
+  });
+}
+
+/* Wire simple del dropdown de motivo */
+(function wireRvDropdown(){
+  const dd = document.getElementById('rvCatDD');
+  if(!dd) return;
+  const trigger = dd.querySelector('.naowee-dropdown__trigger');
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = dd.classList.contains('naowee-dropdown--open');
+    if(open) dd.classList.remove('naowee-dropdown--open');
+    else dd.classList.add('naowee-dropdown--open');
+  });
+  dd.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      dd.querySelectorAll('.naowee-dropdown__option').forEach(o => o.classList.remove('naowee-dropdown__option--selected'));
+      opt.classList.add('naowee-dropdown__option--selected');
+      dd.dataset.val = opt.dataset.val;
+      const ph = dd.querySelector('.naowee-dropdown__placeholder, .naowee-dropdown__value');
+      if(ph){
+        ph.className = 'naowee-dropdown__value';
+        ph.textContent = opt.textContent;
+      }
+      dd.classList.remove('naowee-dropdown--open', 'naowee-dropdown--error');
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('#rvCatDD')) dd.classList.remove('naowee-dropdown--open');
+  });
+})();
+
+/* Cerrar modal con Escape o click en overlay */
+document.getElementById('rvOverlay')?.addEventListener('click', (e) => {
+  if(e.target.id === 'rvOverlay') closeRevertModal();
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && document.getElementById('rvOverlay')?.classList.contains('open')) closeRevertModal();
+});
+
+function doRevert(){
+  if(!rvTargetCode) return;
+  const c = findCod(rvTargetCode);
+  if(!c) return;
+  // Validaciones
+  const motivo = document.getElementById('rvCatDD').dataset.val;
+  const solicitante = document.getElementById('rvSolicitante').value.trim();
+  const just = document.getElementById('rvJust').value.trim();
+  let firstInvalid = null;
+  if(!motivo){
+    document.getElementById('rvCatDD').classList.add('naowee-dropdown--error');
+    if(!firstInvalid) firstInvalid = document.getElementById('rvCatDD');
+  }
+  if(!solicitante){
+    document.getElementById('rvSolicitanteField').classList.add('naowee-textfield--error');
+    if(!firstInvalid) firstInvalid = document.getElementById('rvSolicitanteField');
+  }
+  if(!just){
+    document.getElementById('rvJustField').classList.add('naowee-textfield--error');
+    if(!firstInvalid) firstInvalid = document.getElementById('rvJustField');
+  }
+  if(firstInvalid){
+    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // 1) Actualiza el código in-memory
+  c.estado = 'rev';
+  c.benef = c.benef || '—';
+  // 2) Ajusta contadores del programa
+  if(c.prg && c.prg.codes){
+    c.prg.codes.rev = (c.prg.codes.rev || 0) + 1;
+    c.prg.codes.asig = Math.max(0, (c.prg.codes.asig || 1) - 1);
+    c.prg.codes.disponibles = (c.prg.codes.disponibles || 0);
+  }
+  // 3) Registra en historial (localStorage — trazabilidad simple)
+  try {
+    const hist = JSON.parse(localStorage.getItem('naowee-reversiones') || '[]');
+    hist.push({
+      code: c.code,
+      programa: c.prg.name,
+      programaId: c.prg.id,
+      beneficiario: c.benef,
+      valor: c.valor,
+      motivo,
+      motivoLabel: RV_MOTIVOS[motivo] || motivo,
+      solicitante,
+      justificacion: just,
+      autor: 'Doug Vargas · Gestor de incentivos',
+      fecha: new Date().toISOString()
+    });
+    localStorage.setItem('naowee-reversiones', JSON.stringify(hist));
+  } catch(_) {}
+
+  // 4) Feedback + cierre
+  closeRevertModal();
+  updateKPIs();
+  renderCodigos();
+  const valM = '$' + (c.valor/1000).toLocaleString('es-CO') + 'K';
+  showRvToast(`Código ${c.code} revertido. ${valM} volvió al rubro del programa. Registro disponible en el historial.`, 'positive');
+}
+
+/* Toast estilo naowee-message */
+function showRvToast(text, variant = 'positive'){
+  const wrap = document.getElementById('rvToastWrap');
+  if(!wrap) return;
+  const el = document.createElement('div');
+  el.className = `rv-toast naowee-message naowee-message--${variant}`;
+  const ico = variant === 'positive'
+    ? '<polyline points="20 6 9 17 4 12"/>'
+    : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+  el.innerHTML = `
+    <div class="naowee-message__header">
+      <div class="naowee-message__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${ico}</svg>
+      </div>
+      <div class="naowee-message__text">${text}</div>
+      <button type="button" class="rv-toast__dismiss" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>`;
+  wrap.appendChild(el);
+  const dismiss = () => { el.style.transition = 'opacity .2s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 220); };
+  el.querySelector('.rv-toast__dismiss').addEventListener('click', dismiss);
+  setTimeout(dismiss, 5000);
+}
+
+// Limpia errores al escribir
+['rvSolicitante','rvJust'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', function(){
+    this.closest('.naowee-textfield')?.classList.remove('naowee-textfield--error');
+  });
+});
 </script>
+<script src="shared/profile-switcher.js" defer></script>
 
 
 <!-- Footer flotante Naowee -->
@@ -583,6 +871,94 @@ function fadeAndGo(url){window.location.href=url}
   <div class="naowee-floating-footer__sep"></div>
   <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
 </div>
+
+<!-- ═══ MODAL: Revertir código ═══ -->
+<div class="rv-overlay" id="rvOverlay" role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+  <div class="rv-modal">
+    <header class="rv-header">
+      <div>
+        <h2 class="rv-header__title" id="rvTitle">Revertir código</h2>
+        <p class="rv-header__sub">El código volverá a estar disponible y el valor se devolverá al rubro del programa. La acción queda registrada en el historial.</p>
+      </div>
+      <button type="button" class="rv-close" onclick="closeRevertModal()" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+
+    <div class="rv-body">
+      <!-- Resumen del código a revertir -->
+      <div class="rv-summary" id="rvSummary">
+        <div class="rv-summary__ico">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg>
+        </div>
+        <div class="rv-summary__body">
+          <div class="rv-summary__code" id="rvCode">—</div>
+          <div class="rv-summary__meta">
+            <span>Programa: <strong id="rvProg">—</strong></span>
+            <span>Beneficiario: <strong id="rvBenef">—</strong></span>
+          </div>
+        </div>
+        <div class="rv-summary__val" id="rvValor">—</div>
+      </div>
+
+      <!-- Categoría de reversión -->
+      <div class="naowee-dropdown" id="rvCatDD" data-rv-dropdown>
+        <label class="naowee-dropdown__label naowee-dropdown__label--required">Motivo de la reversión</label>
+        <div class="naowee-dropdown__trigger" tabindex="0">
+          <span class="naowee-dropdown__placeholder">Selecciona un motivo</span>
+          <div class="naowee-dropdown__controls">
+            <span class="naowee-dropdown__chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+          </div>
+        </div>
+        <div class="naowee-dropdown__menu" role="listbox">
+          <div class="naowee-dropdown__option" data-val="devolucion">Devolución del beneficiario</div>
+          <div class="naowee-dropdown__option" data-val="error">Error en la asignación</div>
+          <div class="naowee-dropdown__option" data-val="no-elegible">Beneficiario no elegible</div>
+          <div class="naowee-dropdown__option" data-val="fraude">Sospecha de fraude</div>
+          <div class="naowee-dropdown__option" data-val="cambio-categoria">Cambio de categoría / programa</div>
+          <div class="naowee-dropdown__option" data-val="cancelacion">Cancelación del programa</div>
+          <div class="naowee-dropdown__option" data-val="otro">Otro motivo</div>
+        </div>
+      </div>
+
+      <!-- Solicitante -->
+      <div class="naowee-textfield" id="rvSolicitanteField">
+        <label class="naowee-textfield__label naowee-textfield__label--required">Solicitante</label>
+        <div class="naowee-textfield__input-wrap">
+          <input class="naowee-textfield__input" id="rvSolicitante" type="text" placeholder="Nombre de quien solicita la reversión" maxlength="100"/>
+        </div>
+        <div class="naowee-textfield__helper">Persona que solicitó la reversión (beneficiario, coordinador, etc).</div>
+      </div>
+
+      <!-- Justificación -->
+      <div class="naowee-textfield naowee-textfield--textarea" id="rvJustField">
+        <label class="naowee-textfield__label naowee-textfield__label--required">Justificación</label>
+        <div class="naowee-textfield__input-wrap">
+          <textarea class="naowee-textfield__input" id="rvJust" rows="3" placeholder="Describe los detalles de la reversión (evidencia, contexto, acción de seguimiento)..." maxlength="400"></textarea>
+        </div>
+      </div>
+
+      <!-- Autor (readonly) -->
+      <div class="naowee-textfield">
+        <label class="naowee-textfield__label">Realizado por</label>
+        <div class="naowee-textfield__input-wrap">
+          <input class="naowee-textfield__input" type="text" value="Doug Vargas · Gestor de incentivos" readonly/>
+        </div>
+      </div>
+    </div>
+
+    <footer class="rv-footer">
+      <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="closeRevertModal()">Cancelar</button>
+      <button class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="doRevert()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Revertir código
+      </button>
+    </footer>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="rv-toast-wrap" id="rvToastWrap" aria-live="polite"></div>
 
 </body>
 </html>
