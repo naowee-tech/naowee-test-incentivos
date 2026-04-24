@@ -436,16 +436,21 @@
         );
         const visible = confirmedVals.slice(0, 2);
         const extra = confirmedVals.length - visible.length;
-        const parts = visible.map(v => `
-          <span class="wz-tag-multi__chip">
-            ${byVal[v] || v}
-            <span class="wz-tag-multi__chip-close" data-remove="${v}" role="button" aria-label="Quitar ${byVal[v] || v}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </span>
-          </span>
-        `);
+        // Usa el componente .naowee-tag del Design System con tag--accent
+        const parts = visible.map(v => {
+          const lbl = byVal[v] || v;
+          return `
+            <span class="naowee-tag naowee-tag--small naowee-tag--accent">
+              ${lbl}
+              <span class="naowee-tag__active-area" data-remove="${v}" role="button" aria-label="Quitar ${lbl}">
+                <span class="naowee-tag__close">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </span>
+              </span>
+            </span>`;
+        });
         if(extra > 0){
-          parts.push(`<span class="wz-tag-multi__counter">+${extra}</span>`);
+          parts.push(`<span class="naowee-tag naowee-tag--small naowee-tag--accent">+${extra}</span>`);
         }
         chipsEl.innerHTML = parts.join('');
         field.dataset.wzValue = confirmedVals.join(',');
@@ -483,24 +488,66 @@
         });
       });
 
+      // Floating del menu: position:fixed + coords calculadas por JS para
+      // escapar del overflow-scroll del modal. El menu queda dentro del
+      // componente (no se mueve al body) — así no colapsa el layout.
+      let isFloating = false;
+      function floatMenu(){
+        const rect = trigger.getBoundingClientRect();
+        if(rect.width < 40) return; // trigger no rendered yet — no-op
+        const vh = window.innerHeight;
+        const spaceBelow = vh - rect.bottom;
+        const spaceAbove = rect.top;
+        const menuMaxH = 320;
+        menu.classList.add('wz-tag-multi__menu--floating');
+        menu.style.width = rect.width + 'px';
+        menu.style.left = rect.left + 'px';
+        if(spaceBelow >= menuMaxH + 8 || spaceBelow >= spaceAbove){
+          menu.style.top = (rect.bottom + 4) + 'px';
+          menu.style.bottom = 'auto';
+        } else {
+          menu.style.top = 'auto';
+          menu.style.bottom = (vh - rect.top + 4) + 'px';
+        }
+        isFloating = true;
+      }
+      function unfloatMenu(){
+        if(!isFloating) return;
+        menu.classList.remove('wz-tag-multi__menu--floating');
+        menu.style.width = menu.style.left = menu.style.top = menu.style.bottom = '';
+        isFloating = false;
+      }
+      // Reposicionar en scroll/resize cuando el menu está flotando
+      function reposition(){
+        if(field.classList.contains('is-open') && isFloating) floatMenu();
+      }
+      window.addEventListener('scroll', reposition, true);
+      window.addEventListener('resize', reposition);
+
       trigger.addEventListener('click', e => {
         e.stopPropagation();
         const wasOpen = field.classList.contains('is-open');
         // Cerrar otros dropdowns abiertos
         document.querySelectorAll('.wz-tag-multi.is-open').forEach(d => {
-          if(d !== field) d.classList.remove('is-open');
+          if(d !== field){
+            d.classList.remove('is-open');
+            d.dispatchEvent(new CustomEvent('wz-tag-multi:close'));
+          }
         });
         document.querySelectorAll('.naowee-dropdown--open').forEach(d => d.classList.remove('naowee-dropdown--open'));
         if(wasOpen){
           field.classList.remove('is-open');
           trigger.setAttribute('aria-expanded', 'false');
+          unfloatMenu();
         } else {
           tempVals = [...confirmedVals];
           renderOptionsState();
           field.classList.add('is-open');
           trigger.setAttribute('aria-expanded', 'true');
+          floatMenu();
         }
       });
+      field.addEventListener('wz-tag-multi:close', unfloatMenu);
 
       confirmBtn.addEventListener('click', e => {
         e.stopPropagation();
@@ -508,14 +555,18 @@
         renderChips();
         field.classList.remove('is-open');
         trigger.setAttribute('aria-expanded', 'false');
+        unfloatMenu();
         clearTagMultiError(field);
       });
     });
-    // Click outside cierra todos
+    // Click outside cierra todos (también si se clickea el menu que está
+    // flotando en body: hay que ignorarlo).
     document.addEventListener('click', e => {
-      if(!e.target.closest('.wz-tag-multi')){
-        document.querySelectorAll('.wz-tag-multi.is-open').forEach(d => d.classList.remove('is-open'));
-      }
+      if(e.target.closest('.wz-tag-multi') || e.target.closest('.wz-tag-multi__menu')) return;
+      document.querySelectorAll('.wz-tag-multi.is-open').forEach(d => {
+        d.classList.remove('is-open');
+        d.dispatchEvent(new CustomEvent('wz-tag-multi:close'));
+      });
     });
   }
 

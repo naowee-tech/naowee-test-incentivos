@@ -453,7 +453,7 @@
   color:var(--naowee-color-text-accent,#d74009);
 }
 
-/* Menu flotante */
+/* Menu flotante — default anchored al componente */
 .wz-tag-multi__menu{
   position:absolute;top:calc(100% + 4px);left:0;right:0;
   background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
@@ -464,6 +464,15 @@
   max-height:320px;overflow:hidden;
 }
 .wz-tag-multi.is-open .wz-tag-multi__menu{display:flex}
+
+/* Modo floating — movido a <body>, position:fixed escapa del overflow scroll
+   y los stacking contexts del modal (transform del wrapper). JS calcula coords. */
+.wz-tag-multi__menu--floating{
+  position:fixed !important;
+  top:auto;left:auto;right:auto;bottom:auto;
+  z-index:10000;
+  display:flex !important;
+}
 .wz-tag-multi__options{
   flex:1;overflow-y:auto;padding:6px;
 }
