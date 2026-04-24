@@ -41,6 +41,38 @@
   --naowee-shadow-brand-lg: 0 12px 32px rgba(255,117,0,.30);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   CROSS-DOCUMENT VIEW TRANSITIONS
+   Permite que sidebar + header + logo se mantengan "fijos" visualmente
+   al navegar entre pantallas (Chrome 126+, Safari 18+).
+   Navegadores sin soporte: navegación normal sin animación.
+   ═══════════════════════════════════════════════════════════════ */
+@view-transition{ navigation: auto; }
+
+/* Nombres estables → el navegador morphea estos elementos entre docs */
+.sidebar      { view-transition-name: app-sidebar; }
+.sidebar-logo { view-transition-name: app-sidebar-logo; }
+.top-header   { view-transition-name: app-header; }
+.page         { view-transition-name: app-page; }
+
+/* Solo el contenido (.page) hace crossfade; el resto se mantiene */
+::view-transition-old(app-sidebar),
+::view-transition-new(app-sidebar),
+::view-transition-old(app-sidebar-logo),
+::view-transition-new(app-sidebar-logo),
+::view-transition-old(app-header),
+::view-transition-new(app-header){
+  animation: none;
+}
+::view-transition-old(app-page){
+  animation: 180ms cubic-bezier(.4,0,.2,1) both fadeOut;
+}
+::view-transition-new(app-page){
+  animation: 220ms cubic-bezier(.4,0,.2,1) both fadeIn;
+}
+@keyframes fadeOut{ to { opacity: 0; transform: translateY(-4px); } }
+@keyframes fadeIn{ from { opacity: 0; transform: translateY(6px); } }
+
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family:var(--naowee-font-family, var(--font));
@@ -150,6 +182,9 @@ a{color:inherit;text-decoration:none}
 .top-header{
   height:var(--header-h);background:var(--surface);border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 24px;flex-shrink:0;
+  /* Crea stacking context por encima de .page para que el dropdown del perfil
+     no quede debajo de botones/contenido de la página */
+  position:relative;z-index:20;
 }
 
 /* ═══ Profile switcher ═══ */
@@ -214,7 +249,30 @@ a{color:inherit;text-decoration:none}
 .profile-dd__item .role-meta small{font-size:11px;color:var(--text-secondary);font-weight:500}
 
 /* PAGE */
-.page{flex:1;overflow-y:auto;overflow-x:hidden;padding:28px 32px 40px}
+.page{flex:1;overflow-y:auto;overflow-x:hidden;padding:28px 32px 72px}
+
+/* ═══ FOOTER FLOTANTE NAOWEE (paridad con escenarios/digitacion) ═══
+   Usa el componente .naowee-floating-footer del DS si está disponible,
+   con fallback local por si falla el CDN. */
+.naowee-floating-footer{
+  position:fixed;bottom:14px;right:20px;z-index:50;
+  display:inline-flex;align-items:center;gap:10px;
+  padding:8px 14px;background:#fff;
+  border:1px solid var(--border);border-radius:9999px;
+  box-shadow:0 4px 12px rgba(40,40,52,.06);
+  font-size:11.5px;color:var(--text-secondary);
+  pointer-events:auto;
+  view-transition-name: app-footer;
+}
+.naowee-floating-footer__logo{height:18px;width:auto;display:block}
+.naowee-floating-footer__sep{
+  width:1px;height:14px;background:var(--border);flex-shrink:0;
+}
+.naowee-floating-footer__text{font-weight:500;line-height:1}
+.naowee-floating-footer__text strong{color:var(--text-primary);font-weight:700}
+
+::view-transition-old(app-footer),
+::view-transition-new(app-footer){ animation: none; }
 .page-title{font-size:24px;font-weight:700;color:var(--text-primary);margin-bottom:4px}
 .page-sub{font-size:13px;color:var(--text-secondary);margin-bottom:24px}
 

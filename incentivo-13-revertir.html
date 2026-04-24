@@ -76,7 +76,17 @@
   .receipt__id{font-family:'SF Mono',monospace;font-size:12px;font-weight:700;color:#b42318;background:var(--red-bg);padding:4px 10px;border-radius:var(--radius-md)}
 
   .receipt__body{padding:20px 26px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
-  .receipt__ava{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#ffbf75,#d74009);display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:800;border:3px solid #fff;box-shadow:0 0 0 1px var(--border)}
+  .receipt__ava{
+    width:68px;height:68px;border-radius:50%;
+    background:linear-gradient(135deg,#ffbf75,#d74009);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:24px;font-weight:800;
+    border:3px solid #fff;
+    box-shadow:
+      0 0 0 1px var(--border),
+      0 8px 22px rgba(215,64,9,.30),
+      0 2px 6px rgba(215,64,9,.17);
+  }
   .receipt__person{display:flex;flex-direction:column;gap:3px;min-width:0}
   .receipt__person-name{font-size:17px;font-weight:800;letter-spacing:-.01em}
   .receipt__person-meta{font-size:12px;color:var(--text-secondary)}
@@ -290,5 +300,13 @@ try{
 
 function fadeAndGo(url){window.location.href=url}
 </script>
+
+<!-- Footer flotante Naowee -->
+<div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
+  <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
+  <div class="naowee-floating-footer__sep"></div>
+  <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
+</div>
+
 </body>
 </html>

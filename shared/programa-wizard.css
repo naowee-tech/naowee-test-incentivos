@@ -38,19 +38,20 @@
   padding-bottom: 4px;
 }
 
-/* Divider top en footer */
+/* Divider top en footer + padding parejo en todos los lados */
 .wz-modal.naowee-modal--fixed-footer .naowee-modal__footer{
   border-top: 1px solid var(--naowee-color-border-default, #e7e9f3);
   box-shadow: none;
-  padding-top: 16px;
+  padding: 20px 24px;
 }
 
-/* Stepper — sin fondo gris ni divider arriba/abajo (escenarios-style) */
+/* Stepper — divider inferior para separar del contenido */
 .wz-stepper-wrap{
   padding: 16px 24px;
   background: #fff;
   overflow-x: auto;
   flex-shrink: 0;
+  border-bottom: 1px solid var(--naowee-color-border-default, #e7e9f3);
 }
 
 /* Transición suave entre paneles — fadeInUp */

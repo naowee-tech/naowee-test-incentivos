@@ -21,23 +21,30 @@
   }
   .page-sub{font-size:14px;color:var(--naowee-color-text-secondary,#646587);line-height:1.5;max-width:640px}
 
-  /* Stepper — sticky debajo del header (patrón digitación) */
-  .stepper-wrap{
-    position:sticky;top:0;z-index:10;
-    margin:-24px -24px 32px;padding:20px 24px 16px;
-    background:var(--bg,#f5f6fa);
-  }
+  /* Stepper — progressive sticky collapse (patrón digitación `.sport-section`).
+     El .stepper ES el sticky element directamente: sin wrapper intermedio,
+     sin border-top extra que cree visual gap al pegarse al header. */
   .stepper{
+    position:sticky;top:0;z-index:10;
     display:flex;align-items:center;gap:0;
     padding:14px 20px;background:#fff;
     border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:14px;overflow-x:auto;
-    transition:box-shadow .2s;
+    border-radius:14px;
+    margin:0 0 24px;
+    overflow-x:auto;
+    transition:box-shadow .22s,border-radius .22s,border-color .22s,padding .18s ease;
   }
-  .stepper-wrap.is-stuck .stepper{box-shadow:0 4px 16px rgba(40,40,52,.08)}
+  .stepper.is-stuck{
+    box-shadow:0 4px 16px rgba(40,40,52,.08);
+  }
   .step{
     display:flex;align-items:center;gap:10px;flex-shrink:0;
     font-size:12.5px;font-weight:600;color:var(--naowee-color-text-secondary,#646587);
+  }
+  /* Label del step — colapsa progresivamente al scrollear (estilo digitación) */
+  .step-lbl{
+    display:inline-block;white-space:nowrap;overflow:hidden;
+    transition:max-width .18s ease,opacity .18s ease,margin-left .18s ease;
   }
   .step .n{
     width:26px;height:26px;border-radius:50%;
@@ -128,12 +135,12 @@
   .programs-section{padding:24px 28px}
   .programs-section__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
   .programs-section__head h4{font-size:15px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
-  /* Footer con nav (patrón wizard) */
+  /* Footer con nav (patrón wizard) — fondo blanco */
   .profile-card__footer{
     padding:16px 28px;
     border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
     display:flex;justify-content:space-between;align-items:center;gap:12px;
-    background:#fafbfd;
+    background:#fff;
   }
   /* Avatar con gradient + borde blanco (preservado según pedido del usuario) */
   .profile-avatar{
@@ -142,7 +149,11 @@
     display:flex;align-items:center;justify-content:center;
     color:#fff;font-size:28px;font-weight:800;
     border:3px solid #fff;
-    box-shadow:0 0 0 1px var(--naowee-color-border-default,#e7e9f3),0 8px 24px rgba(215,64,9,.2);
+    /* Elevation tintada con el color del avatar (override por inline style en variant coach/no-elig) */
+    box-shadow:
+      0 0 0 1px var(--naowee-color-border-default,#e7e9f3),
+      0 10px 28px rgba(215,64,9,.30),
+      0 2px 6px rgba(215,64,9,.18);
   }
   .profile-meta{display:flex;flex-direction:column;gap:6px;min-width:0}
   .profile-name{font-size:20px;font-weight:800;color:var(--naowee-color-text-primary,#282834);letter-spacing:-.01em;line-height:1.2}
@@ -150,8 +161,12 @@
   .profile-sub .dot{width:3px;height:3px;background:#d0d4e6;border-radius:50%}
   .profile-sub strong{color:var(--naowee-color-text-primary,#282834);font-weight:600}
 
-  .profile-body{padding:28px;display:grid;grid-template-columns:1fr 1fr;gap:48px}
-  @media(max-width:760px){.profile-body{grid-template-columns:1fr;gap:28px}}
+  .profile-body{padding:28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:72px;position:relative}
+  .profile-body::before{
+    content:"";position:absolute;top:28px;bottom:28px;left:50%;width:1px;
+    background:var(--naowee-color-border-default,#e7e9f3);
+  }
+  @media(max-width:760px){.profile-body{grid-template-columns:1fr;gap:32px}.profile-body::before{display:none}}
   .data-block h5{
     font-size:11px;font-weight:700;letter-spacing:.6px;color:#9c9ebf;
     text-transform:uppercase;margin-bottom:12px;
@@ -203,29 +218,36 @@
 
   .cond-list{display:flex;flex-direction:column;gap:8px}
   .cond{
-    display:flex;align-items:center;gap:12px;
-    padding:10px 12px;
+    display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+    padding:11px 14px 11px 12px;
     border-radius:10px;
-    background:#f6fbf6;
-    border:1px solid #c8e6c9;
+    background:#eaf7eb;
+    border:1.5px solid #9cd89e;
     font-size:13px;color:var(--naowee-color-text-primary,#282834);
-    transition:background .2s;
+    transition:background .2s,border-color .2s;
+    position:relative;
   }
-  .cond.err{background:#fff5f3;border-color:#ffc4bb}
+  .cond::before{
+    content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;
+    background:var(--naowee-color-feedback-fill-positive-loud,#1f8923);
+  }
+  .cond.err{background:#ffeeea;border-color:#f4a99a}
+  .cond.err::before{background:#b42318}
   .cond .mk{
     width:26px;height:26px;border-radius:50%;flex-shrink:0;
     display:inline-flex;align-items:center;justify-content:center;
     background:var(--naowee-color-feedback-fill-positive-loud,#1f8923);color:#fff;
-    box-shadow:0 2px 6px rgba(31,137,35,.2);
+    box-shadow:0 2px 6px rgba(31,137,35,.25);
   }
-  .cond.err .mk{background:#b42318;box-shadow:0 2px 6px rgba(180,35,24,.2)}
+  .cond.err .mk{background:#b42318;box-shadow:0 2px 6px rgba(180,35,24,.25)}
   .cond .mk svg{width:14px;height:14px;stroke-width:3}
-  .cond .txt{flex:1;font-weight:500;color:var(--naowee-color-text-primary,#282834)}
+  .cond .txt{font-weight:600;color:var(--naowee-color-text-primary,#282834)}
   .cond .val{
-    font-size:12.5px;font-weight:700;
+    font-size:12.5px;font-weight:800;
     color:var(--naowee-color-feedback-fill-positive-loud,#1f8923);
+    padding:3px 9px;border-radius:9999px;background:rgba(31,137,35,.12);
   }
-  .cond.err .val{color:#b42318}
+  .cond.err .val{color:#b42318;background:rgba(180,35,24,.12)}
 
   /* Programs applicable */
   .programs-card{
@@ -377,39 +399,47 @@
         </div>
       </div>
 
-      <!-- Stepper sticky -->
-      <div class="stepper-wrap" id="stepperWrap">
-        <div class="stepper">
-          <div class="step active"><span class="n">1</span> Buscar deportista</div>
-          <span class="step-sep"></span>
-          <div class="step"><span class="n">2</span> Seleccionar incentivo</div>
-          <span class="step-sep"></span>
-          <div class="step"><span class="n">3</span> Evidencia de entrega</div>
-          <span class="step-sep"></span>
-          <div class="step"><span class="n">4</span> Confirmación</div>
-        </div>
+      <!-- Stepper sticky con progressive collapse estilo digitación.
+           El .stepper ES el sticky element directamente (patrón .sport-section) -->
+      <div class="stepper" id="stepperWrap">
+        <div class="step active"><span class="n">1</span><span class="step-lbl">Buscar deportista</span></div>
+        <span class="step-sep"></span>
+        <div class="step"><span class="n">2</span><span class="step-lbl">Seleccionar incentivo</span></div>
+        <span class="step-sep"></span>
+        <div class="step"><span class="n">3</span><span class="step-lbl">Evidencia de entrega</span></div>
+        <span class="step-sep"></span>
+        <div class="step"><span class="n">4</span><span class="step-lbl">Confirmación</span></div>
       </div>
 
       <!-- Search card -->
       <div class="search-card">
-        <div class="search-card__title">Documento del deportista</div>
-        <p class="search-card__hint">Ingresa el número de documento para validar elegibilidad.</p>
+        <div class="search-card__title">Documento del beneficiario</div>
+        <p class="search-card__hint">Los incentivos se otorgan a deportistas o a su personal de apoyo (entrenadores, coach, preparadores). Ingresa el documento para validar la elegibilidad.</p>
 
         <div class="search-row">
-          <div class="fld">
-            <label for="docType">Tipo de documento</label>
-            <select id="docType">
-              <option value="CC">Cédula de ciudadanía</option>
-              <option value="TI">Tarjeta de identidad</option>
-              <option value="CE">Cédula de extranjería</option>
-              <option value="PP">Pasaporte</option>
-            </select>
+          <!-- Tipo de documento — DS dropdown -->
+          <div class="naowee-dropdown" id="docTypeDd" data-value="CC">
+            <label class="naowee-dropdown__label">Tipo de documento</label>
+            <div class="naowee-dropdown__trigger" tabindex="0">
+              <span class="naowee-dropdown__value">Cédula de ciudadanía</span>
+              <div class="naowee-dropdown__controls">
+                <span class="naowee-dropdown__chevron">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </div>
+            </div>
+            <div class="naowee-dropdown__menu" role="listbox">
+              <div class="naowee-dropdown__option naowee-dropdown__option--selected" data-val="CC">Cédula de ciudadanía</div>
+              <div class="naowee-dropdown__option" data-val="TI">Tarjeta de identidad</div>
+              <div class="naowee-dropdown__option" data-val="CE">Cédula de extranjería</div>
+              <div class="naowee-dropdown__option" data-val="PP">Pasaporte</div>
+            </div>
           </div>
           <div class="fld">
             <label for="docNumber">Número</label>
             <input id="docNumber" type="text" inputmode="numeric" placeholder="Ej. 1001234567" autofocus/>
           </div>
-          <button class="naowee-btn naowee-btn--loud naowee-btn--large" id="btnSearch" onclick="doSearch()">
+          <button class="naowee-btn naowee-btn--loud naowee-btn--large" id="btnSearch" onclick="doSearch()" disabled>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
             Buscar
           </button>
@@ -417,8 +447,10 @@
 
         <div class="quick-row">
           <span class="quick-label">Demo · probar con:</span>
-          <button class="quick-chip" onclick="runDemo('eligible')"><code>1001234567</code> · aplica</button>
-          <button class="quick-chip" onclick="runDemo('not-eligible')"><code>1003456789</code> · no cumple</button>
+          <button class="quick-chip" onclick="runDemo('eligible')"><code>1001234567</code> · deportista aplica</button>
+          <button class="quick-chip" onclick="runDemo('not-eligible')"><code>1003456789</code> · deportista no cumple</button>
+          <button class="quick-chip" onclick="runDemo('eligible-coach')"><code>1050987654</code> · entrenador aplica</button>
+          <button class="quick-chip" onclick="runDemo('not-eligible-coach')"><code>1067543210</code> · entrenador no fue el primero</button>
           <button class="quick-chip" onclick="runDemo('not-found')"><code>9999999999</code> · sin registro</button>
         </div>
       </div>
@@ -430,7 +462,7 @@
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           </div>
           <h4>Ingresa un documento para empezar</h4>
-          <p>El deportista debe acercarse con su documento de identidad. Puedes usar los ejemplos de demo arriba para ver los tres posibles resultados de búsqueda.</p>
+          <p>El beneficiario (deportista o personal de apoyo) debe acercarse con su documento de identidad. Usa los ejemplos de demo para ver los casos posibles.</p>
         </div>
       </div>
 
@@ -441,6 +473,7 @@
 <script>
 const SAMPLE = {
   eligible: {
+    role:'athlete',
     name:'María Camila Herrera Rojas',
     docType:'CC', doc:'1001234567',
     age:19, category:'Prejuvenil', disc:'Atletismo · 400m',
@@ -458,6 +491,7 @@ const SAMPLE = {
     ]
   },
   'not-eligible':{
+    role:'athlete',
     name:'Juan David Castaño Pérez',
     docType:'CC', doc:'1003456789',
     age:16, category:'Juvenil', disc:'Fútbol · delantero',
@@ -468,14 +502,56 @@ const SAMPLE = {
       { label:'Medalla de oro o plata', val:'Sin medallas', ok:false },
       { label:'Matrícula activa', val:'Activa', ok:true }
     ]
+  },
+  'eligible-coach':{
+    role:'coach',
+    name:'Carlos Alberto Ruiz Mendoza',
+    docType:'CC', doc:'1050987654',
+    age:42, coachRole:'Entrenador principal', years:12,
+    disc:'Atletismo · velocidad', zone:'Atlántico · Barranquilla',
+    vinculacion:'Activa · Liga de Atletismo Atlántico',
+    initials:'CR',
+    athlete:{ name:'María Camila Herrera Rojas', disc:'Atletismo · 400m', medal:'Oro · JN 2025', firstSince:'feb 2018' },
+    conditions:[
+      { label:'Primer entrenador registrado del deportista', val:'Sí · desde feb 2018', ok:true },
+      { label:'Deportista con medalla de oro o plata', val:'Oro JN 2025', ok:true },
+      { label:'Vinculación activa con el Ministerio', val:'Activa', ok:true },
+      { label:'Mínimo 5 años como entrenador', val:'12 años', ok:true }
+    ],
+    programs:[
+      { name:'Reconocimiento al formador — Oro', desc:'Bono único · primer entrenador registrado del medallista', value:'$500.000', iconBg:'#fff3e6', iconColor:'#d74009', icon:'medal' },
+      { name:'Bono formativo continuado', desc:'Estímulo anual por trayectoria del entrenador', value:'$200.000', iconBg:'#f3f0ff', iconColor:'#7c3aed', icon:'award' }
+    ]
+  },
+  'not-eligible-coach':{
+    role:'coach',
+    name:'Laura Patricia Gómez Valencia',
+    docType:'CC', doc:'1067543210',
+    age:36, coachRole:'Entrenadora alto rendimiento', years:4,
+    disc:'Atletismo · velocidad', zone:'Atlántico · Barranquilla',
+    vinculacion:'Activa · Liga de Atletismo Atlántico',
+    initials:'LG',
+    athlete:{ name:'María Camila Herrera Rojas', disc:'Atletismo · 400m', medal:'Oro · JN 2025', currentSince:'ago 2024' },
+    conditions:[
+      { label:'Primer entrenador registrado del deportista', val:'No · vinculada desde ago 2024', ok:false },
+      { label:'Deportista con medalla de oro o plata', val:'Oro JN 2025', ok:true },
+      { label:'Vinculación activa con el Ministerio', val:'Activa', ok:true },
+      { label:'Mínimo 5 años como entrenador', val:'4 años', ok:false }
+    ]
   }
 };
+
+function getSelectedDocType(){
+  return document.getElementById('docTypeDd')?.dataset.value || 'CC';
+}
 
 function doSearch(){
   const n = document.getElementById('docNumber').value.trim();
   if(!n){ document.getElementById('docNumber').focus(); return; }
   if(n === '1001234567') return runDemo('eligible');
   if(n === '1003456789') return runDemo('not-eligible');
+  if(n === '1050987654') return runDemo('eligible-coach');
+  if(n === '1067543210') return runDemo('not-eligible-coach');
   return runDemo('not-found');
 }
 
@@ -484,6 +560,8 @@ function runDemo(kind, skipLoading){
   const render = () => {
     if(kind === 'eligible') wrap.innerHTML = renderEligible(SAMPLE.eligible);
     else if(kind === 'not-eligible') wrap.innerHTML = renderNotEligible(SAMPLE['not-eligible']);
+    else if(kind === 'eligible-coach') wrap.innerHTML = renderEligible(SAMPLE['eligible-coach']);
+    else if(kind === 'not-eligible-coach') wrap.innerHTML = renderNotEligible(SAMPLE['not-eligible-coach']);
     else wrap.innerHTML = renderNotFound();
   };
   if(skipLoading){ render(); return; }
@@ -512,11 +590,17 @@ const KV_ICONS = {
   category:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
   strat:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>',
   matricula: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>',
-  medal:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 22l5-3 5 3-1.21-8.12"/></svg>'
+  medal:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 22l5-3 5 3-1.21-8.12"/></svg>',
+  /* Personal de apoyo */
+  role:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 013 3v4a3 3 0 01-6 0V5a3 3 0 013-3zM19 11v2a7 7 0 01-14 0v-2M12 20v2M8 22h8"/></svg>',
+  years:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  athlete:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  status:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>'
 };
 
 function renderProfileCard(p, opts){
   const isNotEligible = opts?.notEligible === true;
+  const isCoach = p.role === 'coach';
   const total = p.conditions.length;
   const ok = p.conditions.filter(c => c.ok).length;
   const pct = total ? Math.round((ok/total)*100) : 0;
@@ -525,9 +609,59 @@ function renderProfileCard(p, opts){
     ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>'
     : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   const badgeText = isNotEligible ? 'No cumple condiciones' : `Aplica a ${p.programs?.length || 0} incentivos`;
-  const avatarStyle = isNotEligible ? 'background:linear-gradient(135deg,#b5b9d4,#646587)' : '';
+  // Avatar con gradiente + elevation tintada del mismo color
+  const avatarStyle = isNotEligible
+    ? 'background:linear-gradient(135deg,#b5b9d4,#646587);box-shadow:0 0 0 1px var(--naowee-color-border-default,#e7e9f3),0 10px 28px rgba(100,101,135,.28),0 2px 6px rgba(100,101,135,.14)'
+    : (isCoach
+        ? 'background:linear-gradient(135deg,#c4b5fd,#7c3aed);box-shadow:0 0 0 1px var(--naowee-color-border-default,#e7e9f3),0 10px 28px rgba(124,58,237,.32),0 2px 6px rgba(124,58,237,.18)'
+        : '');
+  const dataTitle = isCoach ? 'Datos del personal de apoyo' : 'Datos del deportista';
+  const kindId = isCoach
+    ? (isNotEligible ? 'not-eligible-coach' : 'eligible-coach')
+    : (isNotEligible ? 'not-eligible' : 'eligible');
 
-  const dataRows = `
+  const profileTypeBadge = isCoach
+    ? '<div style="display:inline-flex;margin-bottom:2px"><span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Personal de apoyo</span></div>'
+    : '';
+
+  const subMeta = isCoach ? `
+    <span><strong>${p.docType}</strong> ${p.doc}</span><span class="dot"></span>
+    <span>${p.coachRole}</span><span class="dot"></span>
+    <span>${p.disc}</span><span class="dot"></span>
+    <span>${p.zone}</span>
+  ` : `
+    <span><strong>${p.docType}</strong> ${p.doc}</span><span class="dot"></span>
+    <span>${p.age} años</span><span class="dot"></span>
+    <span>${p.disc}</span><span class="dot"></span>
+    <span>${p.zone}</span>
+  `;
+
+  const dataRows = isCoach ? `
+    <div class="kv-list">
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.role}</span>
+        <span class="kv-row__lbl">Rol</span>
+        <span class="kv-row__val">${p.coachRole}</span>
+      </div>
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.years}</span>
+        <span class="kv-row__lbl">Años como entrenador</span>
+        <span class="kv-row__val">${p.years} años</span>
+      </div>
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.status}</span>
+        <span class="kv-row__lbl">Vinculación</span>
+        <span class="kv-row__val">${p.vinculacion}</span>
+      </div>
+      <div class="kv-row">
+        <span class="kv-row__ico">${KV_ICONS.athlete}</span>
+        <span class="kv-row__lbl">Deportista vinculado</span>
+        <span class="kv-row__val" style="max-width:220px;line-height:1.35">
+          ${p.athlete.name}<br/>
+          <span style="font-weight:500;color:var(--naowee-color-text-secondary,#646587);font-size:11.5px">${p.athlete.medal}${p.athlete.firstSince ? ' · desde '+p.athlete.firstSince : p.athlete.currentSince ? ' · desde '+p.athlete.currentSince : ''}</span>
+        </span>
+      </div>
+    </div>` : `
     <div class="kv-list">
       <div class="kv-row">
         <span class="kv-row__ico">${KV_ICONS.category}</span>
@@ -590,7 +724,11 @@ function renderProfileCard(p, opts){
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 ${pr.icon === 'trophy'
                   ? '<path d="M6 9H4a2 2 0 01-2-2V5h4M18 9h2a2 2 0 002-2V5h-4M6 5h12v6a6 6 0 01-12 0V5zM10 17h4l1 4H9z"/>'
-                  : '<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a3 3 0 016 0v3"/>'}
+                  : pr.icon === 'medal'
+                    ? '<circle cx="12" cy="8" r="6"/><path d="M8.21 13.89L7 22l5-3 5 3-1.21-8.12"/>'
+                    : pr.icon === 'award'
+                      ? '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>'
+                      : '<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a3 3 0 016 0v3"/>'}
               </svg>
             </div>
             <div class="prog__body">
@@ -608,7 +746,7 @@ function renderProfileCard(p, opts){
   const footer = isNotEligible ? '' : `
     <div class="profile-card__footer">
       <span></span>
-      <button class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="saveProfileAndGo('${p.doc}','eligible')">
+      <button class="naowee-btn naowee-btn--loud naowee-btn--large" onclick="saveProfileAndGo('${p.doc}','${kindId}')">
         Continuar
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -620,13 +758,9 @@ function renderProfileCard(p, opts){
       <div class="profile-head">
         <div class="profile-avatar" style="${avatarStyle}">${p.initials}</div>
         <div class="profile-meta">
+          ${profileTypeBadge}
           <div class="profile-name">${p.name}</div>
-          <div class="profile-sub">
-            <span><strong>${p.docType}</strong> ${p.doc}</span><span class="dot"></span>
-            <span>${p.age} años</span><span class="dot"></span>
-            <span>${p.disc}</span><span class="dot"></span>
-            <span>${p.zone}</span>
-          </div>
+          <div class="profile-sub">${subMeta}</div>
         </div>
         <span class="naowee-badge ${badgeClass} naowee-badge--quiet naowee-badge--small" style="flex-shrink:0">
           ${badgeIcon}${badgeText}
@@ -634,7 +768,7 @@ function renderProfileCard(p, opts){
       </div>
       <div class="profile-body">
         <div class="data-block">
-          <h5>Datos del deportista</h5>
+          <h5>${dataTitle}</h5>
           ${dataRows}
         </div>
         <div class="data-block">
@@ -652,17 +786,19 @@ function renderEligible(p){
 }
 
 function renderNotEligible(p){
+  const isCoach = p.role === 'coach';
+  const msg = isCoach
+    ? `<strong>${p.name.split(' ')[0]} no es el primer entrenador registrado de ${p.athlete?.name?.split(' ').slice(0,2).join(' ') || 'este deportista'}.</strong> El reconocimiento al formador solo aplica al personal de apoyo que aparece como primer entrenador en el historial del deportista medallista.`
+    : `<strong>Este deportista no aplica para ningún incentivo activo.</strong> Los programas actualmente activos requieren condiciones que no se cumplen en este perfil.`;
   return `
     <div class="result-wrap">
       ${renderProfileCard(p, { notEligible: true })}
       <div class="naowee-message naowee-message--negative" style="margin-top:4px">
         <div class="naowee-message__header">
           <div class="naowee-message__icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
-          <div class="naowee-message__text">
-            <strong>Este deportista no aplica para ningún incentivo activo.</strong> Los programas actualmente activos requieren condiciones que no se cumplen en este perfil.
-          </div>
+          <div class="naowee-message__text">${msg}</div>
         </div>
       </div>
     </div>
@@ -677,10 +813,10 @@ function renderNotFound(){
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8.5 11h5M11 8.5v5"/></svg>
         </div>
         <h4>Documento no encontrado en la plataforma</h4>
-        <p>El documento ingresado no está registrado en el SUID. Verifica el número o solicita que el deportista se registre antes de continuar.</p>
+        <p>El documento ingresado no está registrado en el SUID. Verifica el número o solicita que el beneficiario (deportista o personal de apoyo) se registre antes de continuar.</p>
         <div class="not-found__actions">
-          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="document.getElementById('docNumber').value='';document.getElementById('docNumber').focus();resetState()">Intentar otro</button>
-          <button class="naowee-btn naowee-btn--link naowee-btn--small">Contactar soporte</button>
+          <button class="naowee-btn naowee-btn--mute naowee-btn--medium" onclick="document.getElementById('docNumber').value='';document.getElementById('docNumber').focus();resetState()">Intentar otro</button>
+          <button class="naowee-btn naowee-btn--link naowee-btn--medium">Contactar soporte</button>
         </div>
       </div>
     </div>
@@ -722,24 +858,177 @@ document.addEventListener('click', (e) => {
   const sw = document.getElementById('profileSwitcher');
   if(sw && !sw.contains(e.target)) sw.classList.remove('open');
 });
-function fadeAndGo(url){window.location.href=url}
+function fadeAndGo(url){
+  // Cross-document view transitions manejan la animación en Chrome 126+/Safari 18+.
+  // Fallback: fade manual para navegadores sin VT API.
+  if('startViewTransition' in document || CSS.supports('view-transition-name: x')){
+    window.location.href = url;
+    return;
+  }
+  document.body.style.transition='opacity .25s ease';
+  document.body.style.opacity='0';
+  setTimeout(()=>{window.location.href=url},260);
+}
 
 applyRole('operador');
 tryRehydrate();
 
-/* Sticky stepper shadow detection */
+/* ══ DS dropdown (tipo de documento) — wire click/keyboard + positioning ══ */
+(function wireDocTypeDropdown(){
+  const dd = document.getElementById('docTypeDd');
+  if(!dd) return;
+  const trigger = dd.querySelector('.naowee-dropdown__trigger');
+  const menu = dd.querySelector('.naowee-dropdown__menu');
+  const valueEl = dd.querySelector('.naowee-dropdown__value');
+
+  function positionMenu(){
+    const r = trigger.getBoundingClientRect();
+    const desiredH = Math.min(260, menu.scrollHeight || 260);
+    const openUp = (window.innerHeight - r.bottom - 8) < desiredH && r.top > desiredH;
+    // Forzamos fixed para que top/left queden en coords de viewport
+    // (el DS por default posiciona absolute y caía muy abajo).
+    menu.style.position = 'fixed';
+    menu.style.margin = '0';
+    menu.style.width = r.width + 'px';
+    menu.style.left = r.left + 'px';
+    menu.style.top = openUp ? (r.top - 6 - desiredH) + 'px' : (r.bottom + 6) + 'px';
+  }
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const wasOpen = dd.classList.contains('naowee-dropdown--open');
+    document.querySelectorAll('.naowee-dropdown--open').forEach(d => d.classList.remove('naowee-dropdown--open'));
+    if(!wasOpen){ dd.classList.add('naowee-dropdown--open'); positionMenu(); }
+  });
+  trigger.addEventListener('keydown', e => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); trigger.click(); }
+    if(e.key === 'Escape'){ dd.classList.remove('naowee-dropdown--open'); }
+  });
+  const scroller = document.querySelector('.page');
+  if(scroller) scroller.addEventListener('scroll', () => {
+    if(dd.classList.contains('naowee-dropdown--open')) positionMenu();
+  }, { passive: true });
+  window.addEventListener('resize', () => {
+    if(dd.classList.contains('naowee-dropdown--open')) positionMenu();
+  });
+  menu.querySelectorAll('.naowee-dropdown__option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      menu.querySelectorAll('.naowee-dropdown__option').forEach(o => o.classList.remove('naowee-dropdown__option--selected'));
+      opt.classList.add('naowee-dropdown__option--selected');
+      if(valueEl) valueEl.textContent = opt.textContent.trim();
+      dd.dataset.value = opt.dataset.val || 'CC';
+      dd.classList.remove('naowee-dropdown--open');
+    });
+  });
+  // Click outside closes
+  document.addEventListener('click', () => {
+    dd.classList.remove('naowee-dropdown--open');
+  });
+})();
+
+/* ══ Buscar guard — deshabilitado hasta que el número tenga contenido ══ */
+(function wireSearchGuard(){
+  const inp = document.getElementById('docNumber');
+  const btn = document.getElementById('btnSearch');
+  if(!inp || !btn) return;
+  const sync = () => { btn.disabled = inp.value.trim().length === 0; };
+  inp.addEventListener('input', sync);
+  inp.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !btn.disabled){ e.preventDefault(); doSearch(); }
+  });
+  sync(); // arranque: también respeta el valor rehidratado
+})();
+
+/* Progressive sticky collapse — patrón digitación .sport-section.
+   El .stepper ES el sticky element; JS interpola margin/padding/border/labels
+   en función de la distancia al top del scrollport (.page). */
 (function(){
-  const wrap = document.getElementById('stepperWrap');
-  if(!wrap) return;
-  const scroller = document.querySelector('.page') || window;
-  const handler = () => {
-    const rect = wrap.getBoundingClientRect();
-    wrap.classList.toggle('is-stuck', rect.top <= 1);
-  };
-  (scroller === window ? window : scroller).addEventListener('scroll', handler, { passive: true });
-  handler();
+  const stepper = document.getElementById('stepperWrap');
+  if(!stepper) return;
+  const labels = stepper.querySelectorAll('.step-lbl');
+  const seps = stepper.querySelectorAll('.step-sep');
+  const page = document.querySelector('.page');
+  if(!page) return;
+
+  const COLLAPSE_RANGE = 60;
+  const labelWidths = Array.from(labels).map(el => {
+    const w = el.getBoundingClientRect().width;
+    el.style.maxWidth = w + 'px';
+    return w;
+  });
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  function apply(progress){
+    stepper.classList.toggle('is-stuck', progress > 0);
+
+    // Full-bleed: margin horizontal negativo (cancela .page padding 32px).
+    const mH = lerp(0, -32, progress);
+    stepper.style.marginLeft = mH + 'px';
+    stepper.style.marginRight = mH + 'px';
+
+    // translateY compensa los 28px de padding-top del .page → al pin queda
+    // pegado al header (y=88 viewport) en vez del content-box top (y=116).
+    // Se declara aquí para que salga en la misma declaración de transform.
+    const ty = lerp(0, -pagePadTop, progress);
+    stepper.style.transform = `translateY(${ty}px)`;
+
+    // Radios: pierde top (flush con header), mantiene bottom (efecto drawer).
+    const radTop = lerp(14, 0, progress);
+    stepper.style.borderRadius = `${radTop}px ${radTop}px 14px 14px`;
+    // Al 100% retiramos border-top por completo (width 0) para que no haya
+    // 1px de reserva que se perciba como gap visual con el header.
+    if(progress >= .98){
+      stepper.style.borderTopWidth = '0';
+      stepper.style.paddingTop = (lerp(14, 11, progress) + 1) + 'px'; // compensa el 1px perdido
+    } else {
+      stepper.style.borderTopWidth = '';
+      stepper.style.paddingTop = lerp(14, 11, progress) + 'px';
+    }
+
+    // Padding bottom + horizontal
+    stepper.style.paddingBottom = lerp(14, 11, progress) + 'px';
+    const padH = lerp(20, 44, progress);
+    stepper.style.paddingLeft = padH + 'px';
+    stepper.style.paddingRight = padH + 'px';
+
+    // Labels: colapsan max-width + opacity + margin
+    labels.forEach((el, i) => {
+      el.style.maxWidth = lerp(labelWidths[i], 0, progress) + 'px';
+      el.style.opacity = 1 - progress;
+      el.style.marginLeft = lerp(0, -6, progress) + 'px';
+    });
+    seps.forEach(s => {
+      s.style.minWidth = lerp(20, 12, progress) + 'px';
+      s.style.margin = `0 ${lerp(12, 6, progress)}px`;
+    });
+  }
+
+  // Chrome/WebKit pin sticky al CONTENT-box top del scroll container
+  // (no al padding-box como dice la spec). Debemos usar el content-box top
+  // como referencia real y compensar visualmente con translateY.
+  const pagePadTop = parseFloat(getComputedStyle(page).paddingTop) || 0;
+
+  function onScroll(){
+    const pageRectTop = page.getBoundingClientRect().top;
+    const pageContentTop = pageRectTop + pagePadTop; // donde realmente pin sticky
+    const stepperRectTop = stepper.getBoundingClientRect().top;
+    const dist = stepperRectTop - pageContentTop;
+    const progress = Math.min(1, Math.max(0, 1 - dist / COLLAPSE_RANGE));
+    apply(progress);
+  }
+
+  page.addEventListener('scroll', onScroll, { passive:true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
 })();
 </script>
+
+<!-- Footer flotante Naowee -->
+<div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
+  <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
+  <div class="naowee-floating-footer__sep"></div>
+  <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
+</div>
 
 </body>
 </html>
