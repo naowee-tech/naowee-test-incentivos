@@ -123,6 +123,32 @@
   function validateStep(step){
     const pane = document.querySelector(`.wz-pane[data-pane="${step}"]`);
     if(!pane) return true;
+    // Regla de negocio step-3: si el modo es "Varios tipos" se requieren
+    // al menos 2 incentivos. Con solo 1 no hay razón para estar en multi —
+    // el usuario debería volver a "Un solo tipo". Se bloquea Continuar y
+    // se orienta con toast caution.
+    if(step === 3 && incTypesMode === 'multi'){
+      const cards = pane.querySelectorAll('.wz-inc-card');
+      if(cards.length < 2){
+        // Flash del hint + shake del botón "Agregar otro tipo" — sin toast,
+        // el mensaje caution inline ya comunica el requisito.
+        const hint = document.getElementById('wzTypesHint');
+        if(hint){
+          hint.classList.remove('wz-flash-caution');
+          void hint.offsetWidth;
+          hint.classList.add('wz-flash-caution');
+          setTimeout(() => hint.classList.remove('wz-flash-caution'), 1200);
+        }
+        const addBtn = document.getElementById('wzAddInc');
+        if(addBtn){
+          addBtn.classList.remove('wz-shake');
+          void addBtn.offsetWidth;
+          addBtn.classList.add('wz-shake');
+          setTimeout(() => addBtn.classList.remove('wz-shake'), 500);
+        }
+        return false;
+      }
+    }
     let ok = true;
     let firstInvalid = null;
     pane.querySelectorAll('[data-wz-required]').forEach(field => {
@@ -900,7 +926,11 @@
     const row = document.createElement('div');
     row.className = 'manual-row';
     row.innerHTML = `
-      <input type="text" placeholder="2026BEC-${String(defaultIdx || 1).padStart(5, '0')}"/>
+      <div class="naowee-textfield manual-row__code">
+        <div class="naowee-textfield__input-wrap">
+          <input class="naowee-textfield__input" type="text" placeholder="2026BEC-${String(defaultIdx || 1).padStart(5, '0')}"/>
+        </div>
+      </div>
       <div class="naowee-dropdown manual-row__cat" data-wz-dropdown data-wz-name="manual-cat">
         <div class="naowee-dropdown__trigger" tabindex="0">
           <span class="naowee-dropdown__placeholder">Categoría</span>
@@ -919,8 +949,13 @@
           <div class="naowee-dropdown__option" data-val="dinero">Dinero</div>
         </div>
       </div>
-      <input type="text" inputmode="numeric" placeholder="1.000.000" data-wz-input="money"/>
-      <button type="button" class="x-btn" onclick="removeManualRow(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
+      <div class="naowee-textfield manual-row__value">
+        <div class="naowee-textfield__input-wrap">
+          <span class="naowee-textfield__prefix">$</span>
+          <input class="naowee-textfield__input" type="text" inputmode="numeric" placeholder="1.000.000" data-wz-input="money"/>
+        </div>
+      </div>
+      <button type="button" class="x-btn" onclick="removeManualRow(this)" aria-label="Eliminar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`;
     return row;
   }
 
@@ -955,21 +990,35 @@
   let incTypesMode = 'single';
   let incCounter = 1;
 
+  // Iconos en estilo DS: mismo patrón del info (AlertCircle), swap de
+  // path interno — círculo con "i" vs. círculo con "!".
+  const TYPES_HINT_ICONS = {
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+  };
+
   function setIncTypesMode(el, mode){
     incTypesMode = mode;
     el.parentElement.querySelectorAll('.toggle-card').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
+    // El botón "Agregar otro tipo" sólo tiene sentido en modo multi.
     const addBtn = document.getElementById('wzAddInc');
     if(addBtn) addBtn.hidden = (mode !== 'multi');
-    // Actualizar hint contextual (texto + estilo)
+    // Hint contextual — swap variante DS (informative ↔ caution), icono y texto.
     const hint = document.getElementById('wzTypesHint');
+    const hintIcon = document.getElementById('wzTypesHintIcon');
+    const hintText = document.getElementById('wzTypesHintText');
     if(hint){
-      hint.dataset.mode = mode;
-      const text = hint.querySelector('.wz-types-hint__text');
-      if(text){
-        const newText = mode === 'multi' ? text.dataset.multi : text.dataset.single;
-        if(newText) text.innerHTML = newText;
-      }
+      hint.classList.toggle('naowee-message--informative', mode === 'single');
+      hint.classList.toggle('naowee-message--caution', mode === 'multi');
+    }
+    if(hintIcon){
+      hintIcon.innerHTML = mode === 'multi' ? TYPES_HINT_ICONS.warn : TYPES_HINT_ICONS.info;
+    }
+    if(hintText){
+      hintText.innerHTML = mode === 'multi'
+        ? 'En modo <strong>Varios tipos</strong> debes agregar al menos <strong>2 incentivos</strong>. Usa el botón <em>Agregar otro tipo de incentivo</em> para sumar categorías.'
+        : 'Todo el rubro se destinará a este único tipo de incentivo. Si necesitas más de uno, cambia a <strong>Varios tipos</strong>.';
     }
     // Toggle clase en la lista → CSS oculta badge/remove en single
     const list = document.getElementById('wzIncList');
@@ -1070,14 +1119,11 @@
     group.dataset.groupId = condGroupCounter;
     group.innerHTML = `
       <div class="cond-group__head">
-        <span class="cond-group__badge">Grupo ${groupNum} · AND</span>
-        <button type="button" class="cond-group__remove" onclick="removeConditionGroup(this)" aria-label="Eliminar grupo"${groupNum === 1 ? ' hidden' : ''}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-        </button>
+        <span class="cond-group__badge">Grupo ${groupNum} · Y</span>
       </div>
       <div class="cond-rows"></div>
-      <button type="button" class="add-cond" onclick="addConditionRow(this)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <button type="button" class="naowee-btn naowee-btn--mute naowee-btn--small wz-add-cond" onclick="addConditionRow(this)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Añadir condición
       </button>`;
     builder.appendChild(group);
@@ -1104,9 +1150,7 @@
     const groups = document.querySelectorAll('#wzCondBuilder .cond-group');
     groups.forEach((g, i) => {
       const badge = g.querySelector('.cond-group__badge');
-      if(badge) badge.textContent = `Grupo ${i + 1} · AND`;
-      const rm = g.querySelector('.cond-group__remove');
-      if(rm) rm.hidden = (groups.length === 1);
+      if(badge) badge.textContent = `Grupo ${i + 1} · Y`;
     });
   }
 
@@ -1265,25 +1309,42 @@
     input.addEventListener('blur', () => stepper.classList.remove('naowee-input-stepper--active'));
   }
 
+  // Operadores en lenguaje natural español — para la vista previa
+  const OP_NATURAL = {
+    gte: 'es mayor o igual a',
+    lte: 'es menor o igual a',
+    eq:  'es',
+    neq: 'no es',
+    in:  'incluye',
+    nin: 'no incluye'
+  };
+
   function refreshCondPreview(){
-    const pv = document.getElementById('wzCondPreview');
-    if(!pv) return;
+    const pv   = document.getElementById('wzCondPreview');
+    const body = document.getElementById('wzCondPreviewBody');
+    if(!pv || !body) return;
+
     const groups = document.querySelectorAll('#wzCondBuilder .cond-group');
+    const emptyHTML = '<em>Agrega al menos una condición para ver la vista previa.</em>';
+
     if(!groups.length){
-      pv.innerHTML = `Vista previa: <em>agrega al menos una condición para ver la vista previa.</em>`;
+      pv.dataset.empty = 'true';
+      body.innerHTML = emptyHTML;
       return;
     }
+
     const groupPieces = [];
-    groups.forEach(g => {
+    groups.forEach((g, gi) => {
       const rows = g.querySelectorAll('.cond-row');
       if(!rows.length) return;
+
       const rowPieces = [...rows].map(r => {
         const fieldKey = r.querySelector('[data-cond-field]').dataset.val || 'edad';
-        const def = COND_FIELDS[fieldKey];
-        const opVal = r.querySelector('[data-cond-op]').dataset.val || def.operators[0][0];
-        const opLbl = (def.operators.find(o => o[0] === opVal) || ['', '?'])[1];
-        const valEl = r.querySelector('[data-cond-val]');
-        let rawVal = '';
+        const def      = COND_FIELDS[fieldKey];
+        const opVal    = r.querySelector('[data-cond-op]').dataset.val || def.operators[0][0];
+        const opNat    = OP_NATURAL[opVal] || (def.operators.find(o => o[0] === opVal) || ['', '?'])[1];
+        const valEl    = r.querySelector('[data-cond-val]');
+        let rawVal     = '';
         if(valEl){
           if(valEl.classList.contains('naowee-input-stepper')){
             rawVal = valEl.querySelector('input').value;
@@ -1291,17 +1352,29 @@
             rawVal = valEl.querySelector('.naowee-dropdown__value')?.textContent || '';
           }
         }
-        const val = String(rawVal).trim() || '…';
-        return `<code>${def.label} ${opLbl} ${val}</code>`;
+        const val     = String(rawVal).trim();
+        const valHTML = val
+          ? `<span class="wz-cond-preview__val">${val}</span>`
+          : `<span class="wz-cond-preview__val wz-cond-preview__val--empty">…</span>`;
+        return `<span class="wz-cond-preview__field">${def.label}</span> ${opNat} ${valHTML}`;
       });
-      const joined = rowPieces.join(` <strong>AND</strong> `);
-      groupPieces.push(groups.length > 1 ? `(${joined})` : joined);
+
+      const joined = rowPieces.join(' <span class="wz-cond-preview__conn wz-cond-preview__conn--and">y</span> ');
+      groupPieces.push(`<div class="wz-cond-preview__group"><span class="wz-cond-preview__group-lbl">Grupo ${gi + 1}</span><span class="wz-cond-preview__group-body">${joined}</span></div>`);
     });
+
     if(!groupPieces.length){
-      pv.innerHTML = `Vista previa: <em>agrega al menos una condición para ver la vista previa.</em>`;
+      pv.dataset.empty = 'true';
+      body.innerHTML = emptyHTML;
       return;
     }
-    pv.innerHTML = `Vista previa: ${groupPieces.join(' <strong>OR</strong> ')}`;
+
+    pv.dataset.empty = 'false';
+    const orDivider = '<div class="wz-cond-preview__or"><span class="wz-cond-preview__conn wz-cond-preview__conn--or">o</span></div>';
+    const intro = groups.length > 1
+      ? 'El atleta es elegible si cumple <strong>cualquiera</strong> de estos grupos de condiciones:'
+      : 'El atleta es elegible si cumple <strong>todas</strong> estas condiciones:';
+    body.innerHTML = `<p class="wz-cond-preview__intro">${intro}</p>${groupPieces.join(orDivider)}`;
   }
 
   /* ══ Step-5 — dropzone clickeable + file chip + budget live ══ */

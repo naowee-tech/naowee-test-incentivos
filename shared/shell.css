@@ -165,7 +165,7 @@ a{color:inherit;text-decoration:none}
   padding:6px 8px 6px 6px;cursor:pointer;background:#fff;
   transition:border-color .15s,box-shadow .15s;
 }
-.user-chip:hover{border-color:var(--border-dark);box-shadow:var(--shadow-sm)}
+.user-chip:hover{border-color:var(--border-dark)}
 .ava{position:relative;flex-shrink:0}
 .ava-ring{
   width:34px;height:34px;border-radius:50%;
