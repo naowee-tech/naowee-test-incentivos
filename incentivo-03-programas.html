@@ -579,7 +579,13 @@ document.addEventListener('input', e => {
   }
 });
 
-renderRows();
+/* Diferir el primer render post-paint.
+   Deja que el browser pinte sidebar + header (con view-transition)
+   antes de hidratar la tabla — evita que la animación de la barra
+   naranja se vea tosca al venir de Dashboard.
+   Usamos setTimeout(0) porque rAF se throttle durante la transición
+   cross-document y la tabla quedaría vacía. */
+setTimeout(renderRows, 0);
 
 function fadeAndGo(url){window.location.href=url}
 </script>
