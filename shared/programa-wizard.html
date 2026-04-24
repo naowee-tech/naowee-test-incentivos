@@ -88,6 +88,9 @@
             <div class="naowee-textfield naowee-textfield--readonly">
               <label class="naowee-textfield__label">Responsable</label>
               <div class="naowee-textfield__input-wrap">
+                <span class="naowee-textfield__prefix" style="padding:0 2px 0 12px;color:var(--naowee-color-text-secondary)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
                 <input class="naowee-textfield__input" type="text" value="Doug Vargas · Ministerio del Deporte" readonly/>
               </div>
             </div>
@@ -95,7 +98,7 @@
 
           <div class="wz-subtitle">Vigencia y cobertura territorial</div>
           <div class="wz-grid">
-            <div class="naowee-textfield has-datepicker" data-wz-required data-wz-datepicker>
+            <div class="naowee-textfield has-datepicker" data-wz-required data-wz-datepicker data-wz-range="from" data-wz-range-name="vigencia">
               <label class="naowee-textfield__label naowee-textfield__label--required">Vigencia desde</label>
               <div class="naowee-textfield__input-wrap">
                 <input class="naowee-textfield__input" type="text" placeholder="dd mmm aaaa" readonly/>
@@ -104,7 +107,7 @@
                 </span>
               </div>
             </div>
-            <div class="naowee-textfield has-datepicker" data-wz-required data-wz-datepicker>
+            <div class="naowee-textfield has-datepicker" data-wz-required data-wz-datepicker data-wz-range="to" data-wz-range-name="vigencia">
               <label class="naowee-textfield__label naowee-textfield__label--required">Vigencia hasta</label>
               <div class="naowee-textfield__input-wrap">
                 <input class="naowee-textfield__input" type="text" placeholder="dd mmm aaaa" readonly/>
@@ -115,16 +118,32 @@
             </div>
           </div>
 
-          <div>
-            <label class="naowee-textfield__label" style="display:block;margin-bottom:6px">Cobertura territorial</label>
-            <div class="chip-picker">
-              <button class="naowee-tag naowee-tag--choice">Nacional</button>
-              <button class="naowee-tag naowee-tag--choice">Atlántico</button>
-              <button class="naowee-tag naowee-tag--choice">Cundinamarca</button>
-              <button class="naowee-tag naowee-tag--choice">Antioquia</button>
-              <button class="naowee-tag naowee-tag--choice">Valle</button>
-              <button class="naowee-tag naowee-tag--choice">Santander</button>
-              <button class="naowee-tag naowee-tag--choice">+ Más</button>
+          <div class="naowee-dropdown" data-wz-dropdown data-wz-multi data-wz-name="cobertura">
+            <label class="naowee-dropdown__label">Cobertura territorial</label>
+            <div class="naowee-dropdown__trigger" tabindex="0">
+              <span class="naowee-dropdown__placeholder">Selecciona departamentos o nacional</span>
+              <div class="naowee-dropdown__controls">
+                <span class="naowee-dropdown__chevron">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+              </div>
+            </div>
+            <div class="naowee-dropdown__menu" role="listbox">
+              <div class="naowee-dropdown__option" data-val="nacional">Nacional</div>
+              <div class="naowee-dropdown__option" data-val="atlantico">Atlántico</div>
+              <div class="naowee-dropdown__option" data-val="cundinamarca">Cundinamarca</div>
+              <div class="naowee-dropdown__option" data-val="antioquia">Antioquia</div>
+              <div class="naowee-dropdown__option" data-val="valle">Valle</div>
+              <div class="naowee-dropdown__option" data-val="santander">Santander</div>
+              <div class="naowee-dropdown__option" data-val="bolivar">Bolívar</div>
+              <div class="naowee-dropdown__option" data-val="boyaca">Boyacá</div>
+              <div class="naowee-dropdown__option" data-val="caldas">Caldas</div>
+              <div class="naowee-dropdown__option" data-val="huila">Huila</div>
+              <div class="naowee-dropdown__option" data-val="meta">Meta</div>
+              <div class="naowee-dropdown__option" data-val="narino">Nariño</div>
+              <div class="naowee-dropdown__option" data-val="nsantander">Norte de Santander</div>
+              <div class="naowee-dropdown__option" data-val="risaralda">Risaralda</div>
+              <div class="naowee-dropdown__option" data-val="tolima">Tolima</div>
             </div>
           </div>
 
@@ -224,8 +243,8 @@
             </div>
           </div>
 
-          <button type="button" class="add-cond wz-add-inc" id="wzAddInc" onclick="addIncentive()" hidden>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <button type="button" class="naowee-btn naowee-btn--mute naowee-btn--small wz-add-inc" id="wzAddInc" onclick="addIncentive()" hidden>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Agregar otro tipo de incentivo
           </button>
         </div>

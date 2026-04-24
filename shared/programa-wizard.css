@@ -321,6 +321,53 @@
 .wz-inc-card__remove:hover{ background: #fff0ee; color: #b42318; }
 .wz-add-inc{ align-self: flex-start; }
 
+/* ═════ Multi-select dropdown — checkbox visual + menu con scroll ═════ */
+.naowee-dropdown[data-wz-multi] .naowee-dropdown__menu{
+  max-height: 280px;
+  overflow-y: auto;
+}
+.naowee-dropdown[data-wz-multi] .naowee-dropdown__option{
+  padding-left: 36px;
+  position: relative;
+}
+.naowee-dropdown[data-wz-multi] .naowee-dropdown__option::before{
+  content: "";
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--naowee-color-border-default, #d0d4e6);
+  border-radius: 4px;
+  background: #fff;
+  transition: background .15s, border-color .15s;
+}
+.naowee-dropdown[data-wz-multi] .naowee-dropdown__option:hover::before{
+  border-color: var(--naowee-color-text-accent, #d74009);
+}
+.naowee-dropdown[data-wz-multi] .naowee-dropdown__option--selected::before{
+  background: var(--naowee-color-text-accent, #d74009);
+  border-color: var(--naowee-color-text-accent, #d74009);
+}
+.naowee-dropdown[data-wz-multi] .naowee-dropdown__option--selected::after{
+  content: "";
+  position: absolute;
+  left: 16px; top: 50%;
+  transform: translate(0, -62%) rotate(45deg);
+  width: 5px; height: 10px;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+}
+
+/* ═════ Datepicker — día fuera de rango ═════ */
+.wz-dp__day--disabled{
+  color: var(--naowee-color-border-default, #c9ccdc) !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+  pointer-events: none;
+  text-decoration: line-through;
+  opacity: .55;
+}
+
 /* Toggle card body — flex para que el texto no se desborde */
 .toggle-card__body{ flex: 1; min-width: 0; }
 
