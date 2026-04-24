@@ -7,10 +7,10 @@ Prototipado de la funcionalidad de Incentivos del SUID. HTML/CSS/JS vanilla, sin
 Consumido vía CDN (sin copia local):
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css">
 ```
 
-Ver todos los componentes en vivo: https://douguizard.github.io/naowee-design-system/playground.html
+Ver todos los componentes en vivo: https://naowee-tech.github.io/naowee-design-system/playground.html
 
 ## Cómo desarrollar
 
@@ -62,6 +62,6 @@ incentivos-ui-ux-demo/
 
 | Proyecto | Repo | URL |
 |----------|------|-----|
-| Design System | `douguizard/naowee-design-system` | https://douguizard.github.io/naowee-design-system/ |
-| Digitación demo | `douguizard/digitacion-ui-ux-demo` | https://douguizard.github.io/digitacion-ui-ux-demo/ |
-| Escenarios demo | `douguizard/escenarios-ux-ui-demo` | https://douguizard.github.io/escenarios-ux-ui-demo/ |
+| Design System | `naowee-tech/naowee-design-system` | https://naowee-tech.github.io/naowee-design-system/ |
+| Digitación demo | `naowee-tech/naowee-test-digitacion` | https://naowee-tech.github.io/naowee-test-digitacion/ |
+| Escenarios demo | `naowee-tech/naowee-test-escenarios` | https://naowee-tech.github.io/naowee-test-escenarios/ |

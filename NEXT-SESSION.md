@@ -58,7 +58,7 @@ claude
 
 ## Notas de contexto
 
-- **Cuenta GitHub**: `douguizard` (para cuando haga falta crear el repo público)
+- **Repo**: `naowee-tech/naowee-test-incentivos` (transferido desde `douguizard/incentivos-ui-ux-demo` el 2026-04-24)
 - **Puerto preview**: 4500 (digitación 4200, escenarios 4300)
 - **DS versión**: v1.4.0 pinned via jsDelivr
 - **Día de inicio**: 2026-04-22

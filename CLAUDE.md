@@ -3,7 +3,7 @@
 ## Project Overview
 Nueva funcionalidad de **Incentivos** del SUID. Standalone HTML files con CSS + JS embebido para prototipado UI/UX. No build tools, no external dependencies except Google Fonts Inter y el Design System via CDN.
 
-> **Este proyecto usa el Design System publicado en https://douguizard.github.io/naowee-design-system/** (repo `douguizard/naowee-design-system`). No hay copia local de `design-system.css` — siempre se consume via CDN pinneado.
+> **Este proyecto usa el Design System publicado en https://naowee-tech.github.io/naowee-design-system/** (repo `naowee-tech/naowee-design-system`). No hay copia local de `design-system.css` — siempre se consume via CDN pinneado.
 
 ## Tech Stack
 - **Language**: HTML, CSS, JavaScript (vanilla)
@@ -18,16 +18,16 @@ SIEMPRE en cada archivo HTML:
 
 ```html
 <!-- Design System pinneado -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css">
 
 <!-- Opcional: helper para tabs animados -->
-<script src="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/tabs.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/tabs.js"></script>
 ```
 
 Para dev/local puedes usar `@main` (refresca cada ~12h); en producción siempre pin a tag (`@v1.4.0` o superior).
 
 ### Tokens y componentes disponibles
-Ver el playground para preview en vivo: https://douguizard.github.io/naowee-design-system/playground.html
+Ver el playground para preview en vivo: https://naowee-tech.github.io/naowee-design-system/playground.html
 
 Componentes claves del DS:
 - `.naowee-btn` + variantes (`--loud`, `--quiet`, `--mute`, `--on-fill`)
@@ -83,7 +83,7 @@ Los números ayudan a ordenar y reflejan el flujo en el índice.
 
 ## Approach
 - **Antes de construir nada, estudiar los documentos en `docs/`** — son la fuente de verdad. No inventar campos, flujos ni reglas.
-- **Reutilizar componentes del DS** — antes de crear un componente nuevo, buscar su equivalente en el playground: https://douguizard.github.io/naowee-design-system/playground.html
+- **Reutilizar componentes del DS** — antes de crear un componente nuevo, buscar su equivalente en el playground: https://naowee-tech.github.io/naowee-design-system/playground.html
 - **No copiar `design-system.css` localmente** — siempre CDN pinneado
 - Think before acting. Read existing files before writing code.
 - Prefer editing over rewriting whole files.
@@ -94,10 +94,10 @@ Los números ayudan a ordenar y reflejan el flujo en el índice.
 
 ## Referencias cruzadas
 
-- **Design System source**: https://github.com/douguizard/naowee-design-system
-- **Playground DS**: https://douguizard.github.io/naowee-design-system/playground.html
-- **Digitación demo**: https://douguizard.github.io/digitacion-ui-ux-demo/ (referencia de patrones UI)
-- **Escenarios demo**: https://douguizard.github.io/escenarios-ux-ui-demo/ (referencia de flujo CRUD + mapas)
+- **Design System source**: https://github.com/naowee-tech/naowee-design-system
+- **Playground DS**: https://naowee-tech.github.io/naowee-design-system/playground.html
+- **Digitación demo**: https://naowee-tech.github.io/naowee-test-digitacion/ (referencia de patrones UI)
+- **Escenarios demo**: https://naowee-tech.github.io/naowee-test-escenarios/ (referencia de flujo CRUD + mapas)
 
 ## Puertos locales
 - 4200 — Digitación
