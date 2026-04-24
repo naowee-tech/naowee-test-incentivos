@@ -15,7 +15,7 @@
 - **Stack:** HTML + CSS + JS vanilla. Sin build. Sin dependencias locales.
 - **Design System:** Consumido via CDN pinneado a **`@v1.4.0`** (no hay copia local)
   ```html
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css"/>
   ```
 
 ### Pantallas construidas (13/13)
@@ -83,7 +83,7 @@ Agregados en `shared/shell.css`:
 ```
 
 Se aplican automáticamente al `.naowee-btn--loud:hover/focus/active`.
-**Pendiente:** migrar estos tokens al repo `douguizard/naowee-design-system`.
+**Pendiente:** migrar estos tokens al repo `naowee-tech/naowee-design-system`.
 
 ### 2.5 Override del DS: btn--loud:hover
 
@@ -292,11 +292,11 @@ http://localhost:4500/incentivo-05-programa-detalle.html?activated=1
 ```
 
 ### Ver DS playground
-https://douguizard.github.io/naowee-design-system/playground.html
+https://naowee-tech.github.io/naowee-design-system/playground.html
 
 ### Descargar DS CSS para inspeccionar
 ```bash
-curl -s "https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css" -o /tmp/naowee-ds.css
+curl -s "https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css" -o /tmp/naowee-ds.css
 ```
 
 ---
@@ -335,9 +335,9 @@ Arranca con la pantalla 05 (detalle del programa). Muéstrame el plan antes de t
   git commit -m "refactor: migrar 01 login, 02 dashboard, 03 programas a DS components + tokens de elevation naranja"
   git push origin main
   ```
-- [ ] **Confirmar que el repo está en GitHub** (`douguizard/incentivos-ui-ux-demo` o similar) — si no, créalo:
+- [ ] **Confirmar que el repo está en GitHub** (`naowee-tech/naowee-test-incentivos` o similar) — si no, créalo:
   ```bash
-  gh repo create douguizard/incentivos-ui-ux-demo --public --source=. --push
+  gh repo create naowee-tech/naowee-test-incentivos --public --source=. --push
   ```
 - [ ] **Guardar este HANDOFF** en algún lugar accesible desde la nueva cuenta (Drive, Notion, etc.).
 

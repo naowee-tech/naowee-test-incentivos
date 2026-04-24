@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
 <!-- Design System (pinned v1.4.0) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css"/>
 
 <!-- Shell layout -->
 <link rel="stylesheet" href="shared/shell.css"/>
@@ -364,8 +364,8 @@
       <div class="info-footer">
         <strong>Stack</strong>
         HTML + CSS + JS vanilla. Sin build. Design System consumido via jsDelivr pinneado a
-        <a href="https://github.com/douguizard/naowee-design-system/releases/tag/v1.4.0">@v1.4.0</a>.
-        Playground: <a href="https://douguizard.github.io/naowee-design-system/playground.html">playground</a>.
+        <a href="https://github.com/naowee-tech/naowee-design-system/releases/tag/v1.4.0">@v1.4.0</a>.
+        Playground: <a href="https://naowee-tech.github.io/naowee-design-system/playground.html">playground</a>.
         Template base: <code>incentivo-template.html</code>. Puerto local: <code>4500</code>.
       </div>
 
@@ -421,11 +421,7 @@ document.addEventListener('click', (e) => {
 });
 
 /* ═══ Logout ═══ */
-function fadeAndGo(url){
-  document.body.style.transition = 'opacity .25s ease';
-  document.body.style.opacity = '0';
-  setTimeout(() => { window.location.href = url; }, 260);
-}
+function fadeAndGo(url){ window.location.href = url; }
 document.getElementById('btnLogout')?.addEventListener('click', () => {
   fadeAndGo('incentivo-01-login.html');
 });

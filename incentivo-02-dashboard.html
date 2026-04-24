@@ -6,7 +6,7 @@
 <title>SUID – Incentivos · Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css"/>
 <link rel="stylesheet" href="shared/shell.css"/>
 <link rel="stylesheet" href="shared/programa-wizard.css"/>
 
@@ -521,7 +521,7 @@ function switchRole(role){
 }
 function toggleProfileDD(ev){ ev.stopPropagation(); document.getElementById('profileSwitcher')?.classList.toggle('open'); }
 document.addEventListener('click', (e) => { const sw = document.getElementById('profileSwitcher'); if(sw && !sw.contains(e.target)) sw.classList.remove('open'); });
-function fadeAndGo(url){document.body.style.transition='opacity .25s ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url},260)}
+function fadeAndGo(url){window.location.href=url}
 </script>
 
 <script src="shared/programa-wizard.js" defer></script>

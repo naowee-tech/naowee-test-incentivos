@@ -290,3 +290,50 @@ a{color:inherit;text-decoration:none}
   .sidebar .nav-row .icon{margin-left:0}
   .user-info{display:none}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   CROSS-DOCUMENT VIEW TRANSITIONS (MPA)
+   - Sidebar y header no parpadean al navegar (quedan "fijos").
+   - La barra naranja del item activo se desliza al nuevo item.
+   - El contenido principal hace cross-fade suave.
+   - Respeta prefers-reduced-motion.
+   Soporte: Chrome/Edge 126+, Safari 18+. En navegadores sin
+   soporte: navegación normal, sin transición (fallback limpio).
+   ══════════════════════════════════════════════════════════════ */
+
+@view-transition { navigation: auto; }
+
+.sidebar     { view-transition-name: shell-sidebar; }
+.page-header { view-transition-name: shell-header; }
+.active-bar  { view-transition-name: shell-nav-indicator; }
+
+/* Barra de selección: easing orgánico, duración cómoda */
+::view-transition-group(shell-nav-indicator){
+  animation-duration:380ms;
+  animation-timing-function:cubic-bezier(0.22,1,0.36,1);
+}
+
+/* Sidebar y header visuales idénticos entre páginas: swap instantáneo */
+::view-transition-old(shell-sidebar),
+::view-transition-new(shell-sidebar),
+::view-transition-old(shell-header),
+::view-transition-new(shell-header){
+  animation:none;
+}
+
+/* Main content: cross-fade ligero */
+::view-transition-old(root){
+  animation:180ms cubic-bezier(0.4,0,0.2,1) both shell-fade-out;
+}
+::view-transition-new(root){
+  animation:240ms cubic-bezier(0.4,0,0.2,1) both shell-fade-in;
+}
+@keyframes shell-fade-out{ to { opacity:0 } }
+@keyframes shell-fade-in { from { opacity:0 } }
+
+/* Respetar reduced-motion: navegación instantánea */
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*){ animation-duration:1ms !important; }
+}

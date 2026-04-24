@@ -6,7 +6,7 @@
 <title>SUID – Incentivos · Detalle del programa</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/douguizard/naowee-design-system@v1.4.0/dist/design-system.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css"/>
 <link rel="stylesheet" href="shared/shell.css"/>
 <link rel="stylesheet" href="shared/programa-wizard.css"/>
 <script src="shared/programs-data.js"></script>
@@ -856,7 +856,7 @@ document.addEventListener('click', (e) => {
   if(sw && !sw.contains(e.target)) document.getElementById('profileDD').classList.remove('open');
 });
 
-function fadeAndGo(url){document.body.style.transition='opacity .25s ease';document.body.style.opacity='0';setTimeout(()=>{window.location.href=url},260)}
+function fadeAndGo(url){window.location.href=url}
 
 /* ══ HYDRATE: llena la página según el ?id= del query string ══ */
 const STATUS_META = {
