@@ -382,6 +382,122 @@
   border-color: var(--naowee-color-interactive-fill-loud-hover, #b8340a);
 }
 
+/* ═════ Tag-multi (portado del pattern reg-multi de escenarios-08)
+   Trigger con chips inline + menu con opciones + botón Agregar.
+   Los cambios del menu se mantienen en temp hasta click Agregar.
+   ═════ */
+.wz-tag-multi{position:relative;width:100%;display:flex;flex-direction:column}
+.wz-tag-multi__label{
+  font-size:14px;font-weight:400;line-height:18px;
+  color:var(--naowee-color-text-primary,#282834);padding-bottom:6px;
+}
+.wz-tag-multi__label .req{color:var(--naowee-color-text-accent,#d74009);margin-left:2px}
+
+.wz-tag-multi__trigger{
+  display:flex;align-items:center;gap:8px;
+  min-height:48px;padding:8px 12px;width:100%;
+  background:#fff;border:1px solid #8788ab;border-radius:12px;
+  cursor:pointer;text-align:left;
+  font-family:'Inter',sans-serif;font-size:14px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.wz-tag-multi__trigger:hover{border-color:#646587}
+.wz-tag-multi.is-open .wz-tag-multi__trigger{
+  border-color:var(--naowee-color-text-accent,#d74009);
+  box-shadow:0 0 0 3px rgba(215,64,9,.15);
+}
+.wz-tag-multi__chips{
+  display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0;
+  align-items:center;
+}
+.wz-tag-multi__placeholder{
+  color:var(--naowee-color-text-secondary,#9c9ebf);flex:1;text-align:left;
+}
+.wz-tag-multi__chevron{
+  width:20px;height:20px;color:var(--naowee-color-text-primary,#282834);
+  transition:transform .2s;flex-shrink:0;
+}
+.wz-tag-multi.is-open .wz-tag-multi__chevron{
+  transform:rotate(180deg);color:var(--naowee-color-text-accent,#d74009);
+}
+
+/* Chip inline en el trigger (item confirmado) */
+.wz-tag-multi__chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 6px 3px 10px;
+  background:#fff;border:1.5px solid var(--naowee-color-text-accent,#d74009);
+  border-radius:6px;
+  font-size:12px;font-weight:500;color:var(--naowee-color-text-accent,#d74009);
+  max-width:100%;
+}
+.wz-tag-multi__chip-close{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:4px;cursor:pointer;
+  color:var(--naowee-color-text-accent,#d74009);
+  transition:background .15s;
+}
+.wz-tag-multi__chip-close:hover{background:#fff3e6}
+.wz-tag-multi__chip-close svg{width:10px;height:10px}
+.wz-tag-multi__counter{
+  display:inline-flex;align-items:center;
+  padding:3px 10px;
+  border:1.5px solid var(--naowee-color-text-accent,#d74009);
+  border-radius:6px;
+  font-size:12px;font-weight:600;
+  color:var(--naowee-color-text-accent,#d74009);
+}
+
+/* Menu flotante */
+.wz-tag-multi__menu{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+  border-radius:12px;
+  box-shadow:0 8px 24px rgba(40,40,52,.12);
+  z-index:3000;
+  display:none;flex-direction:column;
+  max-height:320px;overflow:hidden;
+}
+.wz-tag-multi.is-open .wz-tag-multi__menu{display:flex}
+.wz-tag-multi__options{
+  flex:1;overflow-y:auto;padding:6px;
+}
+.wz-tag-multi__option{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:6px;
+  cursor:pointer;transition:background .15s;
+  font-size:14px;color:var(--naowee-color-text-primary,#282834);
+}
+.wz-tag-multi__option:hover{background:#f4f5f9}
+.wz-tag-multi__option.is-selected{background:#fff3e6;font-weight:600;color:var(--naowee-color-text-accent,#d74009)}
+
+/* Checkbox visual (pattern .naowee-checkbox__box del DS) */
+.wz-tag-multi__check{
+  width:20px;height:20px;border-radius:4px;
+  border:2px solid #8788ab;background:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:background .15s,border-color .15s;
+}
+.wz-tag-multi__check svg{
+  width:14px;height:14px;color:#fff;opacity:0;
+  transition:opacity .15s;
+}
+.wz-tag-multi__option.is-selected .wz-tag-multi__check{
+  background:var(--naowee-color-text-accent,#d74009);
+  border-color:var(--naowee-color-text-accent,#d74009);
+}
+.wz-tag-multi__option.is-selected .wz-tag-multi__check svg{opacity:1}
+
+.wz-tag-multi__footer{
+  padding:8px;border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
+}
+.wz-tag-multi__footer .naowee-btn{width:100%}
+
+/* Estado error */
+.wz-tag-multi--error .wz-tag-multi__trigger{
+  border-color: var(--naowee-color-feedback-border-negative-loud, #ed314a);
+  box-shadow: 0 0 0 3px rgba(237, 49, 74, .15);
+}
+
 /* ═════ Step 3 — diferenciación visual entre single y multi ═════ */
 .wz-types-hint{
   display: flex;

@@ -119,32 +119,35 @@
             </div>
           </div>
 
-          <div class="naowee-dropdown" data-wz-dropdown data-wz-multi data-wz-name="cobertura">
-            <label class="naowee-dropdown__label">Cobertura territorial</label>
-            <div class="naowee-dropdown__trigger" tabindex="0">
-              <span class="naowee-dropdown__placeholder">Selecciona departamentos o nacional</span>
-              <div class="naowee-dropdown__controls">
-                <span class="naowee-dropdown__chevron">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-                </span>
+          <div class="wz-tag-multi" data-wz-tag-multi data-wz-name="cobertura" data-wz-required>
+            <label class="wz-tag-multi__label">Cobertura territorial <span class="req">*</span></label>
+            <button type="button" class="wz-tag-multi__trigger" aria-haspopup="listbox" aria-expanded="false">
+              <span class="wz-tag-multi__chips" data-chips>
+                <span class="wz-tag-multi__placeholder">Selecciona departamentos o nacional</span>
+              </span>
+              <svg class="wz-tag-multi__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="wz-tag-multi__menu" role="listbox">
+              <div class="wz-tag-multi__options" data-options>
+                <div class="wz-tag-multi__option" data-val="nacional" data-label="Nacional"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Nacional</span></div>
+                <div class="wz-tag-multi__option" data-val="atlantico" data-label="Atlántico"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Atlántico</span></div>
+                <div class="wz-tag-multi__option" data-val="cundinamarca" data-label="Cundinamarca"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Cundinamarca</span></div>
+                <div class="wz-tag-multi__option" data-val="antioquia" data-label="Antioquia"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Antioquia</span></div>
+                <div class="wz-tag-multi__option" data-val="valle" data-label="Valle"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Valle</span></div>
+                <div class="wz-tag-multi__option" data-val="santander" data-label="Santander"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Santander</span></div>
+                <div class="wz-tag-multi__option" data-val="bolivar" data-label="Bolívar"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Bolívar</span></div>
+                <div class="wz-tag-multi__option" data-val="boyaca" data-label="Boyacá"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Boyacá</span></div>
+                <div class="wz-tag-multi__option" data-val="caldas" data-label="Caldas"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Caldas</span></div>
+                <div class="wz-tag-multi__option" data-val="huila" data-label="Huila"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Huila</span></div>
+                <div class="wz-tag-multi__option" data-val="meta" data-label="Meta"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Meta</span></div>
+                <div class="wz-tag-multi__option" data-val="narino" data-label="Nariño"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Nariño</span></div>
+                <div class="wz-tag-multi__option" data-val="nsantander" data-label="Norte de Santander"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Norte de Santander</span></div>
+                <div class="wz-tag-multi__option" data-val="risaralda" data-label="Risaralda"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Risaralda</span></div>
+                <div class="wz-tag-multi__option" data-val="tolima" data-label="Tolima"><span class="wz-tag-multi__check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>Tolima</span></div>
               </div>
-            </div>
-            <div class="naowee-dropdown__menu" role="listbox">
-              <div class="naowee-dropdown__option" data-val="nacional">Nacional</div>
-              <div class="naowee-dropdown__option" data-val="atlantico">Atlántico</div>
-              <div class="naowee-dropdown__option" data-val="cundinamarca">Cundinamarca</div>
-              <div class="naowee-dropdown__option" data-val="antioquia">Antioquia</div>
-              <div class="naowee-dropdown__option" data-val="valle">Valle</div>
-              <div class="naowee-dropdown__option" data-val="santander">Santander</div>
-              <div class="naowee-dropdown__option" data-val="bolivar">Bolívar</div>
-              <div class="naowee-dropdown__option" data-val="boyaca">Boyacá</div>
-              <div class="naowee-dropdown__option" data-val="caldas">Caldas</div>
-              <div class="naowee-dropdown__option" data-val="huila">Huila</div>
-              <div class="naowee-dropdown__option" data-val="meta">Meta</div>
-              <div class="naowee-dropdown__option" data-val="narino">Nariño</div>
-              <div class="naowee-dropdown__option" data-val="nsantander">Norte de Santander</div>
-              <div class="naowee-dropdown__option" data-val="risaralda">Risaralda</div>
-              <div class="naowee-dropdown__option" data-val="tolima">Tolima</div>
+              <div class="wz-tag-multi__footer">
+                <button type="button" class="naowee-btn naowee-btn--loud naowee-btn--small" data-confirm>Agregar</button>
+              </div>
             </div>
           </div>
 

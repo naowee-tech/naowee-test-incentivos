@@ -47,6 +47,7 @@
 
   function wireAll(){
     upgradeDropdowns();
+    upgradeTagMultis();
     upgradeDatepickers();
     wireDropzone();
     wireDropzoneClick();
@@ -127,9 +128,15 @@
     pane.querySelectorAll('[data-wz-required]').forEach(field => {
       const input = field.querySelector('input, textarea');
       const isDropdown = field.classList.contains('naowee-dropdown');
-      const val = isDropdown
-        ? (field.querySelector('.naowee-dropdown__value')?.textContent || '').trim()
-        : (input?.value || '').trim();
+      const isTagMulti = field.classList.contains('wz-tag-multi');
+      let val;
+      if(isTagMulti){
+        val = (field.dataset.wzValue || '').trim();
+      } else if(isDropdown){
+        val = (field.querySelector('.naowee-dropdown__value')?.textContent || '').trim();
+      } else {
+        val = (input?.value || '').trim();
+      }
       const isEmpty = !val || val === '0' || val === '$';
       if(isEmpty){
         ok = false;
@@ -167,7 +174,10 @@
     field.classList.add('wz-shake');
     setTimeout(() => field.classList.remove('wz-shake'), 500);
     const isDropdown = field.classList.contains('naowee-dropdown');
-    if(isDropdown){
+    const isTagMulti = field.classList.contains('wz-tag-multi');
+    if(isTagMulti){
+      field.classList.add('wz-tag-multi--error');
+    } else if(isDropdown){
       field.classList.add('naowee-dropdown--error');
     }else{
       field.classList.add('naowee-textfield--error');
@@ -190,6 +200,7 @@
   function clearError(field){
     field.classList.remove('naowee-textfield--error');
     field.classList.remove('naowee-dropdown--error');
+    field.classList.remove('wz-tag-multi--error');
     const helper = field.querySelector('.naowee-helper');
     if(helper && helper.classList.contains('naowee-helper--negative')){
       helper.remove();
@@ -394,6 +405,122 @@
     document.addEventListener('click', () => {
       document.querySelectorAll('.naowee-dropdown--open').forEach(d => d.classList.remove('naowee-dropdown--open'));
     });
+  }
+
+  /* ══ Tag-multi (dropdown multi-select con chips + botón Agregar)
+     Pattern portado del escenario-08 (reg-multi). Diferente del naowee-dropdown:
+     los cambios quedan en temp hasta click en "Agregar". Al confirmar, renderiza
+     chips inline en el trigger. ══ */
+  function upgradeTagMultis(){
+    document.querySelectorAll('[data-wz-tag-multi]').forEach(field => {
+      if(field.dataset.wzWired) return;
+      field.dataset.wzWired = '1';
+      const trigger = field.querySelector('.wz-tag-multi__trigger');
+      const menu = field.querySelector('.wz-tag-multi__menu');
+      const chipsEl = field.querySelector('[data-chips]');
+      const optionsEl = field.querySelector('[data-options]');
+      const confirmBtn = field.querySelector('[data-confirm]');
+      const allOptions = [...optionsEl.querySelectorAll('.wz-tag-multi__option')];
+      const placeholderHtml = chipsEl.innerHTML; // backup del placeholder
+      let tempVals = [];     // selección en curso (menu abierto)
+      let confirmedVals = []; // selección aplicada (trigger)
+
+      function renderChips(){
+        if(confirmedVals.length === 0){
+          chipsEl.innerHTML = placeholderHtml;
+          field.dataset.wzValue = '';
+          return;
+        }
+        const byVal = Object.fromEntries(
+          allOptions.map(o => [o.dataset.val, o.dataset.label])
+        );
+        const visible = confirmedVals.slice(0, 2);
+        const extra = confirmedVals.length - visible.length;
+        const parts = visible.map(v => `
+          <span class="wz-tag-multi__chip">
+            ${byVal[v] || v}
+            <span class="wz-tag-multi__chip-close" data-remove="${v}" role="button" aria-label="Quitar ${byVal[v] || v}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </span>
+          </span>
+        `);
+        if(extra > 0){
+          parts.push(`<span class="wz-tag-multi__counter">+${extra}</span>`);
+        }
+        chipsEl.innerHTML = parts.join('');
+        field.dataset.wzValue = confirmedVals.join(',');
+        // Wire remove
+        chipsEl.querySelectorAll('[data-remove]').forEach(x => {
+          x.addEventListener('click', e => {
+            e.stopPropagation();
+            e.preventDefault();
+            const v = x.dataset.remove;
+            confirmedVals = confirmedVals.filter(c => c !== v);
+            tempVals = [...confirmedVals];
+            renderChips();
+            renderOptionsState();
+            clearTagMultiError(field);
+          });
+        });
+      }
+
+      function renderOptionsState(){
+        allOptions.forEach(opt => {
+          opt.classList.toggle('is-selected', tempVals.includes(opt.dataset.val));
+        });
+      }
+
+      allOptions.forEach(opt => {
+        opt.addEventListener('click', e => {
+          e.stopPropagation();
+          const v = opt.dataset.val;
+          if(tempVals.includes(v)){
+            tempVals = tempVals.filter(x => x !== v);
+          } else {
+            tempVals = [...tempVals, v];
+          }
+          renderOptionsState();
+        });
+      });
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const wasOpen = field.classList.contains('is-open');
+        // Cerrar otros dropdowns abiertos
+        document.querySelectorAll('.wz-tag-multi.is-open').forEach(d => {
+          if(d !== field) d.classList.remove('is-open');
+        });
+        document.querySelectorAll('.naowee-dropdown--open').forEach(d => d.classList.remove('naowee-dropdown--open'));
+        if(wasOpen){
+          field.classList.remove('is-open');
+          trigger.setAttribute('aria-expanded', 'false');
+        } else {
+          tempVals = [...confirmedVals];
+          renderOptionsState();
+          field.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+
+      confirmBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        confirmedVals = [...tempVals];
+        renderChips();
+        field.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        clearTagMultiError(field);
+      });
+    });
+    // Click outside cierra todos
+    document.addEventListener('click', e => {
+      if(!e.target.closest('.wz-tag-multi')){
+        document.querySelectorAll('.wz-tag-multi.is-open').forEach(d => d.classList.remove('is-open'));
+      }
+    });
+  }
+
+  function clearTagMultiError(field){
+    field.classList.remove('wz-tag-multi--error');
   }
 
   /* ══ Date picker ══ */
