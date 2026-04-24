@@ -55,9 +55,10 @@
   border-bottom: 1px solid var(--naowee-color-border-default, #e7e9f3);
 }
 
-/* Stepper llena todo el ancho del wrap: .naowee-stepper con width:100%
-   + flex:1 en cada connector → se reparten el espacio restante
-   equitativamente entre pasos (idéntico al patrón del DS por default). */
+/* Stepper distribuye los 5 pasos a lo ancho del wrap. Los pasos 1-4
+   tienen flex:1 para crecer y estirar el connector interno (línea entre
+   números). El paso 5 es content-size con margin-right para separarse
+   del borde derecho del ol (evita que "Códigos" quede pegado a la X). */
 .wz-modal .naowee-stepper{
   width: 100%;
 }
@@ -68,14 +69,17 @@
 }
 .wz-modal .naowee-stepper__step{
   padding: 4px 8px;
-  flex-shrink: 0;
 }
-/* Step 1 sin padding izquierdo — alinea con el título del header.
-   Step 5 con padding-right extra — la X close del header tiene un ícono
-   centrado en un botón de ~40px, el ícono queda visualmente ~20px más
-   adentro del padding del header. Damos el mismo "interior" al step 5. */
+.wz-modal .naowee-stepper__step:not(:last-child){
+  flex: 1 1 0;
+  min-width: 0;
+}
 .wz-modal .naowee-stepper__step:first-child{ padding-left: 0; }
-.wz-modal .naowee-stepper__step:last-child{ padding-right: 20px; }
+.wz-modal .naowee-stepper__step:last-child{
+  flex: 0 0 auto;
+  padding-right: 0;
+  margin-right: 28px;
+}
 
 /* Transición suave entre paneles — fadeInUp */
 .wz-pane{ animation: wzFadeInUp .4s cubic-bezier(.4,0,.2,1); }
