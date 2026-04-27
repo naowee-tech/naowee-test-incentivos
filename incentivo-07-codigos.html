@@ -512,6 +512,21 @@
               </div>
             </div>
 
+            <div class="toolbar-dd-wrap" id="ddTipoWrap">
+              <button type="button" class="toolbar-dd" onclick="toggleDD('ddTipoWrap')">
+                <span id="ddTipoLabel">Tipo: Todos</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="toolbar-dd-menu" role="listbox">
+                <div class="toolbar-dd-item" role="option" aria-selected="true" data-val="all" onclick="setTipo('all','Tipo: Todos')">Todos los tipos</div>
+                <div class="toolbar-dd-item" role="option" data-val="Bono" onclick="setTipo('Bono','Tipo: Bono')"><span class="dd-dot" style="background:#7c3aed"></span>Bono</div>
+                <div class="toolbar-dd-item" role="option" data-val="Beca" onclick="setTipo('Beca','Tipo: Beca')"><span class="dd-dot" style="background:#d74009"></span>Beca</div>
+                <div class="toolbar-dd-item" role="option" data-val="Kit" onclick="setTipo('Kit','Tipo: Kit')"><span class="dd-dot" style="background:#1f78d1"></span>Kit</div>
+                <div class="toolbar-dd-item" role="option" data-val="Inscripción" onclick="setTipo('Inscripción','Tipo: Inscripción')"><span class="dd-dot" style="background:#15803d"></span>Inscripción</div>
+                <div class="toolbar-dd-item" role="option" data-val="Transporte" onclick="setTipo('Transporte','Tipo: Transporte')"><span class="dd-dot" style="background:#0891b2"></span>Transporte</div>
+              </div>
+            </div>
+
             <div class="toolbar-dd-wrap" id="ddProgWrap">
               <button type="button" class="toolbar-dd" onclick="toggleDD('ddProgWrap')">
                 <span id="ddProgLabel">Programa: Todos</span>
@@ -574,33 +589,48 @@ function buildCodigos(){
   const all = [];
   window.PROGRAMS_DATA.forEach(p => {
     if(!p.codes.total) return;
-    for(let i = 1; i <= p.codes.total; i++){
-      const code = `${p.id.replace('PRG-','')}-${String(i).padStart(5, '0')}`;
+    const tipo = p.incentives?.[0]?.category || 'Otro';
+    const isBono = tipo === 'Bono';
+
+    // Bono → inventario completo (disp/asig/reasig/rev)
+    // Resto → solo registros de asignación (asig/reasig/rev), sin código
+    const limit = isBono ? p.codes.total : (p.codes.asig + p.codes.rev);
+    if(!limit) return;
+
+    for(let i = 1; i <= limit; i++){
+      const code = isBono ? `${p.id.replace('PRG-','')}-${String(i).padStart(5, '0')}` : null;
       let estado;
-      // Distribución: primero asig (con cada 12-vo reasig), luego rev, luego disp
-      if(i <= p.codes.asig){
-        // 1 de cada 12 asignados se reasigna a otro beneficiario (alta circulación)
-        estado = (i % 12 === 0) ? 'reasig' : 'asig';
-      } else if(i <= p.codes.asig + p.codes.rev){
-        estado = 'rev';
+      if(isBono){
+        if(i <= p.codes.asig){
+          estado = (i % 12 === 0) ? 'reasig' : 'asig';
+        } else if(i <= p.codes.asig + p.codes.rev){
+          estado = 'rev';
+        } else {
+          estado = 'disp';
+        }
       } else {
-        estado = 'disp';
+        // Sin inventario de códigos: solo asig (con reasignaciones esporádicas) + rev
+        if(i <= p.codes.asig){
+          estado = (i % 18 === 0) ? 'reasig' : 'asig';
+        } else {
+          estado = 'rev';
+        }
       }
       const benefIdx = (i * 7) % PEOPLE.length;
       const benef = estado === 'disp' ? null : PEOPLE[benefIdx];
       const op = estado === 'disp' ? null : OPERATORS[i % OPERATORS.length];
-      const day = Math.max(1, 22 - Math.floor(i / Math.max(5, p.codes.total/20)));
+      const day = Math.max(1, 22 - Math.floor(i / Math.max(5, limit/20)));
       const hour = String(8 + (i * 3) % 12).padStart(2, '0');
       const min = String((i * 13) % 60).padStart(2, '0');
       const fecha = estado === 'disp' ? null : `${day} ${p.from.split(' ')[1]} · ${hour}:${min}`;
-      all.push({ code, prg: p, estado, benef, op, fecha, valor: p.unit });
+      all.push({ code, prg: p, estado, benef, op, fecha, valor: p.unit, tipo });
     }
   });
   return all;
 }
 
 const ALL = buildCodigos();
-const state = { estado: 'all', prog: 'all', search: '', page: 1, pageSize: 10 };
+const state = { estado: 'all', prog: 'all', tipo: 'all', search: '', page: 1, pageSize: 10 };
 
 /* ══ KPI numbers ══ */
 function updateKPIs(){
@@ -651,6 +681,13 @@ function setEstado(val, label){
   toggleDD('ddEstadoWrap');
   renderCodigos();
 }
+function setTipo(val, label){
+  state.tipo = val; state.page = 1;
+  document.getElementById('ddTipoLabel').textContent = label;
+  document.querySelectorAll('#ddTipoWrap .toolbar-dd-item').forEach(it => it.setAttribute('aria-selected', it.dataset.val === val ? 'true' : 'false'));
+  toggleDD('ddTipoWrap');
+  renderCodigos();
+}
 function setProg(val, label){
   state.prog = val; state.page = 1;
   document.getElementById('ddProgLabel').textContent = label;
@@ -670,10 +707,11 @@ function clearSearch(id){
 function filteredCodigos(){
   return ALL.filter(c => {
     if(state.estado !== 'all' && c.estado !== state.estado) return false;
+    if(state.tipo !== 'all' && c.tipo !== state.tipo) return false;
     if(state.prog !== 'all' && c.prg.id !== state.prog) return false;
     if(state.search){
       const q = state.search.toLowerCase();
-      const hay = `${c.code} ${c.benef || ''} ${c.op || ''}`.toLowerCase();
+      const hay = `${c.code || ''} ${c.benef || ''} ${c.op || ''} ${c.prg.name}`.toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -712,9 +750,12 @@ function renderCodigos(){
              Revertir
            </button>`
         : `<span class="cod-noaction">—</span>`;
+      const codeCell = c.code
+        ? `<code>${c.code}</code>`
+        : `<span style="font-family:'Inter',sans-serif;font-size:12.5px;color:#9c9ebf;font-style:italic">Sin código</span>`;
       return `
         <tr onclick="fadeAndGo('incentivo-05-programa-detalle.html?id=${c.prg.id}')">
-          <td><code>${c.code}</code></td>
+          <td>${codeCell}</td>
           <td>
             <div class="prg-mini">
               <div class="prg-mini__ico" style="background:${c.prg.iconBg};color:${c.prg.iconColor}">
