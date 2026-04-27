@@ -177,16 +177,16 @@
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS · GESTOR</div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-02-dashboard.html')">
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9" rx=".5"/><rect x="11" y="7" width="3" height="13" rx=".5"/><rect x="16" y="14" width="3" height="6" rx=".5"/></svg></div>
         <span class="lbl">Dashboard</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-03-programas.html')">
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><rect x="8" y="8" width="13" height="13" rx="2"/></svg></div>
         <span class="lbl">Programas</span>
       </div>
       <div class="nav-row active">
         <div class="active-bar"></div>
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="3" y1="15" x2="19" y2="15"/></svg></div>
         <span class="lbl">Códigos</span>
       </div>
     </nav>
@@ -494,7 +494,7 @@ function fadeAndGo(url){window.location.href=url}
 updateFooter();
 document.querySelectorAll('#manualRows input').forEach(i => i.addEventListener('input', updateManualCount));
 </script>
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

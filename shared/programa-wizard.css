@@ -152,28 +152,33 @@
 }
 .wz-shake{ animation: wzShake .45s cubic-bezier(.36,.07,.19,.97); }
 
+/* Required marker — asterisco naranja en labels (dropdown + textfield).
+   El DS sólo define ::after para textfield (color rojo); aquí unificamos
+   ambos en accent naranja del proyecto. */
+.naowee-dropdown__label--required::after,
+.naowee-textfield__label--required::after{
+  content: ' *';
+  color: var(--naowee-color-text-accent, #d74009);
+}
+
+/* Cuando el field del wizard está en error, sólo mostramos el helper de
+   error (.naowee-helper--negative con badge "Este campo es obligatorio")
+   y ocultamos el helper informativo original (ej: "Debe ser posterior a
+   la vigencia desde") para no duplicar mensajes en rojo. Scope al wizard
+   para no afectar otros modales (revertir, etc). */
+.wz-modal .naowee-textfield--error .naowee-textfield__helper,
+.wz-modal .naowee-dropdown--error .naowee-dropdown__helper{ display: none; }
+
 /* Toggle cards (tipo de incentivo) */
 .toggle-cards{ display: flex; flex-direction: column; gap: 8px; }
 .toggle-card{
   display: flex; gap: 12px; padding: 14px 16px;
   border: 1.5px solid var(--naowee-color-border-default, #e7e9f3);
-  border-radius: 12px; cursor: pointer; align-items: flex-start; transition: all .15s;
+  border-radius: 12px; cursor: pointer; align-items: center; transition: all .15s;
 }
 .toggle-card:hover{ border-color: var(--naowee-color-border-strong, #d0d4e6); }
 .toggle-card.active{ background: #fff3e6; border-color: var(--naowee-color-text-accent, #d74009); }
-.toggle-card__check{
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--naowee-color-border-strong, #d0d4e6);
-  flex-shrink: 0; margin-top: 1px; position: relative;
-}
-.toggle-card.active .toggle-card__check{
-  border-color: var(--naowee-color-text-accent, #d74009);
-  background: var(--naowee-color-text-accent, #d74009);
-}
-.toggle-card.active .toggle-card__check::after{
-  content: ""; position: absolute; top: 5px; left: 5px;
-  width: 6px; height: 6px; background: #fff; border-radius: 50%;
-}
+.toggle-card .naowee-radio{ padding: 0; flex-shrink: 0; }
 .toggle-card__title{ font-size: 13px; font-weight: 700; color: var(--naowee-color-text-primary, #282834); margin-bottom: 2px; }
 .toggle-card__desc{ font-size: 11.5px; color: var(--naowee-color-text-secondary, #646587); line-height: 1.4; }
 
@@ -334,7 +339,7 @@
   border-radius: 10px;
 }
 .wz-cond-preview__group-lbl{
-  font-size: 10px; font-weight: 700; letter-spacing: .5px;
+  font-size: 10px; font-weight: 600; letter-spacing: .5px;
   color: var(--naowee-color-text-accent, #d74009);
   text-transform: uppercase;
 }
@@ -343,7 +348,7 @@
   color: var(--naowee-color-text-primary, #282834);
 }
 .wz-cond-preview__field{
-  font-weight: 700;
+  font-weight: 600;
   color: var(--naowee-color-text-primary, #282834);
 }
 .wz-cond-preview__val{
@@ -352,7 +357,7 @@
   background: #fff3e6;
   color: var(--naowee-color-text-accent, #d74009);
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12.5px;
   margin: 0 1px;
 }
@@ -363,7 +368,7 @@
 }
 .wz-cond-preview__conn{
   display: inline-block;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: lowercase;
   letter-spacing: .3px;
   padding: 0 4px;
@@ -435,13 +440,7 @@
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px;
 }
-.wz-inc-card__badge{
-  font-size: 10.5px; font-weight: 700; letter-spacing: .4px;
-  color: var(--naowee-color-text-accent, #d74009);
-  background: #fff3e6;
-  padding: 3px 10px; border-radius: 9999px;
-  text-transform: uppercase;
-}
+/* Badge: estilos del DS (.naowee-badge--quiet --neutral --small) */
 .wz-inc-card__remove{
   border: none; background: transparent; cursor: pointer;
   color: var(--naowee-color-text-secondary, #646587);
@@ -649,10 +648,7 @@
 .wz-inc-list--single .wz-inc-card__head{ display: none; }
 
 /* Multi mode: badge prominente + card con accent en head */
-.wz-inc-list--multi .wz-inc-card__badge{
-  background: var(--naowee-color-text-accent, #d74009);
-  color: #fff;
-}
+/* Multi mode: badge low-contrast del DS (sin override de color) */
 
 /* ═════ Helper text (label de ayuda bajo inputs) ═════ */
 .naowee-textfield__helper{

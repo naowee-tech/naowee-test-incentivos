@@ -15,10 +15,20 @@
   /* Back link wrapper */
   .back-link-wrap{margin-bottom:12px}
 
-  /* Detail header card (no shadow) */
-  .detail-head{
+  /* Hero card — header + KPIs unificados en un solo container */
+  .hero-card{
     background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:16px;padding:24px 28px;margin-bottom:20px;
+    border-radius:16px;margin-bottom:20px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(40,40,52,.03);
+  }
+  .hero-card__divider{
+    height:1px;background:var(--naowee-color-border-default,#e7e9f3);
+    margin:0 28px;
+  }
+
+  /* Detail header card — top section del hero (sin border propio) */
+  .detail-head{
+    padding:24px 28px;
     display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:center;
   }
   @media(max-width:900px){.detail-head{grid-template-columns:1fr}}
@@ -46,12 +56,26 @@
   .detail-head__actions{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
   .detail-head__btns{display:flex;gap:8px}
 
-  /* Mini KPI strip — sin shadow */
-  .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-  @media(max-width:900px){.kpi-strip{grid-template-columns:repeat(2,1fr)}}
+  /* Mini KPI strip — bottom section del hero, sin borders individuales,
+     dividers verticales sutiles entre KPIs (con inset vertical). */
+  .kpi-strip{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    padding:18px 4px;
+  }
+  @media(max-width:900px){
+    .kpi-strip{grid-template-columns:repeat(2,1fr);gap:0}
+  }
   .mini-kpi{
-    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:12px;padding:14px 18px;
+    background:transparent;border:none;border-radius:0;
+    padding:6px 24px;position:relative;
+  }
+  .mini-kpi + .mini-kpi::before{
+    content:"";position:absolute;left:0;top:8px;bottom:8px;
+    width:1px;background:var(--naowee-color-border-default,#e7e9f3);
+  }
+  @media(max-width:900px){
+    .mini-kpi:nth-child(odd) + .mini-kpi::before{display:block}
+    .mini-kpi:nth-child(3)::before{display:none}
   }
   .mini-kpi__lbl{
     font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
@@ -63,6 +87,11 @@
     letter-spacing:-.02em;margin-top:4px;line-height:1.1;
   }
   .mini-kpi__sub{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);margin-top:2px}
+
+  /* Énfasis en "Ejecutado" — KPI principal: tipografía mayor y barra
+     de progreso más prominente con accent color. */
+  .mini-kpi--hero .mini-kpi__val{font-size:28px;color:var(--naowee-color-text-accent,#d74009)}
+  .mini-kpi--hero .naowee-progress{height:6px}
 
   /* Content card (wrapping tabs + panes) — escenarios style */
   .detail-card{
@@ -88,13 +117,12 @@
   }
   .section + .section{margin-top:28px}
 
-  /* Info rows — label gray / value dark, sin caja alrededor */
+  /* Info rows — label gray / value dark, ritmo por spacing (sin dividers) */
   .info-row-plain{
     display:grid;grid-template-columns:180px 1fr;gap:16px;
-    padding:10px 0;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
+    padding:7px 0;
     font-size:13px;
   }
-  .info-row-plain:last-child{border-bottom:none}
   .info-row-plain dt{color:var(--naowee-color-text-secondary,#646587);font-weight:500}
   .info-row-plain dd{color:var(--naowee-color-text-primary,#282834);font-weight:500}
   .info-row-plain dd code{
@@ -125,22 +153,21 @@
   }
   .inc-card__val-lbl{font-size:10.5px;color:var(--naowee-color-text-secondary,#646587)}
 
-  /* Cond preview plain (sin caja) */
-  .cond-preview-box{
-    padding:14px 18px;
-    background:#fafbfd;border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:10px;
-    font-size:12.5px;line-height:1.8;font-family:'SF Mono',monospace;
-    color:var(--naowee-color-text-primary,#282834);
-    margin-bottom:12px;
-  }
-  .cond-preview-box b{color:var(--naowee-color-text-accent,#d74009);font-weight:700}
-  .cond-preview-box em{color:var(--naowee-color-feedback-fill-positive-loud,#1f8923);font-style:normal;font-weight:700}
+  /* Cond preview en detalle: usa .wz-cond-preview de programa-wizard.css */
+  /* Resumen humano (1 frase) — bajo el preview natural language */
   .cond-summary{
-    padding:14px 0;font-size:12.5px;color:var(--naowee-color-text-secondary,#646587);
-    line-height:1.6;
+    margin-top:14px;padding:12px 16px;
+    background:#f7f8fc;border-radius:10px;
+    font-size:13px;line-height:1.55;
+    color:var(--naowee-color-text-secondary,#646587);
   }
-  .cond-summary strong{color:var(--naowee-color-text-primary,#282834)}
+  .cond-summary__lbl{
+    font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--naowee-color-text-accent,#d74009);
+    display:block;margin-bottom:4px;
+  }
+  .cond-summary__txt{color:var(--naowee-color-text-primary,#282834)}
+  .cond-summary__txt strong{font-weight:600;color:var(--naowee-color-text-primary,#282834)}
 
   /* ═════ TOOLBAR pattern escenarios-11 (search pill + dropdown + pagination) ═════ */
   .cg-toolbar{
@@ -148,6 +175,9 @@
     gap:12px;flex-wrap:wrap;margin-bottom:18px;
   }
   .cg-toolbar__left{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  /* Botón en toolbar igualado al alto del search y del toolbar-dd (34px) */
+  .cg-toolbar__left > .naowee-btn{height:34px;padding:0 14px;font-size:12.5px}
+  .cg-toolbar__left > .naowee-btn svg{width:14px;height:14px}
   .cg-toolbar .naowee-searchbox--pill{width:300px;max-width:100%}
   .cg-toolbar .naowee-searchbox--pill .naowee-searchbox__input-wrap{
     border-radius:9999px;height:34px;padding:4px 12px;
@@ -462,20 +492,20 @@
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS</div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-02-dashboard.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9" rx=".5"/><rect x="11" y="7" width="3" height="13" rx=".5"/><rect x="16" y="14" width="3" height="6" rx=".5"/></svg></div>
         <span class="lbl">Dashboard</span>
       </div>
       <div class="nav-row active">
         <div class="active-bar"></div>
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><rect x="8" y="8" width="13" height="13" rx="2"/></svg></div>
         <span class="lbl">Programas</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-07-codigos.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="3" y1="15" x2="19" y2="15"/></svg></div>
         <span class="lbl">Códigos</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="6" cy="18" r="1.5"/><line x1="6" y1="7.5" x2="6" y2="10.5"/><line x1="6" y1="13.5" x2="6" y2="16.5"/><line x1="11" y1="6" x2="20" y2="6"/><line x1="11" y1="12" x2="18" y2="12"/><line x1="11" y1="18" x2="16" y2="18"/></svg></div>
         <span class="lbl">Historial</span>
       </div>
     </nav>
@@ -497,19 +527,6 @@
           <div class="user-info"><span class="user-name">Doug Vargas</span><span class="user-role">Gestor de incentivos</span></div>
           <button class="user-chip__chevron" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
-        <div class="profile-dd" id="profileDD">
-          <div class="profile-dd__label">Cambiar de perfil</div>
-          <div class="profile-dd__item active" data-role="admin" onclick="switchRole('admin')">
-            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#c4b5fd;color:#4c1d95">DV</span>
-            <div class="role-meta"><strong>Gestor de incentivos</strong><small>Parametriza y audita</small></div>
-            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div class="profile-dd__item" data-role="operador" onclick="switchRole('operador')">
-            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#ffdfb5;color:#92400e">DV</span>
-            <div class="role-meta"><strong>Operador</strong><small>Asigna incentivos en campo</small></div>
-            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -523,6 +540,8 @@
         </button>
       </div>
 
+      <!-- Hero card: detail-head + KPIs unificados -->
+      <div class="hero-card">
       <!-- Detail header -->
       <div class="detail-head">
         <div class="detail-head__ico" id="hdIco">
@@ -547,14 +566,16 @@
         </div>
       </div>
 
-      <!-- KPIs -->
+      <div class="hero-card__divider"></div>
+
+      <!-- KPIs (parte inferior del hero-card) -->
       <div class="kpi-strip">
         <div class="mini-kpi">
           <div class="mini-kpi__lbl">Rubro total</div>
           <div class="mini-kpi__val" id="kpiRubro">—</div>
           <div class="mini-kpi__sub" id="kpiRubroSub">—</div>
         </div>
-        <div class="mini-kpi">
+        <div class="mini-kpi mini-kpi--hero">
           <div class="mini-kpi__lbl">Ejecutado</div>
           <div class="mini-kpi__val" id="kpiExec">—</div>
           <div class="naowee-progress naowee-progress--positive" style="margin-top:8px">
@@ -573,6 +594,7 @@
           <div class="mini-kpi__sub" id="kpiRevSub">—</div>
         </div>
       </div>
+      </div><!-- /.hero-card -->
 
       <!-- Detail card con tabs -->
       <div class="detail-card">
@@ -610,8 +632,21 @@
                   Editar reglas
                 </button>
               </div>
-              <div class="cond-preview-box" id="condPreview">—</div>
-              <div class="cond-summary" id="condSummary"><strong>En lenguaje natural:</strong> —</div>
+              <!-- Natural language preview (mismo UI que la creación del programa) -->
+              <div class="wz-cond-preview" id="condPreview">
+                <div class="wz-cond-preview__head">
+                  <div class="wz-cond-preview__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <div>
+                    <div class="wz-cond-preview__title">Así se lee la regla</div>
+                    <div class="wz-cond-preview__sub">Lenguaje natural</div>
+                  </div>
+                </div>
+                <div class="wz-cond-preview__body" id="condPreviewBody"></div>
+              </div>
+              <!-- Resumen humano (1 frase para entendimiento rápido) -->
+              <div class="cond-summary" id="condSummary"></div>
             </div>
           </div>
 
@@ -847,16 +882,9 @@ const STATUS_META = {
   paused: { label: 'Pausado', variant: 'caution' },
   closed: { label: 'Cerrado', variant: 'informative' }
 };
-const CAT_ICONS = {
-  'Beca':        '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
-  'Kit':         '<path d="M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1z"/><path d="M9 7V5h6v2"/>',
-  'Bono':        '<circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 010 5H9"/>',
-  'Transporte':  '<rect x="3" y="3" width="18" height="13" rx="2"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>',
-  'Inscripción': '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>',
-  'Descuento':   '<path d="M20 12V8H6a2 2 0 110-4h12v4M20 12V16a2 2 0 01-2 2H6a2 2 0 110-4h12a2 2 0 012 2z"/>',
-  'Pase':        '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 12h18"/>',
-  'Dinero':      '<circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 010 5H9"/>'
-};
+// Iconografía de categorías: ahora viene de shared/programs-data.js
+// (window.CAT_ICONS). Alias local para no tocar callsites.
+const CAT_ICONS = window.CAT_ICONS;
 function formatMoney(n){ return '$' + n.toLocaleString('es-CO'); }
 function formatMoneyShort(n){
   if(!n) return '$0';
@@ -949,13 +977,25 @@ function hydrateProgram(){
     <div class="info-row-plain"><dt>Responsable</dt><dd>${p.responsible}</dd></div>
   `;
 
-  // Condiciones
-  const groupBlocks = p.conditions.groups.map(g => {
-    const inner = g.rules.map(r => `<b>${r.field.toLowerCase()}</b> ${r.op} <em>${r.value}</em>`).join(' <b>AND</b> ');
-    return p.conditions.groups.length > 1 ? `( ${inner} )` : inner;
+  // Condiciones — lenguaje natural (mismo UI que la creación del programa)
+  const groupHTML = p.conditions.groups.map((g, gi) => {
+    const rowHTML = g.rules.map(r => {
+      const valStr = String(r.value);
+      const valHTML = valStr
+        ? `<span class="wz-cond-preview__val">${valStr}</span>`
+        : `<span class="wz-cond-preview__val wz-cond-preview__val--empty">…</span>`;
+      return `<span class="wz-cond-preview__field">${r.field}</span> ${r.op} ${valHTML}`;
+    }).join(' <span class="wz-cond-preview__conn wz-cond-preview__conn--and">y</span> ');
+    return `<div class="wz-cond-preview__group"><span class="wz-cond-preview__group-lbl">Grupo ${gi + 1}</span><span class="wz-cond-preview__group-body">${rowHTML}</span></div>`;
   });
-  document.getElementById('condPreview').innerHTML = groupBlocks.join('<br/><b>OR</b><br/>');
-  document.getElementById('condSummary').innerHTML = `<strong>En lenguaje natural:</strong> ${p.conditions.summary}`;
+  const intro = p.conditions.groups.length > 1
+    ? 'El atleta es elegible si cumple <strong>cualquiera</strong> de estos grupos de condiciones:'
+    : 'El atleta es elegible si cumple <strong>todas</strong> estas condiciones:';
+  const orDivider = '<div class="wz-cond-preview__or"><span class="wz-cond-preview__conn wz-cond-preview__conn--or">o</span></div>';
+  document.getElementById('condPreviewBody').innerHTML =
+    `<p class="wz-cond-preview__intro">${intro}</p>${groupHTML.join(orDivider)}`;
+  document.getElementById('condSummary').innerHTML =
+    `<span class="cond-summary__lbl">En lenguaje natural</span><span class="cond-summary__txt">${p.conditions.summary}</span>`;
 
   // Modal cargar codigos — program name
   const ccName = document.getElementById('ccProgramName');
@@ -1418,7 +1458,7 @@ function clearSearch(inputId){
 
 <script src="shared/programa-wizard.js" defer></script>
 
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

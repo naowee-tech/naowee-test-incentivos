@@ -485,11 +485,19 @@ function markReady(text){
   const btnMain = document.getElementById('btnConfirmMain');
   if(btnMain) btnMain.disabled = false;
   const sum = document.getElementById('sumEvidence');
-  sum.textContent = text;
-  sum.style.color = 'var(--green)';
-  sum.style.fontStyle = 'normal';
-  sum.style.fontWeight = '700';
-  sum.style.fontSize = '11.5px';
+  // Tag verde del DS con icono de archivo + nombre + tamaño.
+  sum.innerHTML = `
+    <span class="naowee-tag naowee-tag--positive naowee-tag--small naowee-tag--quiet" title="${text}">
+      <span class="naowee-tag__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 14 11 16 15 12"/></svg>
+      </span>
+      <span class="sum-evi__txt">${text}</span>
+    </span>`;
+  // Reset estilos inline previos por si se volvió a confirmar con otro archivo.
+  sum.style.color = '';
+  sum.style.fontStyle = '';
+  sum.style.fontWeight = '';
+  sum.style.fontSize = '';
 }
 
 /* Drag & drop bindings */
@@ -567,7 +575,7 @@ document.addEventListener('click', (e) => { const sw = document.getElementById('
 })();
 </script>
 
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

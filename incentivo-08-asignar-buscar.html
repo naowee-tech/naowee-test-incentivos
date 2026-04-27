@@ -440,19 +440,6 @@
           <div class="user-info"><span class="user-name">Doug Vargas</span><span class="user-role" id="userRoleLabel">Operador</span></div>
           <button class="user-chip__chevron" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
-        <div class="profile-dd" id="profileDD">
-          <div class="profile-dd__label">Cambiar de perfil</div>
-          <div class="profile-dd__item" data-role="admin" onclick="switchRole('admin')">
-            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#c4b5fd;color:#4c1d95">DV</span>
-            <div class="role-meta"><strong>Gestor de incentivos</strong><small>Parametriza y audita</small></div>
-            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div class="profile-dd__item active" data-role="operador" onclick="switchRole('operador')">
-            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#ffdfb5;color:#92400e">DV</span>
-            <div class="role-meta"><strong>Operador</strong><small>Asigna incentivos en campo</small></div>
-            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -1074,8 +1061,10 @@ tryRehydrate();
   if(!page) return;
 
   const COLLAPSE_RANGE = 60;
+  // Math.ceil + 2px de safety para evitar que sub-pixel rendering recorte
+  // la última letra al fijar maxWidth desde el measurement inicial.
   const labelWidths = Array.from(labels).map(el => {
-    const w = el.getBoundingClientRect().width;
+    const w = Math.ceil(el.getBoundingClientRect().width) + 2;
     el.style.maxWidth = w + 'px';
     return w;
   });
@@ -1147,7 +1136,7 @@ tryRehydrate();
 })();
 </script>
 
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

@@ -804,10 +804,12 @@
         const r = item.getBoundingClientRect();
         const pr = seg.getBoundingClientRect();
         if(r.width === 0 || pr.width === 0) return; // pane hidden
-        // Leer el padding real del segment en vez de hardcodear xnano (4px).
-        // Así toleramos overrides como .wz-codes-seg con padding: 6px.
-        const padLeft = parseFloat(getComputedStyle(seg).paddingLeft) || 4;
-        const offset = r.left - pr.left - padLeft;
+        // El pill está absolute con `left: 0`, que ancla en el PADDING-BOX
+        // (justo dentro del border). Para alinearlo con el item hay que
+        // restar sólo el border-width, NO el padding (el padding ya está
+        // incluido en r.left vs pr.left, y `left: 0` no lo compensa).
+        const borderLeft = parseFloat(getComputedStyle(seg).borderLeftWidth) || 0;
+        const offset = r.left - pr.left - borderLeft;
         if(!animated) pill.classList.add('naowee-segment__pill--no-anim');
         pill.style.width = r.width + 'px';
         pill.style.setProperty('--segment-pill-x', offset + 'px');
@@ -1002,8 +1004,14 @@
 
   function setIncTypesMode(el, mode){
     incTypesMode = mode;
-    el.parentElement.querySelectorAll('.toggle-card').forEach(c => c.classList.remove('active'));
+    el.parentElement.querySelectorAll('.toggle-card').forEach(c => {
+      c.classList.remove('active');
+      const r = c.querySelector('.naowee-radio');
+      if(r) r.classList.remove('naowee-radio--selected');
+    });
     el.classList.add('active');
+    const elRadio = el.querySelector('.naowee-radio');
+    if(elRadio) elRadio.classList.add('naowee-radio--selected');
     // El botón "Agregar otro tipo" sólo tiene sentido en modo multi.
     const addBtn = document.getElementById('wzAddInc');
     if(addBtn) addBtn.hidden = (mode !== 'multi');
@@ -1047,7 +1055,7 @@
     card.dataset.idx = idx;
     card.innerHTML = `
       <div class="wz-inc-card__head">
-        <span class="wz-inc-card__badge">Incentivo #${idx}</span>
+        <span class="wz-inc-card__badge naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">Incentivo #${idx}</span>
         <button type="button" class="wz-inc-card__remove" onclick="removeIncentive(this)" aria-label="Eliminar incentivo">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         </button>
@@ -1271,7 +1279,7 @@
   /* Stepper DS helpers */
   function makeStepper({ min = 0, max = 120, value = 0, unit = '' } = {}){
     return `
-      <div class="naowee-input-stepper naowee-input-stepper--small" data-cond-val data-min="${min}" data-max="${max}">
+      <div class="naowee-input-stepper" data-cond-val data-min="${min}" data-max="${max}">
         <div class="naowee-input-stepper__content">
           <div class="naowee-input-stepper__input">
             <button type="button" class="naowee-input-stepper__btn" data-step="-1" aria-label="Restar">
