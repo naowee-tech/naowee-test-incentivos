@@ -310,6 +310,10 @@
         <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="6" cy="18" r="1.5"/><line x1="6" y1="7.5" x2="6" y2="10.5"/><line x1="6" y1="13.5" x2="6" y2="16.5"/><line x1="11" y1="6" x2="20" y2="6"/><line x1="11" y1="12" x2="18" y2="12"/><line x1="11" y1="18" x2="16" y2="18"/></svg></div>
         <span class="lbl">Historial</span>
       </div>
+      <div class="nav-row" data-role="admin" onclick="fadeAndGo('incentivo-15-reporteria.html')">
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/><circle cx="18" cy="9" r="1.5"/></svg></div>
+        <span class="lbl">Reportería</span>
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div class="nav-row" onclick="fadeAndGo('incentivo-01-login.html')">
@@ -431,14 +435,14 @@
 
         <article class="kpi-card">
           <div class="kpi-card__top">
-            <div class="kpi-card__lbl">Pausados / borrador</div>
+            <div class="kpi-card__lbl">Borradores</div>
             <div class="kpi-card__ico kpi-card__ico--caution">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
             </div>
           </div>
-          <div class="kpi-card__val">2</div>
+          <div class="kpi-card__val">1</div>
           <div class="kpi-card__foot">
-            <span>1 pausado · 1 borrador</span>
+            <span>pendiente de activación</span>
           </div>
         </article>
 
@@ -479,11 +483,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
               <div class="toolbar-dd-menu" role="listbox">
-                <div class="toolbar-dd-item" role="option" aria-selected="true" data-val="all" onclick="setStatus('all','Estado: Todos')">Todos <span class="dd-count">8</span></div>
-                <div class="toolbar-dd-item" role="option" data-val="active" onclick="setStatus('active','Activos')"><span class="dd-dot" style="background:#15803d"></span>Activos <span class="dd-count">3</span></div>
-                <div class="toolbar-dd-item" role="option" data-val="paused" onclick="setStatus('paused','Pausados')"><span class="dd-dot" style="background:#d74009"></span>Pausados <span class="dd-count">1</span></div>
-                <div class="toolbar-dd-item" role="option" data-val="draft" onclick="setStatus('draft','Borrador')"><span class="dd-dot" style="background:#9c9ebf"></span>Borrador <span class="dd-count">1</span></div>
-                <div class="toolbar-dd-item" role="option" data-val="closed" onclick="setStatus('closed','Cerrados')"><span class="dd-dot" style="background:#1f78d1"></span>Cerrados <span class="dd-count">3</span></div>
+                <div class="toolbar-dd-item" role="option" aria-selected="true" data-val="all" onclick="setStatus('all','Estado: Todos')">Todos</div>
+                <div class="toolbar-dd-item" role="option" data-val="active" onclick="setStatus('active','Activos')"><span class="dd-dot" style="background:#15803d"></span>Activos</div>
+                <div class="toolbar-dd-item" role="option" data-val="draft" onclick="setStatus('draft','Borrador')"><span class="dd-dot" style="background:#9c9ebf"></span>Borrador</div>
+                <div class="toolbar-dd-item" role="option" data-val="closed" onclick="setStatus('closed','Cerrados')"><span class="dd-dot" style="background:#1f78d1"></span>Cerrados</div>
               </div>
             </div>
           </div>
@@ -553,7 +556,6 @@ const PROGRAMS = window.PROGRAMS_DATA.map(p => ({
 const STATUS_META = {
   active: { label:'Activo', variant:'positive' },
   draft:  { label:'Borrador', variant:'neutral' },
-  paused: { label:'Pausado', variant:'caution' },
   closed: { label:'Cerrado', variant:'informative' }
 };
 
@@ -808,6 +810,8 @@ function fadeAndGo(url){window.location.href=url}
 </script>
 <script src="shared/programa-wizard.js" defer></script>
 <script src="shared/profile-switcher.js?v=role-6" defer></script>
+
+<script src="shared/footer-scroll.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

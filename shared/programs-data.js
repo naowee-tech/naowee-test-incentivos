@@ -121,7 +121,7 @@ window.PROGRAMS_DATA = [
     longDesc: 'Cobertura del costo de inscripción a los juegos universitarios 2026 para estudiantes-atletas activos en universidades públicas.',
     iconBg: '#fff3e6',
     iconColor: '#d74009',
-    status: 'paused',
+    status: 'active',
     event: 'Juegos Universitarios 2026',
     coverage: 'Nacional',
     responsible: 'Doug Vargas',

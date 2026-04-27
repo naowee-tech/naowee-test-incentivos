@@ -387,6 +387,10 @@
         <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="6" cy="18" r="1.5"/><line x1="6" y1="7.5" x2="6" y2="10.5"/><line x1="6" y1="13.5" x2="6" y2="16.5"/><line x1="11" y1="6" x2="20" y2="6"/><line x1="11" y1="12" x2="18" y2="12"/><line x1="11" y1="18" x2="16" y2="18"/></svg></div>
         <span class="lbl">Historial</span>
       </div>
+      <div class="nav-row" data-role="admin" onclick="fadeAndGo('incentivo-15-reporteria.html')">
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/><circle cx="18" cy="9" r="1.5"/></svg></div>
+        <span class="lbl">Reportería</span>
+      </div>
     </nav>
     <div class="sidebar-bottom">
       <div class="nav-row" onclick="fadeAndGo('incentivo-01-login.html')">
@@ -501,8 +505,9 @@
               </button>
               <div class="toolbar-dd-menu" role="listbox">
                 <div class="toolbar-dd-item" role="option" aria-selected="true" data-val="all" onclick="setEstado('all','Estado: Todos')">Todos los estados</div>
+                <div class="toolbar-dd-item" role="option" data-val="disp" onclick="setEstado('disp','Disponibles')"><span class="dd-dot" style="background:#9c9ebf"></span>Disponibles</div>
                 <div class="toolbar-dd-item" role="option" data-val="asig" onclick="setEstado('asig','Asignados')"><span class="dd-dot" style="background:#15803d"></span>Asignados</div>
-                <div class="toolbar-dd-item" role="option" data-val="disp" onclick="setEstado('disp','Disponibles')"><span class="dd-dot" style="background:#d74009"></span>Disponibles</div>
+                <div class="toolbar-dd-item" role="option" data-val="reasig" onclick="setEstado('reasig','Reasignados')"><span class="dd-dot" style="background:#7c3aed"></span>Reasignados</div>
                 <div class="toolbar-dd-item" role="option" data-val="rev" onclick="setEstado('rev','Revertidos')"><span class="dd-dot" style="background:#9e0015"></span>Revertidos</div>
               </div>
             </div>
@@ -569,20 +574,18 @@ function buildCodigos(){
   const all = [];
   window.PROGRAMS_DATA.forEach(p => {
     if(!p.codes.total) return;
-    // Generate deterministic codes per program
-    const prefix = p.id.includes('BEC') ? '' : '';
     for(let i = 1; i <= p.codes.total; i++){
       const code = `${p.id.replace('PRG-','')}-${String(i).padStart(5, '0')}`;
       let estado;
-      // Distribution based on program data
-      if(i > p.codes.total - p.codes.rev) estado = 'rev';
-      else if(i > p.codes.asig + p.codes.rev - p.codes.rev) estado = 'disp';
-      else if(i <= p.codes.asig) estado = 'asig';
-      else estado = 'disp';
-      // Correct distribution: first N = asig, next M = rev, last K = disp (roughly)
-      if(i <= p.codes.asig) estado = 'asig';
-      else if(i <= p.codes.asig + p.codes.rev) estado = 'rev';
-      else estado = 'disp';
+      // Distribución: primero asig (con cada 12-vo reasig), luego rev, luego disp
+      if(i <= p.codes.asig){
+        // 1 de cada 12 asignados se reasigna a otro beneficiario (alta circulación)
+        estado = (i % 12 === 0) ? 'reasig' : 'asig';
+      } else if(i <= p.codes.asig + p.codes.rev){
+        estado = 'rev';
+      } else {
+        estado = 'disp';
+      }
       const benefIdx = (i * 7) % PEOPLE.length;
       const benef = estado === 'disp' ? null : PEOPLE[benefIdx];
       const op = estado === 'disp' ? null : OPERATORS[i % OPERATORS.length];
@@ -678,9 +681,10 @@ function filteredCodigos(){
 }
 
 const badges = {
-  asig: '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>',
-  rev: '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>',
-  disp: '<span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">Disponible</span>'
+  disp:   '<span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">Disponible</span>',
+  asig:   '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>',
+  reasig: '<span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small" style="background:#f3e8ff;color:#7c3aed">Reasignado</span>',
+  rev:    '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
 };
 
 const CAT_ICON = '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>';
@@ -1023,6 +1027,8 @@ function showRvToast(opts){
 </script>
 <script src="shared/profile-switcher.js?v=role-6" defer></script>
 
+
+<script src="shared/footer-scroll.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
