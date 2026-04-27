@@ -19,83 +19,119 @@ git pull origin claude/pensive-mendeleev-1b45f3
 PORT=4500 node -e "const http=require('http'),fs=require('fs'),path=require('path'),url=require('url');const MIME={'.html':'text/html','.css':'text/css','.js':'application/javascript','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.gif':'image/gif','.webp':'image/webp','.ico':'image/x-icon','.json':'application/json','.csv':'text/csv','.pdf':'application/pdf'};const ROOT=process.cwd();http.createServer((req,res)=>{let p=url.parse(req.url).pathname;if(p==='/') p='/index.html';let f=path.join(ROOT,p);fs.readFile(f,(e,d)=>{if(e){res.writeHead(404);res.end('Not found: '+f);}else{const ext=path.extname(f).toLowerCase();res.writeHead(200,{'Content-Type':MIME[ext]||'text/plain','Cache-Control':'no-store'});res.end(d);}});}).listen(4500,()=>console.log('on 4500'));"
 ```
 
-URL principal: http://localhost:4500/incentivo-02-dashboard.html
+URL principal: http://localhost:4500/incentivo-03-programas.html
+
+> Nota Claude Code: si `preview_start` se queja de que el puerto está ocupado, el servidor de preview oficial usa `.claude/launch.json` del checkout principal — apunta al directorio raíz, no al worktree. Cuando edites en el worktree, lanza el servidor manualmente con el comando de arriba.
 
 ---
 
 ## Resumen de cambios en esta sesión
 
-### 1. Wizard "Crear programa de incentivos" (`shared/programa-wizard.*`)
-- **Paso 3 · Tipos de incentivo**:
-  - Radio buttons del DS (`naowee-radio` + `naowee-radio__circle` con `--selected`).
-  - Cards `.toggle-card` con `align-items: center`.
-  - Badge `Incentivo #N` ahora usa `naowee-badge --neutral --quiet --small` (low contrast).
-- **Paso 4 · Condiciones**:
-  - Stepper de Edad sin modifier `--small` (alto 48px = mismo que dropdown).
-  - Bug pill del segment corregido: `padLeft` → `borderLeft` en `wireSegments`.
-  - Vista preview en lenguaje natural con font-weights bajados (700→600, 600→500).
-- **Paso 5 · Códigos**:
-  - Pill del segment "Cargar archivo / Manual" respeta padding-left.
-- **Required marker**:
-  - Asterisco naranja unificado en `naowee-dropdown__label--required` y `naowee-textfield__label--required`.
-  - Helper informativo se oculta cuando el field entra en error (scope `.wz-modal`).
+### 1. Wizard "Crear programa de incentivos"
+
+**Refactor estructural — 4 pasos (5to condicional)**
+
+- Antes: 5 pasos (Datos · Rubro · Tipos · Condiciones · Códigos)
+- Ahora: **4 pasos visibles**, con paso 4 condicional al tipo de incentivo:
+  1. **Datos** — nombre, descripción, vigencia, cobertura, justificación + uploader
+  2. **Tipos & rubro** — fusión de los antiguos pasos 2 y 3 (rubro total + cards de incentivo)
+  3. **Condiciones** — un panel por incentivo en multi mode
+  4. **Códigos** — sólo aparece si algún incentivo es categoría "Bono"
+
+**Paso 1 — Datos**
+- Justificación + nuevo uploader DS de "Documentación de la resolución":
+  - Textfield-style con CTA ghost `naowee-btn--mute`
+  - Spinner verde determinado con % al subir (animación rotación + arc)
+  - Tag DS verde `naowee-tag--positive` al completar; CTA desaparece
+  - Single-file (PDF/DOC/DOCX/JPG/PNG, 10MB máx)
+- Cobertura territorial: "Nacional" es exclusiva (selecciónarla deshabilita y limpia los departamentos)
+
+**Paso 2 — Tipos & rubro**
+- Rubro total al tope del paso
+- "Un solo tipo" → 1 card con nombre + categoría + valor unitario opcional
+- "Varios tipos" → auto-agrega 2da card al elegir el toggle. Cada card tiene nombre + categoría + **rubro per-incentivo (obligatorio)** + valor unitario opcional. Sumatoria de rubros validada en vivo (positive cuando suma == total, informative cuando < total, negative cuando > total). Bloquea Continuar si la suma ≠ total.
+- Categoría "Bono" enciende paso 4 inmediatamente. Cambiar a otra → paso 4 desaparece.
+
+**Paso 3 — Condiciones**
+- En multi mode, **un panel por incentivo** con header (badge categoría + nombre) y su propio cond-builder + preview en lenguaje natural.
+- Multi-select habilitado para Categoría deportiva, Logros y Tipo de usuario (operadores `∈` y `∉`).
+- Nuevo campo "Tipo de usuario" con opciones: Deportista, Personal de apoyo, Entrenador, Técnico, Médico, Fisioterapeuta, Árbitro/Juez, Delegado, Ciudadano.
+- Sistema de **reglas implícitas**: `tipoUsuario:personal_apoyo` → "Debe ser el primer entrenador en su historial" (chip verde DS bajo la fila + sub-frase en preview).
+- **Lenguaje natural mejorado** en la preview:
+  - "tiene al menos 18 años" en vez de "Edad ≥ 18"
+  - "compite en alguna de las categorías Juvenil o Mayores" en vez de "Categoría incluye {Juvenil, Mayores}"
+  - "ha obtenido medalla de oro o medalla de plata" en vez de "Logros incluye {Medalla de oro, Medalla de plata}"
+  - "es deportista o entrenador" en vez de "Tipo de usuario incluye Deportista, Entrenador"
+  - Múltiples grupos OR → lista numerada con intro "El atleta es elegible si cumple cualquiera de estas reglas"
+  - Reglas implícitas se acumulan al final como nota verde "**Además:** debe ser el primer entrenador en su historial"
+
+**Paso 4 — Códigos (sólo Bono)**
+- Manual rows: sin columna "Categoría" ni "Valor (opcional)" — sólo input de código + X (todos los códigos son bono → categoría redundante; valor unitario ya viene del paso 2).
+- Validación al activar:
+  - Modo upload: requiere archivo cargado (sino: mensaje DS negative + shake del dropzone)
+  - Modo manual: requiere mín 1 fila con código (sino: marca filas vacías con error + scroll)
+
+**Footer del wizard**
+- Botón "Anterior" pasó de `--link` a `--mute --large` (mismo tamaño que "Guardar borrador")
+
+**Save Draft / Activate**
+- "Guardar borrador" desde cualquier paso: persiste el draft completo en `window.PROGRAMS_DATA` + `sessionStorage['naowee:program-draft-queue']`, cierra wizard, fila aparece de primera. **Sin toast.**
+- `confirmSaveDraftWizard` (modal de descarte) usa el mismo flujo.
+- "Activar programa" construye un program completo con todos los pasos parametrizados, lo unshift a PROGRAMS_DATA, encola a sessionStorage, navega a `?id={nuevoId}&activated=1` → el detalle muestra toast positive bottom-right "**Programa creado exitosamente.** {nombre} ya está disponible para los operadores en campo."
 
 ### 2. Lista de programas (`incentivo-03-programas.html`)
-- Iconos por categoría dinámicos vía `window.CAT_ICONS` (8 íconos: Beca, Kit, Bono, Transporte, Inscripción, Descuento, Pase, Dinero).
-- Tooltip "Editar" del DS (`naowee-tooltip` + `naowee-tooltip__content`).
-- Botón Editar único en color accent naranja, removido el menú de 3 puntos.
-- Padding-right de columna Acciones aumentado a 32px.
-- **Vista diferenciada por rol**: para Gestor de programa se muestra un `prog-hero` (single-program command center) en lugar de la tabla.
+
+- **Drenaje de cola**: al cargar, lee `sessionStorage['naowee:program-draft-queue']`, hace unshift de cada draft a `PROGRAMS_DATA`, limpia la cola.
+- Botón **Editar** ahora pasa el id: `openWizardForEdit('${p.id}')` → abre el wizard pre-poblado.
+- `window.onDraftSaved`: re-sincroniza `PROGRAMS` desde `PROGRAMS_DATA`, resetea `state.page=1`, re-renderiza.
 
 ### 3. Detalle de programa (`incentivo-05-programa-detalle.html`)
-- Hero card unificado: header + 4 KPIs en un solo container con divider sutil. KPI "Ejecutado" como hero (font 28px accent + barra 6px).
-- Tab Condiciones: usa el mismo UI de `wz-cond-preview` que el wizard + resumen humano "En lenguaje natural".
-- Tab Resumen → Información general: removidos dividers entre items (ritmo por spacing).
-- Botón "Cargar códigos" igualado al alto de search/dropdown (34px).
 
-### 4. Códigos (`incentivo-07-codigos.html`)
-- **Modal Revertir código completamente refactorizado**:
-  - Card del programa rediseñada (top con código + monto, divider, filas Programa/Beneficiario).
-  - Helpers removidos, sólo aparece "Este campo es obligatorio" en estado error usando `.naowee-dropdown__helper.rv-error-only`.
-  - Asteriscos dobles eliminados (sólo el del DS).
-  - "Realizado por" como card readonly con icono de persona, no input editable.
-- **Toast de éxito**: estructura DS correcta (`naowee-message__title` + `__content` + `__action` + `__dismiss`).
+- **Drenaje de cola** igual que la lista, antes del primer render.
+- **Tab Resumen**:
+  - `#incList` ahora con `display:flex; flex-direction:column; gap:10px` para que las cards respiren.
+- **Tab Condiciones**:
+  - **Solo el preview rico** (`#condPreview`). Eliminado el bloque duplicado `#condSummary`.
+  - Si los incentivos del programa traen sus propias condiciones (multi mode con conditions per-incentive), se renderiza un bloque por incentivo con header (#N · Nombre · Categoría) y sus reglas en lenguaje natural.
+- **Tab Códigos**:
+  - Si el programa es `_userCreated`, usa `manualCodes` reales en estado "Sin asignación". 0 códigos fake.
+  - Si es demo seeded, mantiene la simulación rica escalada con `program.codes.total`.
+- **Tab Asignaciones**:
+  - Si `_userCreated` → lista vacía (programa recién creado).
+  - Si demo seeded → 182 asignaciones simuladas.
+- **Tab Historial**:
+  - HTML estático eliminado. Ahora dinámico vía `renderHistorial()`:
+    - `_userCreated`: mínimo timeline (Programa creado, opcionalmente Cargue de N códigos, Programa activado) con fechas reales del `createdAt`.
+    - Seeded: timeline rico simulado.
+- **Botones Editar**:
+  - Header: "Editar" → `editCurrentProgram()` que llama `openWizardForEdit(CURRENT_PROGRAM.id)`.
+  - Tab Condiciones: "Editar reglas" → `editCurrentProgram(3)` (salta directo al paso 3).
+- **Toast post-activación**: detecta `?activated=1`, muestra toast DS positive bottom-right por 5.5s, limpia el query param vía `history.replaceState`.
 
-### 5. Dashboard (`incentivo-02-dashboard.html`)
-- Sidebar slide animation: removidos los `view-transition-name` en icon/lbl que causaban bug visual entre páginas con SVGs distintos. Sólo el bar naranja desliza.
-- 4 íconos del sidebar nuevos (bar chart, 2 cards apiladas, hashtag itálico, timeline vertical).
-- Programas activos: 7 → 5 filas (preview).
-- Actividad reciente: 5 → 5 filas (preview, mismo alto).
-- Distribución geográfica: progress de 8px → 4px (sin `--lg`).
-- KPI cards hidratados desde `PROGRAMS_DATA` (agregados de inventario, asignados, revertidos, ejecución).
+### 4. Página standalone `incentivo-04-programa-crear.html` (legacy)
 
-### 6. Mis asignaciones (`incentivo-14-mis-asignaciones.html`)
-- Banner "Doug Vargas Operador en campo" removido.
-- Period tabs reemplazado por `naowee-segment` del DS con pill animado e init en page load.
-- Bug `p.budget` (no existe) → `p.rubro` corregido (los valores ya no muestran $NaN).
+- `saveDraft()` ya no es alert. Captura nombre, descripción, rubro, vigencia desde/hasta, formatea fechas a `dd mmm yyyy`, encola en `sessionStorage` y navega a la lista.
 
-### 7. Validar foto (`incentivo-09-validar-foto.html`)
-- Evidencia: texto verde reemplazado por `naowee-tag --positive --small --quiet` con icono de archivo.
+### 5. Persistencia y sistema de drafts
 
-### 8. Asignar incentivo (`incentivo-08-asignar-buscar.html`)
-- Stepper labels ya no se cortan al final (Math.ceil + 2px safety en el measurement inicial).
+**Cola compartida** (`naowee:program-draft-queue` en sessionStorage):
+- Empuja: cualquier flujo que cree/guarde un programa antes de navegar.
+- Drena: cualquier página que use `PROGRAMS_DATA` (lista, detalle).
+- Patrón LIFO con `queue.reverse().forEach(p => unshift)` → el último guardado queda primero.
 
-### 9. Asignación exitosa (`incentivo-11-asignar-exito.html`)
-- Removida opción "Índice" del sidebar.
+**Modelo de programa creado por usuario**:
+- `_userCreated: true` (bandera para distinguir del seeded)
+- `manualCodes: string[]`
+- `codesMode: 'upload' | 'manual' | 'none'`
+- `codesFile: string` (nombre del archivo subido)
+- `createdAt: ISO timestamp`
+- `incentives[].conditions = { groups, summary }` (cuando hay multi)
+- `conditions = { groups, summary }` (cuando hay single)
 
-### 10. Iconos sidebar (8 páginas)
-- Dashboard: bar chart con eje
-- Programas: 2 cards apiladas
-- Códigos: hashtag itálico (#)
-- Historial: timeline vertical (3 dots conectados)
-
-### 11. Nuevo perfil "Gestor de programa" (`shared/profile-switcher.js`)
-- Persona: **Camila Restrepo** (CR, avatar azul `#bfdbfe`/`#1e3a8a`).
-- Programa asignado: **PRG-2026-003** (Bono transporte intercolegiados).
-- API genérica: `window.getRoleAssignments()` retorna IDs asignados o `null`.
-- API genérica: `window.onRoleApplied(role)` callback que cada página puede implementar para reaccionar a cambios de rol sin depender del timing de scripts deferred.
-- Switcher dropdown: `DEFAULT_ROLES_IN_DD = ['admin', 'programa', 'operador']` aplica en todas las páginas.
-- Páginas que tenían `<div class="profile-dd">` hardcodeado fueron limpiadas para que el JS auto-inyecte el dd con los 3 roles (dashboard, detalle, asignar-buscar, template).
+**Apertura del wizard en modo edición**:
+- `openWizardForEdit(id)` busca el programa, llama `resetWizardForm()`, luego `populateWizardFromProgram(p)`.
+- Repuebla: nombre, descripción, vigencia desde/hasta, rubro total, modo single/multi (agrega cards si faltan), nombre + categoría + valor unitario por card, modo de códigos (manual con sus filas reales).
+- **No repuebla** condiciones del paso 3 (regenera estructura limpia al entrar — comportamiento aceptable para demo).
 
 ---
 
@@ -123,15 +159,35 @@ for f in glob.glob('incentivo-*.html'):
 - **CSS scope**: estilos del wizard scope con `.wz-modal` para no afectar otros modales.
 - **Roles**: `data-role="admin|programa|operador|all"` en cualquier elemento se respeta automáticamente. Excluido `.profile-dd__item`.
 - **DS first**: usar componentes `naowee-*` antes de inventar custom (`naowee-tooltip`, `naowee-tag`, `naowee-message`, `naowee-segment`, `naowee-radio`, `naowee-progress`, etc).
+- **Tag exclusiva**: `data-exclusive="true"` en una opción de `wz-tag-multi` la convierte en exclusiva (selecciona → reemplaza la lista; deshabilita las demás opciones). Patrón usado por "Nacional" en cobertura.
+- **Lenguaje natural de condiciones**: helper `ruleToNaturalSentence(fieldKey, opVal, valueLabels)` en `programa-wizard.js`. Para añadir un nuevo campo, extender `COND_FIELDS` y añadir un branch en el helper.
+- **Reglas implícitas**: `COND_IMPLIED['fieldKey:value'] = 'frase natural'`. Se renderizan como chip DS positive bajo la fila + se acumulan en la preview.
+- **Drafts cross-page**: empuja a `sessionStorage['naowee:program-draft-queue']` antes de navegar; las páginas que rendericen la lista lo absorberán al cargar.
 
 ---
 
 ## Pendientes / próximos pasos sugeridos
 
-- [ ] Validar el hero de Gestor de programa con stakeholders (¿es la jerarquía correcta? ¿faltan métricas?).
-- [ ] Considerar agregar una segunda vista para Gestor de programa con asignaciones de su programa (timeline filtrado).
-- [ ] Si el cliente quiere, soporte multi-programa (`assignedPrograms: [...]` con > 1 ID).
+- [ ] Repoblar condiciones en `populateWizardFromProgram` (paso 3 — actualmente se regenera vacío al editar).
+- [ ] Repoblar cobertura territorial al editar (requiere re-render de chips del `wz-tag-multi`).
+- [ ] Repoblar fechas con datepicker (actualmente sólo se setea el `value` del input — el datepicker DS podría no reflejarlo).
+- [ ] Repoblar Justificación + archivos anexos al editar.
+- [ ] Si el cliente quiere, soporte multi-programa (`assignedPrograms: [...]` con > 1 ID en el rol Gestor).
 - [ ] Tests visuales/regresión (Playwright) para los flujos críticos.
+- [ ] Validar el hero de Gestor de programa con stakeholders.
+
+---
+
+## Archivos modificados en esta sesión
+
+```
+shared/programa-wizard.html   — Stepper 4 pasos · paneles condiciones · paso 2 fusionado
+shared/programa-wizard.js     — buildProgramFromForm · openWizardForEdit · natural language · multi conditions
+shared/programa-wizard.css    — Tokens green DS · spinner · panels · cond preview natural
+incentivo-03-programas.html   — Drenaje cola · botón Editar pasa id
+incentivo-04-programa-crear.html — saveDraft cross-page (legacy page)
+incentivo-05-programa-detalle.html — Drenaje cola · seedCodigos/Asign user-created · historial dinámico · toast activación · editCurrentProgram · removed condSummary · gap entre inc-cards
+```
 
 ---
 
@@ -141,3 +197,6 @@ for f in glob.glob('incentivo-*.html'):
 - Pages activos en demo: `incentivo-01` … `incentivo-14`.
 - Los datos vienen de `shared/programs-data.js` (`window.PROGRAMS_DATA`).
 - Stakeholders / roles definidos en `shared/profile-switcher.js`.
+- El DS está en CDN: `https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.4.0/dist/design-system.css`. La copia local para inspección: `/Users/dvargas/Desktop/naowee-design-system/dist/design-system.css`.
+- En este DS, "ghost button" = `naowee-btn--mute`. NO existe `--ghost`.
+- En este DS, los tags **no** tienen modificador `--quiet` (algunos call-sites legacy lo usan inocuamente). API real: `naowee-tag` + `--accent | --positive | --caution | --negative` + opcional `--small` + opcional `naowee-tag__active-area > naowee-tag__close` para dismiss.

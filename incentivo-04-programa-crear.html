@@ -766,7 +766,44 @@ function addManualRow(){
 }
 
 function saveDraft(){
-  alert('Borrador guardado. Podrás retomarlo desde la lista de programas.');
+  // Captura datos del formulario y empuja un draft a la cola en sessionStorage.
+  // La lista de programas (incentivo-03) drena la cola al cargar y lo ubica
+  // como primera fila — sin toasts ni alertas.
+  const name = (document.getElementById('f-name')?.value || '').trim() || 'Programa sin nombre';
+  const desc = (document.querySelector('.fcard textarea')?.value || '').trim();
+  const rubroStr = (document.getElementById('f-rubro')?.value || '').replace(/\D/g, '');
+  const rubro = rubroStr ? Number(rubroStr) : 0;
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  const fmtDate = v => {
+    if(!v) return '—';
+    const [y, m, d] = v.split('-');
+    const mm = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][Number(m) - 1] || m;
+    return `${d} ${mm} ${y}`;
+  };
+  const from = fmtDate(dateInputs[0]?.value || '');
+  const to = fmtDate(dateInputs[1]?.value || '');
+
+  const draft = {
+    id: 'PRG-2026-' + String(Date.now()).slice(-3),
+    name,
+    shortDesc: desc.slice(0, 80) || 'Sin descripción',
+    longDesc: desc,
+    iconBg: '#f5f6fa', iconColor: '#646587',
+    status: 'draft',
+    event: '', coverage: '—', responsible: 'Doug Vargas',
+    rubro, exec: 0, unit: 0,
+    codes: { total: 0, avail: 0, asig: 0, rev: 0 },
+    from, to,
+    actoAdmin: '', fuente: 'Ministerio del Deporte',
+    incentives: [], conditions: { groups: [], summary: '' }
+  };
+  // Persistir en cola para que la página destino lo inserte al tope.
+  const KEY = 'naowee:program-draft-queue';
+  const queue = JSON.parse(sessionStorage.getItem(KEY) || '[]');
+  queue.push(draft);
+  sessionStorage.setItem(KEY, JSON.stringify(queue));
+  // Navegar a la lista de programas — el draft aparecerá de primero.
+  window.location.href = 'incentivo-03-programas.html';
 }
 function confirmCancel(){
   if(confirm('¿Salir sin guardar? Los cambios se perderán.')){

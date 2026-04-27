@@ -10,6 +10,21 @@
 <link rel="stylesheet" href="shared/shell.css"/>
 <link rel="stylesheet" href="shared/programa-wizard.css"/>
 <script src="shared/programs-data.js"></script>
+<script>
+/* Drena la cola de programas guardados (drafts y activations) que el wizard
+   empuja a sessionStorage antes de navegar acá. Cada entrada se inserta al
+   tope de PROGRAMS_DATA y se elimina de la cola sólo si el detalle la
+   absorbe (otras páginas también drenan, así que no removemos hasta usar). */
+(function drainProgramQueue(){
+  const KEY = 'naowee:program-draft-queue';
+  try {
+    const queue = JSON.parse(sessionStorage.getItem(KEY) || '[]');
+    if(!Array.isArray(queue) || !queue.length) return;
+    queue.reverse().forEach(p => window.PROGRAMS_DATA.unshift(p));
+    sessionStorage.removeItem(KEY);
+  } catch(e){ /* ignora cola corrupta */ }
+})();
+</script>
 
 <style>
   /* Back link wrapper */
@@ -132,6 +147,7 @@
   }
 
   /* Tipo de incentivo card (plain, sin caja envolvente) */
+  #incList{ display:flex;flex-direction:column;gap:10px; }
   .inc-card{
     display:flex;gap:14px;padding:14px 16px;
     border:1px solid var(--naowee-color-border-default,#e7e9f3);
@@ -559,7 +575,7 @@
           <div class="detail-head__meta" id="hdMeta"></div>
         </div>
         <div class="detail-head__actions">
-          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="openWizard()">
+          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="editCurrentProgram()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>
             Editar
           </button>
@@ -627,7 +643,7 @@
             <div class="section">
               <div class="section-label section-label--row">
                 <span>Reglas de elegibilidad</span>
-                <button class="naowee-btn naowee-btn--link naowee-btn--small" onclick="openWizard()" style="text-transform:none;letter-spacing:0">
+                <button class="naowee-btn naowee-btn--link naowee-btn--small" onclick="editCurrentProgram(3)" style="text-transform:none;letter-spacing:0">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>
                   Editar reglas
                 </button>
@@ -645,8 +661,6 @@
                 </div>
                 <div class="wz-cond-preview__body" id="condPreviewBody"></div>
               </div>
-              <!-- Resumen humano (1 frase para entendimiento rápido) -->
-              <div class="cond-summary" id="condSummary"></div>
             </div>
           </div>
 
@@ -785,48 +799,7 @@
           <div class="tab-pane" data-pane="historial" hidden>
             <div class="section">
               <div class="section-label">Historial de cambios del programa</div>
-              <div class="timeline" id="timeline">
-                <div class="timeline-item">
-                  <div class="timeline-dot green">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Programa activado</div>
-                    <div class="timeline-desc">El programa quedó disponible para los operadores en campo.</div>
-                    <div class="timeline-date">Doug Vargas · hace 3 minutos</div>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-dot orange">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Cargue masivo de 200 códigos</div>
-                    <div class="timeline-desc">Archivo <code>becas-medallistas-2026.xlsx</code> procesado sin errores.</div>
-                    <div class="timeline-date">Doug Vargas · hace 4 minutos</div>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-dot blue">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Condiciones de elegibilidad editadas</div>
-                    <div class="timeline-desc">Se agregó la regla <strong>"medalla de plata"</strong> al grupo OR principal.</div>
-                    <div class="timeline-date">Doug Vargas · hace 6 minutos</div>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-dot gray">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Programa creado</div>
-                    <div class="timeline-desc">Estado inicial: borrador. Rubro asignado: $200M.</div>
-                    <div class="timeline-date">Doug Vargas · hace 8 minutos</div>
-                  </div>
-                </div>
-              </div>
+              <div class="timeline" id="timeline"></div>
             </div>
           </div>
         </div>
@@ -977,25 +950,42 @@ function hydrateProgram(){
     <div class="info-row-plain"><dt>Responsable</dt><dd>${p.responsible}</dd></div>
   `;
 
-  // Condiciones — lenguaje natural (mismo UI que la creación del programa)
-  const groupHTML = p.conditions.groups.map((g, gi) => {
-    const rowHTML = g.rules.map(r => {
-      const valStr = String(r.value);
-      const valHTML = valStr
-        ? `<span class="wz-cond-preview__val">${valStr}</span>`
-        : `<span class="wz-cond-preview__val wz-cond-preview__val--empty">…</span>`;
-      return `<span class="wz-cond-preview__field">${r.field}</span> ${r.op} ${valHTML}`;
-    }).join(' <span class="wz-cond-preview__conn wz-cond-preview__conn--and">y</span> ');
-    return `<div class="wz-cond-preview__group"><span class="wz-cond-preview__group-lbl">Grupo ${gi + 1}</span><span class="wz-cond-preview__group-body">${rowHTML}</span></div>`;
-  });
-  const intro = p.conditions.groups.length > 1
-    ? 'El atleta es elegible si cumple <strong>cualquiera</strong> de estos grupos de condiciones:'
-    : 'El atleta es elegible si cumple <strong>todas</strong> estas condiciones:';
+  // Condiciones — si los incentivos tienen su propio bloque (multi mode), las
+  // mostramos por incentivo. Si no, las del programa.
+  const incHasConditions = p.incentives && p.incentives.some(i => i.conditions && i.conditions.groups && i.conditions.groups.length);
+  const renderGroupsHTML = (groups) => {
+    return groups.map((g, gi) => {
+      const rowHTML = g.rules.map(r => {
+        const valStr = String(r.value);
+        const valHTML = valStr
+          ? `<span class="wz-cond-preview__val">${valStr}</span>`
+          : `<span class="wz-cond-preview__val wz-cond-preview__val--empty">…</span>`;
+        return `<span class="wz-cond-preview__field">${r.field}</span> ${r.op} ${valHTML}`;
+      }).join(' <span class="wz-cond-preview__conn wz-cond-preview__conn--and">y</span> ');
+      return `<div class="wz-cond-preview__group"><span class="wz-cond-preview__group-lbl">Grupo ${gi + 1}</span><span class="wz-cond-preview__group-body">${rowHTML}</span></div>`;
+    });
+  };
   const orDivider = '<div class="wz-cond-preview__or"><span class="wz-cond-preview__conn wz-cond-preview__conn--or">o</span></div>';
-  document.getElementById('condPreviewBody').innerHTML =
-    `<p class="wz-cond-preview__intro">${intro}</p>${groupHTML.join(orDivider)}`;
-  document.getElementById('condSummary').innerHTML =
-    `<span class="cond-summary__lbl">En lenguaje natural</span><span class="cond-summary__txt">${p.conditions.summary}</span>`;
+  let condBodyHTML = '';
+  if(incHasConditions){
+    // Mostrar un bloque por cada incentivo con condiciones
+    condBodyHTML = p.incentives.map((inc, idx) => {
+      const groups = inc.conditions && inc.conditions.groups || [];
+      if(!groups.length) return '';
+      const intro = groups.length > 1
+        ? `El atleta es elegible para <strong>${inc.name}</strong> si cumple <strong>cualquiera</strong> de estas reglas:`
+        : `El atleta es elegible para <strong>${inc.name}</strong> si cumple <strong>todas</strong> estas condiciones:`;
+      return `<div class="cond-inc-block"><div class="cond-inc-block__head"><span class="cond-inc-block__num">#${idx+1}</span><span class="cond-inc-block__name">${inc.name}</span><span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">${inc.category}</span></div><p class="wz-cond-preview__intro">${intro}</p>${renderGroupsHTML(groups).join(orDivider)}</div>`;
+    }).join('');
+  } else if(p.conditions.groups.length){
+    const intro = p.conditions.groups.length > 1
+      ? 'El atleta es elegible si cumple <strong>cualquiera</strong> de estos grupos de condiciones:'
+      : 'El atleta es elegible si cumple <strong>todas</strong> estas condiciones:';
+    condBodyHTML = `<p class="wz-cond-preview__intro">${intro}</p>${renderGroupsHTML(p.conditions.groups).join(orDivider)}`;
+  } else {
+    condBodyHTML = '<em>Sin condiciones definidas.</em>';
+  }
+  document.getElementById('condPreviewBody').innerHTML = condBodyHTML;
 
   // Modal cargar codigos — program name
   const ccName = document.getElementById('ccProgramName');
@@ -1014,7 +1004,111 @@ window.addEventListener('load', () => {
   seedAsign();
   renderCodigos();
   renderAsign();
+  renderHistorial();
+  showActivatedToastIfNeeded();
 });
+
+/* Abre el wizard de edición con los datos del programa actualmente visible.
+   Si se pasa un step, intenta saltar a ese paso después de abrir. */
+function editCurrentProgram(step){
+  if(!CURRENT_PROGRAM){ if(typeof openWizard === 'function') openWizard(); return; }
+  if(typeof window.openWizardForEdit === 'function'){
+    window.openWizardForEdit(CURRENT_PROGRAM.id);
+    if(step && typeof window.tryGoStep === 'function'){
+      // Esperamos al próximo tick para que el wizard ya esté abierto y el form populado.
+      setTimeout(() => window.tryGoStep(step), 100);
+    }
+  } else if(typeof openWizard === 'function'){
+    openWizard();
+  }
+}
+window.editCurrentProgram = editCurrentProgram;
+
+/* Si el detalle se abrió tras activar un programa (?activated=1), mostrar
+   un toast positive bottom-right confirmando la creación. Limpia el query
+   param para que un refresh no lo dispare de nuevo. */
+function showActivatedToastIfNeeded(){
+  const params = new URLSearchParams(location.search);
+  if(params.get('activated') !== '1') return;
+  const wrap = document.createElement('div');
+  wrap.className = 'wz-toast-wrap';
+  wrap.innerHTML = `
+    <div class="wz-toast naowee-message naowee-message--positive">
+      <div class="naowee-message__header">
+        <div class="naowee-message__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="naowee-message__text">
+          <strong>Programa creado exitosamente.</strong> ${(CURRENT_PROGRAM && CURRENT_PROGRAM.name) ? CURRENT_PROGRAM.name + ' ' : ''}ya está disponible para los operadores en campo.
+        </div>
+        <button type="button" class="wz-toast__dismiss" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+  const dismiss = () => { wrap.style.opacity = '0'; setTimeout(() => wrap.remove(), 250); };
+  wrap.querySelector('.wz-toast__dismiss').addEventListener('click', dismiss);
+  setTimeout(dismiss, 5500);
+  // Limpia el query param para que recargas no re-disparen.
+  params.delete('activated');
+  const newUrl = location.pathname + (params.toString() ? '?' + params : '') + location.hash;
+  history.replaceState(null, '', newUrl);
+}
+
+/* Historial dinámico — refleja sólo los eventos reales del programa.
+   Para programas creados por el usuario: sólo "Programa creado/activado".
+   Para programas demo seeded: timeline rico simulado. */
+function renderHistorial(){
+  const tl = document.getElementById('timeline');
+  if(!tl || !CURRENT_PROGRAM) return;
+  const p = CURRENT_PROGRAM;
+  const items = [];
+  const ICONS = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    plus:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+    edit:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>'
+  };
+
+  if(p._userCreated){
+    const when = p.createdAt ? new Date(p.createdAt) : new Date();
+    const dateStr = when.toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    if(p.status === 'active'){
+      items.push({ dot:'green', ico: ICONS.check, title:'Programa activado',
+        desc:'El programa quedó disponible para los operadores en campo.',
+        date:`${p.responsible} · ${dateStr}` });
+    }
+    if(p.codes.total > 0){
+      const fileLabel = p.codesFile ? `Archivo <code>${p.codesFile}</code>` : `${p.codes.total} códigos cargados`;
+      items.push({ dot:'orange', ico: ICONS.upload, title:`Cargue de ${p.codes.total} códigos`,
+        desc:`${fileLabel}.`,
+        date:`${p.responsible} · ${dateStr}` });
+    }
+    items.push({ dot:'gray', ico: ICONS.plus, title:'Programa creado',
+      desc:`Estado inicial: ${p.status === 'active' ? 'activo' : 'borrador'}. Rubro asignado: ${formatMoneyShort(p.rubro)}.`,
+      date:`${p.responsible} · ${dateStr}` });
+  } else {
+    // Programa demo seeded: timeline rico simulado consistente con el seed actual.
+    items.push(
+      { dot:'green',  ico: ICONS.check,  title:'Programa activado',         desc:'El programa quedó disponible para los operadores en campo.', date:`${p.responsible} · hace 3 minutos` },
+      { dot:'orange', ico: ICONS.upload, title:`Cargue masivo de ${p.codes.total} códigos`, desc:'Archivo procesado sin errores.', date:`${p.responsible} · hace 4 minutos` },
+      { dot:'blue',   ico: ICONS.edit,   title:'Condiciones de elegibilidad editadas', desc:'Reglas de elegibilidad actualizadas.', date:`${p.responsible} · hace 6 minutos` },
+      { dot:'gray',   ico: ICONS.plus,   title:'Programa creado',           desc:`Estado inicial: borrador. Rubro asignado: ${formatMoneyShort(p.rubro)}.`, date:`${p.responsible} · hace 8 minutos` }
+    );
+  }
+
+  tl.innerHTML = items.map(it => `
+    <div class="timeline-item">
+      <div class="timeline-dot ${it.dot}">${it.ico}</div>
+      <div class="timeline-content">
+        <div class="timeline-title">${it.title}</div>
+        <div class="timeline-desc">${it.desc}</div>
+        <div class="timeline-date">${it.date}</div>
+      </div>
+    </div>
+  `).join('');
+}
 window.addEventListener('resize', () => { positionTabIndicator(); });
 
 /* ══ Dropdown toolbar toggles ══ */
@@ -1062,13 +1156,21 @@ const state = { all: [], filter: 'all', search: '', page: 1, pageSize: 10 };
 const asignState = { all: [], region: 'all', search: '', page: 1, pageSize: 10 };
 
 function seedCodigos(){
+  // Programa creado por el usuario en el wizard: usar SUS códigos reales.
+  // Si no asignó nada todavía, mostrar lista vacía — sin operadores/beneficiarios fake.
+  if(CURRENT_PROGRAM && CURRENT_PROGRAM._userCreated){
+    const codes = Array.isArray(CURRENT_PROGRAM.manualCodes) ? CURRENT_PROGRAM.manualCodes : [];
+    state.all = codes.map(code => ({ code, estado: 'disp', benef: null, op: null, fecha: null }));
+    return;
+  }
+  // Programa demo seeded en programs-data.js: mantener la data fake rica para la demo.
   const out = [];
-  for(let i = 1; i <= 200; i++){
+  const total = (CURRENT_PROGRAM && CURRENT_PROGRAM.codes && CURRENT_PROGRAM.codes.total) || 200;
+  for(let i = 1; i <= total; i++){
     const code = `2026BEC-${String(i).padStart(5, '0')}`;
-    // Distribution: ~18 disponibles, ~3 revertidos, resto asignados
     let estado;
-    if(i > 197) estado = 'rev';
-    else if(i > 182) estado = 'disp';
+    if(i > total - 3) estado = 'rev';
+    else if(i > total - 18) estado = 'disp';
     else estado = 'asig';
     const benef = estado === 'disp' ? null : PEOPLE[(i * 7) % PEOPLE.length];
     const op = estado === 'disp' ? null : OPERATORS[i % OPERATORS.length];
@@ -1167,11 +1269,17 @@ document.addEventListener('input', e => {
   }
 });
 
-/* ══ Asignaciones: fake data (182 registros) ══ */
+/* ══ Asignaciones: fake data (sólo para programas demo) ══ */
 function seedAsign(){
+  // Programa creado por el usuario: 0 asignaciones — apenas se acaba de crear.
+  if(CURRENT_PROGRAM && CURRENT_PROGRAM._userCreated){
+    asignState.all = [];
+    return;
+  }
   const out = [];
   const avColors = ['purple','orange','green','blue','pink','teal'];
-  for(let i = 1; i <= 182; i++){
+  const total = (CURRENT_PROGRAM && CURRENT_PROGRAM.codes && CURRENT_PROGRAM.codes.asig) || 182;
+  for(let i = 1; i <= total; i++){
     const code = `2026BEC-${String(i).padStart(5, '0')}`;
     const person = PEOPLE[(i * 7) % PEOPLE.length];
     const cc = `CC ${(1000000 + i * 131).toLocaleString('es-CO').replace(/,/g, '.')}`;

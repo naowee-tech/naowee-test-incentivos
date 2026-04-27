@@ -529,6 +529,19 @@
 
 <script src="shared/programs-data.js?v=cat-icons-2"></script>
 <script>
+/* Drena la cola de drafts pendientes (cualquier página que guardó un borrador
+   antes de navegar acá los empuja a sessionStorage). Cada draft se inserta al
+   tope de PROGRAMS_DATA antes de derivar la lista local. */
+(function drainDraftQueue(){
+  const KEY = 'naowee:program-draft-queue';
+  try {
+    const queue = JSON.parse(sessionStorage.getItem(KEY) || '[]');
+    if(!Array.isArray(queue) || !queue.length) return;
+    queue.reverse().forEach(d => window.PROGRAMS_DATA.unshift(d));
+    sessionStorage.removeItem(KEY);
+  } catch(e){ /* ignora cola corrupta */ }
+})();
+
 /* ═══ PROGRAMS DATA (consumed from shared/programs-data.js) ═══ */
 const PROGRAMS = window.PROGRAMS_DATA.map(p => ({
   id: p.id, name: p.name, desc: p.shortDesc,
@@ -722,7 +735,7 @@ function renderRows(){
           <td>
             <div class="acciones-cell">
               <span class="naowee-tooltip">
-                <button class="acciones-cell__btn" onclick="event.stopPropagation();openWizard()" aria-label="Editar">
+                <button class="acciones-cell__btn" onclick="event.stopPropagation();openWizardForEdit('${p.id}')" aria-label="Editar">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>
                 </button>
                 <span class="naowee-tooltip__content">Editar</span>
@@ -772,6 +785,20 @@ document.addEventListener('input', e => {
 // timing de setTimeout vs scripts deferred.
 window.onRoleApplied = function(role){
   applyRoleHeader();
+  renderRows();
+};
+
+// Wizard llama esto al guardar borrador → re-sincroniza PROGRAMS desde
+// PROGRAMS_DATA (que ya fue mutado con unshift) y va a la primera página.
+window.onDraftSaved = function(){
+  PROGRAMS.length = 0;
+  window.PROGRAMS_DATA.forEach(p => PROGRAMS.push({
+    id: p.id, name: p.name, desc: p.shortDesc,
+    iconBg: p.iconBg, iconColor: p.iconColor,
+    status: p.status, rubro: p.rubro, exec: p.exec,
+    codes: p.codes, from: p.from, to: p.to
+  }));
+  state.page = 1;
   renderRows();
 };
 // Render inmediato por si el switcher aún no ha cargado (fallback rápido).
