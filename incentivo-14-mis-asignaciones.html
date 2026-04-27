@@ -122,19 +122,8 @@
   .toolbar-dd-item[aria-selected="true"]{background:#fff3e6;color:var(--naowee-color-text-accent,#d74009);font-weight:600}
   .dd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-  /* Period tabs (Hoy/7/30/Todo) */
-  .period-tabs{display:inline-flex;gap:0;background:#f5f6fa;border-radius:9999px;padding:3px}
-  .period-tab{
-    padding:6px 14px;font-size:12px;font-weight:600;
-    color:var(--naowee-color-text-secondary,#646587);
-    background:transparent;border:none;cursor:pointer;border-radius:9999px;
-    transition:background .15s,color .15s;
-  }
-  .period-tab:hover{color:var(--naowee-color-text-primary,#282834)}
-  .period-tab.active{
-    background:#fff;color:var(--naowee-color-text-accent,#d74009);
-    box-shadow:0 1px 3px rgba(40,40,52,.1);
-  }
+  /* Period segment usa naowee-segment del DS */
+  .period-segment{height:36px}
 
   /* Pagination */
   .naowee-pagination{display:flex;align-items:center;gap:0;font-family:'Inter',sans-serif}
@@ -280,20 +269,6 @@
         </div>
       </div>
 
-      <!-- Operator identity banner -->
-      <div class="op-banner">
-        <div class="op-banner__ava">DV</div>
-        <div class="op-banner__body">
-          <div class="op-banner__name">Doug Vargas</div>
-          <div class="op-banner__sub">
-            <span>Cédula: <strong>79.845.211</strong></span>
-            <span>Región: <strong>Atlántico</strong></span>
-            <span>Miembro desde: <strong>ene 2025</strong></span>
-          </div>
-        </div>
-        <span class="op-banner__tag">Operador en campo</span>
-      </div>
-
       <!-- KPI cards -->
       <div class="kpi-grid">
         <article class="kpi-card">
@@ -360,11 +335,12 @@
               </div>
             </div>
 
-            <div class="period-tabs" role="tablist">
-              <button type="button" class="period-tab" data-period="today" onclick="setPeriod('today', this)">Hoy</button>
-              <button type="button" class="period-tab" data-period="7d" onclick="setPeriod('7d', this)">7 días</button>
-              <button type="button" class="period-tab" data-period="30d" onclick="setPeriod('30d', this)">30 días</button>
-              <button type="button" class="period-tab active" data-period="all" onclick="setPeriod('all', this)">Todo</button>
+            <div class="naowee-segment period-segment" role="tablist">
+              <div class="naowee-segment__pill"></div>
+              <button type="button" class="naowee-segment__item" data-period="today" onclick="setPeriod('today', this)">Hoy</button>
+              <button type="button" class="naowee-segment__item" data-period="7d" onclick="setPeriod('7d', this)">7 días</button>
+              <button type="button" class="naowee-segment__item" data-period="30d" onclick="setPeriod('30d', this)">30 días</button>
+              <button type="button" class="naowee-segment__item naowee-segment__item--active" data-period="all" onclick="setPeriod('all', this)">Todo</button>
             </div>
 
             <div class="toolbar-dd-wrap" id="ddEstadoWrap">
@@ -440,7 +416,7 @@ function buildAsignaciones(){
   window.PROGRAMS_DATA.forEach(p => {
     if(p.codes.asig === 0) return;
     const totalAsig = p.codes.asig + p.codes.rev;
-    const unitValue = p.codes.total > 0 ? Math.round(p.budget / p.codes.total) : 0;
+    const unitValue = p.codes.total > 0 ? Math.round(p.rubro / p.codes.total) : 0;
     for(let i = 1; i <= totalAsig; i++){
       globalIdx++;
       const code = `${p.id.replace('PRG-','')}-${String(i).padStart(5, '0')}`;
@@ -526,9 +502,23 @@ function setEstado(val, label){
 
 function setPeriod(val, el){
   state.period = val; state.page = 1;
-  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
+  const seg = el.closest('.naowee-segment');
+  seg?.querySelectorAll('.naowee-segment__item').forEach(t => t.classList.remove('naowee-segment__item--active'));
+  el.classList.add('naowee-segment__item--active');
+  movePeriodPill(el);
   render();
+}
+/* Mueve el pill del segment al item activo (DS spec: transform + width) */
+function movePeriodPill(item){
+  const seg = item.closest('.naowee-segment'); if(!seg) return;
+  const pill = seg.querySelector('.naowee-segment__pill'); if(!pill) return;
+  const r = item.getBoundingClientRect();
+  const pr = seg.getBoundingClientRect();
+  if(!r.width || !pr.width) return;
+  const borderLeft = parseFloat(getComputedStyle(seg).borderLeftWidth) || 0;
+  const offset = r.left - pr.left - borderLeft;
+  pill.style.width = r.width + 'px';
+  pill.style.setProperty('--segment-pill-x', offset + 'px');
 }
 
 function clearSearch(id){
@@ -649,9 +639,18 @@ document.addEventListener('input', e => {
 updateKPIs();
 render();
 
+/* Inicializa el pill del segment en el item activo. requestAnimationFrame
+   para asegurar que el layout esté listo antes de medir bounding rect. */
+requestAnimationFrame(() => {
+  const active = document.querySelector('.period-segment .naowee-segment__item--active');
+  if(active) movePeriodPill(active);
+});
+
 function fadeAndGo(url){window.location.href=url}
 </script>
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
+
+<script src="shared/footer-scroll.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

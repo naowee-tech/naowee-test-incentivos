@@ -10,15 +10,40 @@
 <link rel="stylesheet" href="shared/shell.css"/>
 <link rel="stylesheet" href="shared/programa-wizard.css"/>
 <script src="shared/programs-data.js"></script>
+<script>
+/* Drena la cola de programas guardados (drafts y activations) que el wizard
+   empuja a sessionStorage antes de navegar acá. Cada entrada se inserta al
+   tope de PROGRAMS_DATA y se elimina de la cola sólo si el detalle la
+   absorbe (otras páginas también drenan, así que no removemos hasta usar). */
+(function drainProgramQueue(){
+  const KEY = 'naowee:program-draft-queue';
+  try {
+    const queue = JSON.parse(sessionStorage.getItem(KEY) || '[]');
+    if(!Array.isArray(queue) || !queue.length) return;
+    queue.reverse().forEach(p => window.PROGRAMS_DATA.unshift(p));
+    sessionStorage.removeItem(KEY);
+  } catch(e){ /* ignora cola corrupta */ }
+})();
+</script>
 
 <style>
   /* Back link wrapper */
   .back-link-wrap{margin-bottom:12px}
 
-  /* Detail header card (no shadow) */
-  .detail-head{
+  /* Hero card — header + KPIs unificados en un solo container */
+  .hero-card{
     background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:16px;padding:24px 28px;margin-bottom:20px;
+    border-radius:16px;margin-bottom:20px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(40,40,52,.03);
+  }
+  .hero-card__divider{
+    height:1px;background:var(--naowee-color-border-default,#e7e9f3);
+    margin:0 28px;
+  }
+
+  /* Detail header card — top section del hero (sin border propio) */
+  .detail-head{
+    padding:24px 28px;
     display:grid;grid-template-columns:64px 1fr auto;gap:20px;align-items:center;
   }
   @media(max-width:900px){.detail-head{grid-template-columns:1fr}}
@@ -46,12 +71,26 @@
   .detail-head__actions{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
   .detail-head__btns{display:flex;gap:8px}
 
-  /* Mini KPI strip — sin shadow */
-  .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-  @media(max-width:900px){.kpi-strip{grid-template-columns:repeat(2,1fr)}}
+  /* Mini KPI strip — bottom section del hero, sin borders individuales,
+     dividers verticales sutiles entre KPIs (con inset vertical). */
+  .kpi-strip{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    padding:18px 4px;
+  }
+  @media(max-width:900px){
+    .kpi-strip{grid-template-columns:repeat(2,1fr);gap:0}
+  }
   .mini-kpi{
-    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:12px;padding:14px 18px;
+    background:transparent;border:none;border-radius:0;
+    padding:6px 24px;position:relative;
+  }
+  .mini-kpi + .mini-kpi::before{
+    content:"";position:absolute;left:0;top:8px;bottom:8px;
+    width:1px;background:var(--naowee-color-border-default,#e7e9f3);
+  }
+  @media(max-width:900px){
+    .mini-kpi:nth-child(odd) + .mini-kpi::before{display:block}
+    .mini-kpi:nth-child(3)::before{display:none}
   }
   .mini-kpi__lbl{
     font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
@@ -63,6 +102,11 @@
     letter-spacing:-.02em;margin-top:4px;line-height:1.1;
   }
   .mini-kpi__sub{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);margin-top:2px}
+
+  /* Énfasis en "Ejecutado" — KPI principal: tipografía mayor y barra
+     de progreso más prominente con accent color. */
+  .mini-kpi--hero .mini-kpi__val{font-size:28px;color:var(--naowee-color-text-accent,#d74009)}
+  .mini-kpi--hero .naowee-progress{height:6px}
 
   /* Content card (wrapping tabs + panes) — escenarios style */
   .detail-card{
@@ -88,13 +132,12 @@
   }
   .section + .section{margin-top:28px}
 
-  /* Info rows — label gray / value dark, sin caja alrededor */
+  /* Info rows — label gray / value dark, ritmo por spacing (sin dividers) */
   .info-row-plain{
     display:grid;grid-template-columns:180px 1fr;gap:16px;
-    padding:10px 0;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
+    padding:7px 0;
     font-size:13px;
   }
-  .info-row-plain:last-child{border-bottom:none}
   .info-row-plain dt{color:var(--naowee-color-text-secondary,#646587);font-weight:500}
   .info-row-plain dd{color:var(--naowee-color-text-primary,#282834);font-weight:500}
   .info-row-plain dd code{
@@ -104,6 +147,7 @@
   }
 
   /* Tipo de incentivo card (plain, sin caja envolvente) */
+  #incList{ display:flex;flex-direction:column;gap:10px; }
   .inc-card{
     display:flex;gap:14px;padding:14px 16px;
     border:1px solid var(--naowee-color-border-default,#e7e9f3);
@@ -125,22 +169,21 @@
   }
   .inc-card__val-lbl{font-size:10.5px;color:var(--naowee-color-text-secondary,#646587)}
 
-  /* Cond preview plain (sin caja) */
-  .cond-preview-box{
-    padding:14px 18px;
-    background:#fafbfd;border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:10px;
-    font-size:12.5px;line-height:1.8;font-family:'SF Mono',monospace;
-    color:var(--naowee-color-text-primary,#282834);
-    margin-bottom:12px;
-  }
-  .cond-preview-box b{color:var(--naowee-color-text-accent,#d74009);font-weight:700}
-  .cond-preview-box em{color:var(--naowee-color-feedback-fill-positive-loud,#1f8923);font-style:normal;font-weight:700}
+  /* Cond preview en detalle: usa .wz-cond-preview de programa-wizard.css */
+  /* Resumen humano (1 frase) — bajo el preview natural language */
   .cond-summary{
-    padding:14px 0;font-size:12.5px;color:var(--naowee-color-text-secondary,#646587);
-    line-height:1.6;
+    margin-top:14px;padding:12px 16px;
+    background:#f7f8fc;border-radius:10px;
+    font-size:13px;line-height:1.55;
+    color:var(--naowee-color-text-secondary,#646587);
   }
-  .cond-summary strong{color:var(--naowee-color-text-primary,#282834)}
+  .cond-summary__lbl{
+    font-size:10.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--naowee-color-text-accent,#d74009);
+    display:block;margin-bottom:4px;
+  }
+  .cond-summary__txt{color:var(--naowee-color-text-primary,#282834)}
+  .cond-summary__txt strong{font-weight:600;color:var(--naowee-color-text-primary,#282834)}
 
   /* ═════ TOOLBAR pattern escenarios-11 (search pill + dropdown + pagination) ═════ */
   .cg-toolbar{
@@ -148,6 +191,9 @@
     gap:12px;flex-wrap:wrap;margin-bottom:18px;
   }
   .cg-toolbar__left{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  /* Botón en toolbar igualado al alto del search y del toolbar-dd (34px) */
+  .cg-toolbar__left > .naowee-btn{height:34px;padding:0 14px;font-size:12.5px}
+  .cg-toolbar__left > .naowee-btn svg{width:14px;height:14px}
   .cg-toolbar .naowee-searchbox--pill{width:300px;max-width:100%}
   .cg-toolbar .naowee-searchbox--pill .naowee-searchbox__input-wrap{
     border-radius:9999px;height:34px;padding:4px 12px;
@@ -302,17 +348,70 @@
   /* Asignaciones table columns — better distribution */
   .cg-table--asign{table-layout:fixed}
   .cg-table--asign th:nth-child(1),
-  .cg-table--asign td:nth-child(1){width:28%}
+  .cg-table--asign td:nth-child(1){width:25%}
   .cg-table--asign th:nth-child(2),
-  .cg-table--asign td:nth-child(2){width:16%}
+  .cg-table--asign td:nth-child(2){width:14%}
   .cg-table--asign th:nth-child(3),
-  .cg-table--asign td:nth-child(3){width:14%}
+  .cg-table--asign td:nth-child(3){width:13%}
   .cg-table--asign th:nth-child(4),
-  .cg-table--asign td:nth-child(4){width:14%}
+  .cg-table--asign td:nth-child(4){width:12%}
   .cg-table--asign th:nth-child(5),
-  .cg-table--asign td:nth-child(5){width:14%}
+  .cg-table--asign td:nth-child(5){width:13%}
   .cg-table--asign th:nth-child(6),
-  .cg-table--asign td:nth-child(6){width:14%;padding-right:18px}
+  .cg-table--asign td:nth-child(6){width:13%}
+  .cg-table--asign th:nth-child(7),
+  .cg-table--asign td:nth-child(7){width:10%;padding-right:18px;text-align:right}
+
+  /* Botón ojo "Ver evidencia" — DS ghost (naowee-btn--mute icon-only) */
+  .ev-btn{padding:0;width:34px;min-width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center}
+  .ev-btn svg{width:16px;height:16px}
+
+  /* Lightbox de evidencia */
+  .ev-overlay{
+    position:fixed;inset:0;background:rgba(20,20,30,.72);z-index:1100;
+    display:none;align-items:center;justify-content:center;padding:24px;
+    backdrop-filter:blur(4px);
+  }
+  .ev-overlay.is-open{display:flex;animation:evFadeIn .2s ease}
+  @keyframes evFadeIn{from{opacity:0}to{opacity:1}}
+  .ev-modal{
+    background:#fff;border-radius:16px;overflow:hidden;
+    width:min(880px,100%);max-height:90vh;display:flex;flex-direction:column;
+    box-shadow:0 24px 60px rgba(0,0,0,.4);
+    animation:evScaleIn .25s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes evScaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  .ev-head{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:16px 22px;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
+  }
+  .ev-title{font-size:15px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
+  .ev-sub{font-size:12px;color:var(--naowee-color-text-secondary,#646587);margin-top:2px}
+  .ev-close{
+    width:32px;height:32px;border-radius:8px;border:none;background:transparent;
+    color:var(--naowee-color-text-secondary,#646587);cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;transition:background .15s;
+  }
+  .ev-close:hover{background:#f5f6fa;color:var(--naowee-color-text-primary,#282834)}
+  .ev-body{display:grid;grid-template-columns:1fr 280px;min-height:0;flex:1}
+  @media(max-width:760px){.ev-body{grid-template-columns:1fr}}
+  .ev-photo{
+    background:#0f1218;display:flex;align-items:center;justify-content:center;
+    min-height:380px;position:relative;overflow:hidden;
+  }
+  .ev-photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .ev-meta{padding:14px 22px;background:#fafbfd;overflow-y:auto;border-left:1px solid var(--naowee-color-border-default,#e7e9f3)}
+  .ev-meta__row{display:flex;flex-direction:column;gap:2px;padding:8px 0}
+  .ev-meta__lbl{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--naowee-color-text-secondary,#646587)}
+  .ev-meta__val{font-size:13px;font-weight:600;color:var(--naowee-color-text-primary,#282834)}
+  .ev-meta__val code{font-family:'SF Mono',monospace;font-size:12px;color:var(--naowee-color-text-accent,#d74009);background:#fff3e6;padding:2px 6px;border-radius:4px}
+  .ev-foot{
+    display:flex;justify-content:flex-start;align-items:center;
+    padding:12px 22px;border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
+    font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);background:#fafbfd;
+  }
+  .ev-foot__hint{display:inline-flex;align-items:center;gap:6px}
+  .ev-foot__hint svg{width:14px;height:14px}
 
   /* ═════ MODAL: Cargar códigos ═════ */
   .cc-overlay{
@@ -462,21 +561,25 @@
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS</div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-02-dashboard.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9" rx=".5"/><rect x="11" y="7" width="3" height="13" rx=".5"/><rect x="16" y="14" width="3" height="6" rx=".5"/></svg></div>
         <span class="lbl">Dashboard</span>
       </div>
       <div class="nav-row active">
         <div class="active-bar"></div>
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><rect x="8" y="8" width="13" height="13" rx="2"/></svg></div>
         <span class="lbl">Programas</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-07-codigos.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="3" y1="15" x2="19" y2="15"/></svg></div>
         <span class="lbl">Códigos</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="6" cy="18" r="1.5"/><line x1="6" y1="7.5" x2="6" y2="10.5"/><line x1="6" y1="13.5" x2="6" y2="16.5"/><line x1="11" y1="6" x2="20" y2="6"/><line x1="11" y1="12" x2="18" y2="12"/><line x1="11" y1="18" x2="16" y2="18"/></svg></div>
         <span class="lbl">Historial</span>
+      </div>
+      <div class="nav-row" data-role="admin" onclick="fadeAndGo('incentivo-15-reporteria.html')">
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/><circle cx="18" cy="9" r="1.5"/></svg></div>
+        <span class="lbl">Reportería</span>
       </div>
     </nav>
 
@@ -497,19 +600,6 @@
           <div class="user-info"><span class="user-name">Doug Vargas</span><span class="user-role">Gestor de incentivos</span></div>
           <button class="user-chip__chevron" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
-        <div class="profile-dd" id="profileDD">
-          <div class="profile-dd__label">Cambiar de perfil</div>
-          <div class="profile-dd__item active" data-role="admin" onclick="switchRole('admin')">
-            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#c4b5fd;color:#4c1d95">DV</span>
-            <div class="role-meta"><strong>Gestor de incentivos</strong><small>Parametriza y audita</small></div>
-            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div class="profile-dd__item" data-role="operador" onclick="switchRole('operador')">
-            <span class="naowee-thumbnail naowee-thumbnail--small naowee-thumbnail--quiet" style="background:#ffdfb5;color:#92400e">DV</span>
-            <div class="role-meta"><strong>Operador</strong><small>Asigna incentivos en campo</small></div>
-            <svg class="dd-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -523,6 +613,8 @@
         </button>
       </div>
 
+      <!-- Hero card: detail-head + KPIs unificados -->
+      <div class="hero-card">
       <!-- Detail header -->
       <div class="detail-head">
         <div class="detail-head__ico" id="hdIco">
@@ -540,21 +632,23 @@
           <div class="detail-head__meta" id="hdMeta"></div>
         </div>
         <div class="detail-head__actions">
-          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="openWizard()">
+          <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="editCurrentProgram()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>
             Editar
           </button>
         </div>
       </div>
 
-      <!-- KPIs -->
+      <div class="hero-card__divider"></div>
+
+      <!-- KPIs (parte inferior del hero-card) -->
       <div class="kpi-strip">
         <div class="mini-kpi">
           <div class="mini-kpi__lbl">Rubro total</div>
           <div class="mini-kpi__val" id="kpiRubro">—</div>
           <div class="mini-kpi__sub" id="kpiRubroSub">—</div>
         </div>
-        <div class="mini-kpi">
+        <div class="mini-kpi mini-kpi--hero">
           <div class="mini-kpi__lbl">Ejecutado</div>
           <div class="mini-kpi__val" id="kpiExec">—</div>
           <div class="naowee-progress naowee-progress--positive" style="margin-top:8px">
@@ -573,6 +667,7 @@
           <div class="mini-kpi__sub" id="kpiRevSub">—</div>
         </div>
       </div>
+      </div><!-- /.hero-card -->
 
       <!-- Detail card con tabs -->
       <div class="detail-card">
@@ -605,13 +700,24 @@
             <div class="section">
               <div class="section-label section-label--row">
                 <span>Reglas de elegibilidad</span>
-                <button class="naowee-btn naowee-btn--link naowee-btn--small" onclick="openWizard()" style="text-transform:none;letter-spacing:0">
+                <button class="naowee-btn naowee-btn--link naowee-btn--small" onclick="editCurrentProgram(3)" style="text-transform:none;letter-spacing:0">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>
                   Editar reglas
                 </button>
               </div>
-              <div class="cond-preview-box" id="condPreview">—</div>
-              <div class="cond-summary" id="condSummary"><strong>En lenguaje natural:</strong> —</div>
+              <!-- Natural language preview (mismo UI que la creación del programa) -->
+              <div class="wz-cond-preview" id="condPreview">
+                <div class="wz-cond-preview__head">
+                  <div class="wz-cond-preview__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <div>
+                    <div class="wz-cond-preview__title">Así se lee la regla</div>
+                    <div class="wz-cond-preview__sub">Lenguaje natural</div>
+                  </div>
+                </div>
+                <div class="wz-cond-preview__body" id="condPreviewBody"></div>
+              </div>
             </div>
           </div>
 
@@ -625,7 +731,7 @@
                     <span class="naowee-searchbox__icon">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </span>
-                    <input type="text" class="naowee-searchbox__input" placeholder="Buscar código o beneficiario" id="codigosSearch"/>
+                    <input type="text" class="naowee-searchbox__input" placeholder="Buscar código" id="codigosSearch"/>
                     <button type="button" class="naowee-searchbox__clear" onclick="clearSearch('codigosSearch')" aria-label="Limpiar búsqueda">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
@@ -638,8 +744,9 @@
                   </button>
                   <div class="toolbar-dd-menu" role="listbox">
                     <div class="toolbar-dd-item" role="option" aria-selected="true" data-val="all" onclick="setEstadoFilter('all','Estado: Todos')">Todos los estados</div>
-                    <div class="toolbar-dd-item" role="option" data-val="asig" onclick="setEstadoFilter('asig','Asignados')"><span class="dd-dot" style="background:#1f8923"></span>Asignados</div>
                     <div class="toolbar-dd-item" role="option" data-val="disp" onclick="setEstadoFilter('disp','Disponibles')"><span class="dd-dot" style="background:#a0a3bd"></span>Disponibles</div>
+                    <div class="toolbar-dd-item" role="option" data-val="asig" onclick="setEstadoFilter('asig','Asignados')"><span class="dd-dot" style="background:#1f8923"></span>Asignados</div>
+                    <div class="toolbar-dd-item" role="option" data-val="reasig" onclick="setEstadoFilter('reasig','Reasignados')"><span class="dd-dot" style="background:#7c3aed"></span>Reasignados</div>
                     <div class="toolbar-dd-item" role="option" data-val="rev" onclick="setEstadoFilter('rev','Revertidos')"><span class="dd-dot" style="background:#9e0015"></span>Revertidos</div>
                   </div>
                 </div>
@@ -670,9 +777,8 @@
                 <tr>
                   <th>Código</th>
                   <th>Estado</th>
-                  <th>Beneficiario</th>
-                  <th>Operador</th>
-                  <th>Fecha</th>
+                  <th>Subido por</th>
+                  <th>Última actualización</th>
                   <th style="text-align:right">Valor</th>
                 </tr>
               </thead>
@@ -736,7 +842,8 @@
                   <th>Operador</th>
                   <th>Región</th>
                   <th>Fecha</th>
-                  <th style="text-align:right">Estado</th>
+                  <th>Estado</th>
+                  <th aria-label="Evidencia"></th>
                 </tr>
               </thead>
               <tbody id="asignTbody"></tbody>
@@ -750,48 +857,7 @@
           <div class="tab-pane" data-pane="historial" hidden>
             <div class="section">
               <div class="section-label">Historial de cambios del programa</div>
-              <div class="timeline" id="timeline">
-                <div class="timeline-item">
-                  <div class="timeline-dot green">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Programa activado</div>
-                    <div class="timeline-desc">El programa quedó disponible para los operadores en campo.</div>
-                    <div class="timeline-date">Doug Vargas · hace 3 minutos</div>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-dot orange">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Cargue masivo de 200 códigos</div>
-                    <div class="timeline-desc">Archivo <code>becas-medallistas-2026.xlsx</code> procesado sin errores.</div>
-                    <div class="timeline-date">Doug Vargas · hace 4 minutos</div>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-dot blue">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Condiciones de elegibilidad editadas</div>
-                    <div class="timeline-desc">Se agregó la regla <strong>"medalla de plata"</strong> al grupo OR principal.</div>
-                    <div class="timeline-date">Doug Vargas · hace 6 minutos</div>
-                  </div>
-                </div>
-                <div class="timeline-item">
-                  <div class="timeline-dot gray">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                  </div>
-                  <div class="timeline-content">
-                    <div class="timeline-title">Programa creado</div>
-                    <div class="timeline-desc">Estado inicial: borrador. Rubro asignado: $200M.</div>
-                    <div class="timeline-date">Doug Vargas · hace 8 minutos</div>
-                  </div>
-                </div>
-              </div>
+              <div class="timeline" id="timeline"></div>
             </div>
           </div>
         </div>
@@ -847,16 +913,9 @@ const STATUS_META = {
   paused: { label: 'Pausado', variant: 'caution' },
   closed: { label: 'Cerrado', variant: 'informative' }
 };
-const CAT_ICONS = {
-  'Beca':        '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
-  'Kit':         '<path d="M20 7h-3V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2H4a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V8a1 1 0 00-1-1z"/><path d="M9 7V5h6v2"/>',
-  'Bono':        '<circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 010 5H9"/>',
-  'Transporte':  '<rect x="3" y="3" width="18" height="13" rx="2"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/>',
-  'Inscripción': '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>',
-  'Descuento':   '<path d="M20 12V8H6a2 2 0 110-4h12v4M20 12V16a2 2 0 01-2 2H6a2 2 0 110-4h12a2 2 0 012 2z"/>',
-  'Pase':        '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 12h18"/>',
-  'Dinero':      '<circle cx="12" cy="12" r="10"/><path d="M12 6v12M9 9h4.5a2.5 2.5 0 010 5H9"/>'
-};
+// Iconografía de categorías: ahora viene de shared/programs-data.js
+// (window.CAT_ICONS). Alias local para no tocar callsites.
+const CAT_ICONS = window.CAT_ICONS;
 function formatMoney(n){ return '$' + n.toLocaleString('es-CO'); }
 function formatMoneyShort(n){
   if(!n) return '$0';
@@ -949,13 +1008,42 @@ function hydrateProgram(){
     <div class="info-row-plain"><dt>Responsable</dt><dd>${p.responsible}</dd></div>
   `;
 
-  // Condiciones
-  const groupBlocks = p.conditions.groups.map(g => {
-    const inner = g.rules.map(r => `<b>${r.field.toLowerCase()}</b> ${r.op} <em>${r.value}</em>`).join(' <b>AND</b> ');
-    return p.conditions.groups.length > 1 ? `( ${inner} )` : inner;
-  });
-  document.getElementById('condPreview').innerHTML = groupBlocks.join('<br/><b>OR</b><br/>');
-  document.getElementById('condSummary').innerHTML = `<strong>En lenguaje natural:</strong> ${p.conditions.summary}`;
+  // Condiciones — si los incentivos tienen su propio bloque (multi mode), las
+  // mostramos por incentivo. Si no, las del programa.
+  const incHasConditions = p.incentives && p.incentives.some(i => i.conditions && i.conditions.groups && i.conditions.groups.length);
+  const renderGroupsHTML = (groups) => {
+    return groups.map((g, gi) => {
+      const rowHTML = g.rules.map(r => {
+        const valStr = String(r.value);
+        const valHTML = valStr
+          ? `<span class="wz-cond-preview__val">${valStr}</span>`
+          : `<span class="wz-cond-preview__val wz-cond-preview__val--empty">…</span>`;
+        return `<span class="wz-cond-preview__field">${r.field}</span> ${r.op} ${valHTML}`;
+      }).join(' <span class="wz-cond-preview__conn wz-cond-preview__conn--and">y</span> ');
+      return `<div class="wz-cond-preview__group"><span class="wz-cond-preview__group-lbl">Grupo ${gi + 1}</span><span class="wz-cond-preview__group-body">${rowHTML}</span></div>`;
+    });
+  };
+  const orDivider = '<div class="wz-cond-preview__or"><span class="wz-cond-preview__conn wz-cond-preview__conn--or">o</span></div>';
+  let condBodyHTML = '';
+  if(incHasConditions){
+    // Mostrar un bloque por cada incentivo con condiciones
+    condBodyHTML = p.incentives.map((inc, idx) => {
+      const groups = inc.conditions && inc.conditions.groups || [];
+      if(!groups.length) return '';
+      const intro = groups.length > 1
+        ? `El atleta es elegible para <strong>${inc.name}</strong> si cumple <strong>cualquiera</strong> de estas reglas:`
+        : `El atleta es elegible para <strong>${inc.name}</strong> si cumple <strong>todas</strong> estas condiciones:`;
+      return `<div class="cond-inc-block"><div class="cond-inc-block__head"><span class="cond-inc-block__num">#${idx+1}</span><span class="cond-inc-block__name">${inc.name}</span><span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">${inc.category}</span></div><p class="wz-cond-preview__intro">${intro}</p>${renderGroupsHTML(groups).join(orDivider)}</div>`;
+    }).join('');
+  } else if(p.conditions.groups.length){
+    const intro = p.conditions.groups.length > 1
+      ? 'El atleta es elegible si cumple <strong>cualquiera</strong> de estos grupos de condiciones:'
+      : 'El atleta es elegible si cumple <strong>todas</strong> estas condiciones:';
+    condBodyHTML = `<p class="wz-cond-preview__intro">${intro}</p>${renderGroupsHTML(p.conditions.groups).join(orDivider)}`;
+  } else {
+    condBodyHTML = '<em>Sin condiciones definidas.</em>';
+  }
+  document.getElementById('condPreviewBody').innerHTML = condBodyHTML;
 
   // Modal cargar codigos — program name
   const ccName = document.getElementById('ccProgramName');
@@ -974,7 +1062,111 @@ window.addEventListener('load', () => {
   seedAsign();
   renderCodigos();
   renderAsign();
+  renderHistorial();
+  showActivatedToastIfNeeded();
 });
+
+/* Abre el wizard de edición con los datos del programa actualmente visible.
+   Si se pasa un step, intenta saltar a ese paso después de abrir. */
+function editCurrentProgram(step){
+  if(!CURRENT_PROGRAM){ if(typeof openWizard === 'function') openWizard(); return; }
+  if(typeof window.openWizardForEdit === 'function'){
+    window.openWizardForEdit(CURRENT_PROGRAM.id);
+    if(step && typeof window.tryGoStep === 'function'){
+      // Esperamos al próximo tick para que el wizard ya esté abierto y el form populado.
+      setTimeout(() => window.tryGoStep(step), 100);
+    }
+  } else if(typeof openWizard === 'function'){
+    openWizard();
+  }
+}
+window.editCurrentProgram = editCurrentProgram;
+
+/* Si el detalle se abrió tras activar un programa (?activated=1), mostrar
+   un toast positive bottom-right confirmando la creación. Limpia el query
+   param para que un refresh no lo dispare de nuevo. */
+function showActivatedToastIfNeeded(){
+  const params = new URLSearchParams(location.search);
+  if(params.get('activated') !== '1') return;
+  const wrap = document.createElement('div');
+  wrap.className = 'wz-toast-wrap';
+  wrap.innerHTML = `
+    <div class="wz-toast naowee-message naowee-message--positive">
+      <div class="naowee-message__header">
+        <div class="naowee-message__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="naowee-message__text">
+          <strong>Programa creado exitosamente.</strong> ${(CURRENT_PROGRAM && CURRENT_PROGRAM.name) ? CURRENT_PROGRAM.name + ' ' : ''}ya está disponible para los operadores en campo.
+        </div>
+        <button type="button" class="wz-toast__dismiss" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+  const dismiss = () => { wrap.style.opacity = '0'; setTimeout(() => wrap.remove(), 250); };
+  wrap.querySelector('.wz-toast__dismiss').addEventListener('click', dismiss);
+  setTimeout(dismiss, 5500);
+  // Limpia el query param para que recargas no re-disparen.
+  params.delete('activated');
+  const newUrl = location.pathname + (params.toString() ? '?' + params : '') + location.hash;
+  history.replaceState(null, '', newUrl);
+}
+
+/* Historial dinámico — refleja sólo los eventos reales del programa.
+   Para programas creados por el usuario: sólo "Programa creado/activado".
+   Para programas demo seeded: timeline rico simulado. */
+function renderHistorial(){
+  const tl = document.getElementById('timeline');
+  if(!tl || !CURRENT_PROGRAM) return;
+  const p = CURRENT_PROGRAM;
+  const items = [];
+  const ICONS = {
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    plus:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+    edit:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg>'
+  };
+
+  if(p._userCreated){
+    const when = p.createdAt ? new Date(p.createdAt) : new Date();
+    const dateStr = when.toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    if(p.status === 'active'){
+      items.push({ dot:'green', ico: ICONS.check, title:'Programa activado',
+        desc:'El programa quedó disponible para los operadores en campo.',
+        date:`${p.responsible} · ${dateStr}` });
+    }
+    if(p.codes.total > 0){
+      const fileLabel = p.codesFile ? `Archivo <code>${p.codesFile}</code>` : `${p.codes.total} códigos cargados`;
+      items.push({ dot:'orange', ico: ICONS.upload, title:`Cargue de ${p.codes.total} códigos`,
+        desc:`${fileLabel}.`,
+        date:`${p.responsible} · ${dateStr}` });
+    }
+    items.push({ dot:'gray', ico: ICONS.plus, title:'Programa creado',
+      desc:`Estado inicial: ${p.status === 'active' ? 'activo' : 'borrador'}. Rubro asignado: ${formatMoneyShort(p.rubro)}.`,
+      date:`${p.responsible} · ${dateStr}` });
+  } else {
+    // Programa demo seeded: timeline rico simulado consistente con el seed actual.
+    items.push(
+      { dot:'green',  ico: ICONS.check,  title:'Programa activado',         desc:'El programa quedó disponible para los operadores en campo.', date:`${p.responsible} · hace 3 minutos` },
+      { dot:'orange', ico: ICONS.upload, title:`Cargue masivo de ${p.codes.total} códigos`, desc:'Archivo procesado sin errores.', date:`${p.responsible} · hace 4 minutos` },
+      { dot:'blue',   ico: ICONS.edit,   title:'Condiciones de elegibilidad editadas', desc:'Reglas de elegibilidad actualizadas.', date:`${p.responsible} · hace 6 minutos` },
+      { dot:'gray',   ico: ICONS.plus,   title:'Programa creado',           desc:`Estado inicial: borrador. Rubro asignado: ${formatMoneyShort(p.rubro)}.`, date:`${p.responsible} · hace 8 minutos` }
+    );
+  }
+
+  tl.innerHTML = items.map(it => `
+    <div class="timeline-item">
+      <div class="timeline-dot ${it.dot}">${it.ico}</div>
+      <div class="timeline-content">
+        <div class="timeline-title">${it.title}</div>
+        <div class="timeline-desc">${it.desc}</div>
+        <div class="timeline-date">${it.date}</div>
+      </div>
+    </div>
+  `).join('');
+}
 window.addEventListener('resize', () => { positionTabIndicator(); });
 
 /* ══ Dropdown toolbar toggles ══ */
@@ -1022,34 +1214,45 @@ const state = { all: [], filter: 'all', search: '', page: 1, pageSize: 10 };
 const asignState = { all: [], region: 'all', search: '', page: 1, pageSize: 10 };
 
 function seedCodigos(){
+  // Programa creado por el usuario en el wizard: usar SUS códigos reales.
+  // Si no asignó nada todavía, mostrar lista vacía — sin operadores/beneficiarios fake.
+  if(CURRENT_PROGRAM && CURRENT_PROGRAM._userCreated){
+    const codes = Array.isArray(CURRENT_PROGRAM.manualCodes) ? CURRENT_PROGRAM.manualCodes : [];
+    state.all = codes.map(code => ({ code, estado: 'disp', benef: null, op: null, fecha: null }));
+    return;
+  }
+  // Programa demo seeded en programs-data.js: mantener la data fake rica para la demo.
   const out = [];
-  for(let i = 1; i <= 200; i++){
+  const total = (CURRENT_PROGRAM && CURRENT_PROGRAM.codes && CURRENT_PROGRAM.codes.total) || 200;
+  for(let i = 1; i <= total; i++){
     const code = `2026BEC-${String(i).padStart(5, '0')}`;
-    // Distribution: ~18 disponibles, ~3 revertidos, resto asignados
     let estado;
-    if(i > 197) estado = 'rev';
-    else if(i > 182) estado = 'disp';
+    if(i > total - 3) estado = 'rev';
+    else if(i > total - 18) estado = 'disp';
+    else if(i % 25 === 0) estado = 'reasig';
     else estado = 'asig';
     const benef = estado === 'disp' ? null : PEOPLE[(i * 7) % PEOPLE.length];
     const op = estado === 'disp' ? null : OPERATORS[i % OPERATORS.length];
+    // Gestor de incentivos que subió el código (rol "admin" en este sistema)
+    const UPLOADERS = ['Doug Vargas','María Rojas','Andrés Polo','Camila Pérez'];
+    const uploader = UPLOADERS[i % UPLOADERS.length];
     const day = 22 - Math.floor(i / 30);
     const hour = String((6 + i) % 18 + 6).padStart(2, '0');
     const min = String((i * 13) % 60).padStart(2, '0');
-    const fecha = estado === 'disp' ? null : `${day} abr · ${hour}:${min}`;
-    out.push({ code, estado, benef, op, fecha });
+    const fecha = estado === 'disp'
+      ? `${15 - (i % 12)} feb · cargado`
+      : `${day} abr · ${hour}:${min}`;
+    out.push({ code, estado, benef, op, fecha, uploader });
   }
   state.all = out;
 }
 
 function filteredCodigos(){
   return state.all.filter(r => {
-    if(state.filter === 'disp' && r.estado !== 'disp') return false;
-    if(state.filter === 'asig' && r.estado !== 'asig') return false;
-    if(state.filter === 'rev' && r.estado !== 'rev') return false;
+    if(state.filter !== 'all' && r.estado !== state.filter) return false;
     if(state.search){
       const q = state.search.toLowerCase();
-      const hay = `${r.code} ${r.benef || ''} ${r.op || ''}`.toLowerCase();
-      if(!hay.includes(q)) return false;
+      if(!r.code.toLowerCase().includes(q)) return false;
     }
     return true;
   });
@@ -1067,9 +1270,10 @@ function renderCodigos(){
   const slice = list.slice(start, end);
 
   const badges = {
-    asig: '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>',
-    rev: '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>',
-    disp: '<span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">Sin asignación</span>'
+    disp:   '<span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">Disponible</span>',
+    asig:   '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>',
+    reasig: '<span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small" style="background:#f3e8ff;color:#7c3aed">Reasignado</span>',
+    rev:    '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
   };
 
   tbody.innerHTML = slice.length ? slice.map(r => {
@@ -1078,13 +1282,12 @@ function renderCodigos(){
     const valStyle = r.estado === 'rev' ? 'text-align:right;color:#9c9ebf' : 'text-align:right;font-weight:700';
     return `<tr>
       <td><code>${r.code}</code></td>
-      <td>${badges[r.estado]}</td>
-      <td${mutedStyle}>${r.benef || '—'}</td>
-      <td${mutedStyle}>${r.op || '—'}</td>
+      <td>${badges[r.estado] || badges.disp}</td>
+      <td>${r.uploader || '—'}</td>
       <td${mutedStyle}>${r.fecha || '—'}</td>
       <td style="${valStyle}">$1.000.000</td>
     </tr>`;
-  }).join('') : `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--naowee-color-text-secondary,#646587)">Sin resultados para los filtros actuales.</td></tr>`;
+  }).join('') : `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--naowee-color-text-secondary,#646587)">Sin resultados para los filtros actuales.</td></tr>`;
 
   document.getElementById('pagInfo').textContent = total === 0 ? 'Sin resultados' : `Mostrando ${start + 1}–${end} de ${total}`;
   document.getElementById('pagInput').value = state.page;
@@ -1127,11 +1330,17 @@ document.addEventListener('input', e => {
   }
 });
 
-/* ══ Asignaciones: fake data (182 registros) ══ */
+/* ══ Asignaciones: fake data (sólo para programas demo) ══ */
 function seedAsign(){
+  // Programa creado por el usuario: 0 asignaciones — apenas se acaba de crear.
+  if(CURRENT_PROGRAM && CURRENT_PROGRAM._userCreated){
+    asignState.all = [];
+    return;
+  }
   const out = [];
   const avColors = ['purple','orange','green','blue','pink','teal'];
-  for(let i = 1; i <= 182; i++){
+  const total = (CURRENT_PROGRAM && CURRENT_PROGRAM.codes && CURRENT_PROGRAM.codes.asig) || 182;
+  for(let i = 1; i <= total; i++){
     const code = `2026BEC-${String(i).padStart(5, '0')}`;
     const person = PEOPLE[(i * 7) % PEOPLE.length];
     const cc = `CC ${(1000000 + i * 131).toLocaleString('es-CO').replace(/,/g, '.')}`;
@@ -1171,7 +1380,11 @@ function renderAsign(){
     asig: '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>',
     rev: '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
   };
-  tb.innerHTML = slice.length ? slice.map(r => `
+  tb.innerHTML = slice.length ? slice.map(r => {
+    const evPayload = encodeURIComponent(JSON.stringify({
+      person:r.person, cc:r.cc, code:r.code, op:r.op, region:r.region, fecha:r.fecha, estado:r.estado
+    }));
+    return `
     <tr>
       <td><div style="display:flex;gap:10px;align-items:center;min-width:0">
         <div class="av-sm av-sm--${r.avClass}">${r.initials}</div>
@@ -1181,9 +1394,17 @@ function renderAsign(){
       <td>${r.op}</td>
       <td>${r.region}</td>
       <td>${r.fecha}</td>
-      <td style="text-align:right">${badges[r.estado]}</td>
-    </tr>
-  `).join('') : `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--naowee-color-text-secondary,#646587)">Sin resultados.</td></tr>`;
+      <td>${badges[r.estado]}</td>
+      <td style="text-align:right">
+        <span class="naowee-tooltip">
+          <button class="naowee-btn naowee-btn--mute naowee-btn--small ev-btn" onclick="openEvidence('${evPayload}')" aria-label="Ver evidencia">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <span class="naowee-tooltip__content">Ver evidencia</span>
+        </span>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--naowee-color-text-secondary,#646587)">Sin resultados.</td></tr>`;
   document.getElementById('asignPagInfo').textContent = total === 0 ? 'Sin resultados' : `Mostrando ${start + 1}–${end} de ${total}`;
   document.getElementById('asignPagInput').value = asignState.page;
   document.getElementById('asignPagTotal').textContent = totalPages;
@@ -1196,7 +1417,98 @@ function changeAsignPage(delta){
   asignState.page = Math.max(1, Math.min(totalPages, asignState.page + delta));
   renderAsign();
 }
+
+/* ═══ Lightbox de evidencia ═══ */
+const EV_PALETTES = [
+  ['#1f78d1','#7c3aed'], ['#d74009','#f59e0b'], ['#15803d','#0891b2'],
+  ['#7c3aed','#db2777'], ['#0f766e','#1f78d1'], ['#b45309','#dc2626']
+];
+function evPaletteFor(code){
+  let h = 0;
+  for(const c of (code || '')){ h = (h * 31 + c.charCodeAt(0)) & 0xffffffff; }
+  return EV_PALETTES[Math.abs(h) % EV_PALETTES.length];
+}
+function openEvidence(payload){
+  let r;
+  try { r = JSON.parse(decodeURIComponent(payload)); } catch(e){ return; }
+  const overlay = document.getElementById('evOverlay');
+  const [c1, c2] = evPaletteFor(r.code);
+  overlay.style.setProperty('--ev-c1', c1);
+  overlay.style.setProperty('--ev-c2', c2);
+  document.getElementById('evCode').textContent = r.code;
+  document.getElementById('evBenef').innerHTML = `${r.person}<div style="font-size:11.5px;color:#646587;font-weight:500;margin-top:2px">${r.cc}</div>`;
+  document.getElementById('evCodeRow').innerHTML = `<code>${r.code}</code>`;
+  document.getElementById('evOp').textContent = r.op;
+  document.getElementById('evRegion').textContent = r.region;
+  document.getElementById('evFecha').textContent = r.fecha;
+  document.getElementById('evEstado').innerHTML = r.estado === 'rev'
+    ? '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
+    : '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>';
+  overlay.classList.add('is-open');
+  document.body.style.overflow = 'hidden';
+}
+function closeEvidence(){
+  document.getElementById('evOverlay').classList.remove('is-open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('evOverlay')?.classList.contains('is-open')) closeEvidence();
+});
 </script>
+
+<!-- ═══ Lightbox: Evidencia de entrega ═══ -->
+<div class="ev-overlay" id="evOverlay" role="dialog" aria-modal="true" aria-labelledby="evTitle" onclick="if(event.target===this)closeEvidence()">
+  <div class="ev-modal" role="document">
+    <div class="ev-head">
+      <div>
+        <div class="ev-title" id="evTitle">Evidencia de entrega</div>
+        <div class="ev-sub">Código <code id="evCode">—</code> · captura tomada al confirmar la asignación</div>
+      </div>
+      <button class="ev-close" onclick="closeEvidence()" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="ev-body">
+      <div class="ev-photo">
+        <img id="evPhoto" alt="Evidencia de entrega — entrega de cheque ceremonial al beneficiario"
+             src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80"
+             onerror="this.onerror=null;this.src='https://picsum.photos/seed/'+(document.getElementById('evCode').textContent||'evidencia')+'/900/600'"/>
+      </div>
+      <div class="ev-meta">
+        <div class="ev-meta__row">
+          <div class="ev-meta__lbl">Beneficiario</div>
+          <div class="ev-meta__val" id="evBenef">—</div>
+        </div>
+        <div class="ev-meta__row">
+          <div class="ev-meta__lbl">Código entregado</div>
+          <div class="ev-meta__val" id="evCodeRow">—</div>
+        </div>
+        <div class="ev-meta__row">
+          <div class="ev-meta__lbl">Operador</div>
+          <div class="ev-meta__val" id="evOp">—</div>
+        </div>
+        <div class="ev-meta__row">
+          <div class="ev-meta__lbl">Región</div>
+          <div class="ev-meta__val" id="evRegion">—</div>
+        </div>
+        <div class="ev-meta__row">
+          <div class="ev-meta__lbl">Fecha y hora</div>
+          <div class="ev-meta__val" id="evFecha">—</div>
+        </div>
+        <div class="ev-meta__row">
+          <div class="ev-meta__lbl">Estado</div>
+          <div class="ev-meta__val" id="evEstado">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="ev-foot">
+      <span class="ev-foot__hint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Captura registrada en el paso 3 del flujo de asignación.
+      </span>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ MODAL: Cargar códigos al programa ═══ -->
 <div class="cc-overlay" id="ccOverlay" role="dialog" aria-modal="true" aria-labelledby="ccTitle">
@@ -1418,7 +1730,9 @@ function clearSearch(inputId){
 
 <script src="shared/programa-wizard.js" defer></script>
 
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
+
+<script src="shared/footer-scroll.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

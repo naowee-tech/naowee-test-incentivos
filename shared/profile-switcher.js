@@ -13,14 +13,18 @@
   const STORAGE_KEY = 'naowee-incentivos-role';
 
   const ROLES = {
-    admin:    { name:'Doug Vargas', label:'Gestor de incentivos', initials:'DV', bg:'#c4b5fd', fg:'#4c1d95', meta:'Parametriza y audita' },
-    operador: { name:'Doug Vargas', label:'Operador',             initials:'DV', bg:'#ffdfb5', fg:'#92400e', meta:'Asigna incentivos en campo' },
-    gestor:   { name:'Doug Vargas', label:'Gestor',               initials:'DV', bg:'#ffdfb5', fg:'#92400e', meta:'Asigna y revierte incentivos' }
+    admin:    { name:'Doug Vargas',     label:'Gestor de incentivos', initials:'DV', bg:'#c4b5fd', fg:'#4c1d95', meta:'Parametriza y audita' },
+    operador: { name:'Doug Vargas',     label:'Operador',             initials:'DV', bg:'#ffdfb5', fg:'#92400e', meta:'Asigna incentivos en campo' },
+    gestor:   { name:'Doug Vargas',     label:'Gestor',               initials:'DV', bg:'#ffdfb5', fg:'#92400e', meta:'Asigna y revierte incentivos' },
+    // Gestor de programa: sólo ve el(los) programa(s) que tiene asignado(s).
+    // Persona ficticia distinta de Doug para diferenciar visualmente la vista.
+    programa: { name:'Camila Restrepo', label:'Gestor de programa',   initials:'CR', bg:'#bfdbfe', fg:'#1e3a8a', meta:'Gestiona su programa asignado',
+                assignedPrograms: ['PRG-2026-003'] }
   };
 
   // Qué roles muestra el dropdown por default cuando se auto-inyecta.
-  // Paridad con las páginas legacy (dashboard, detalle, asignar): admin + operador.
-  const DEFAULT_ROLES_IN_DD = ['admin', 'operador'];
+  // Incluye programa para que el switcher permita probar la vista filtrada.
+  const DEFAULT_ROLES_IN_DD = ['admin', 'programa', 'operador'];
 
   function currentRole(){
     return localStorage.getItem(STORAGE_KEY) || 'admin';
@@ -38,6 +42,10 @@
     document.querySelectorAll('.user-chip .user-role').forEach(lbl => {
       lbl.textContent = r.label;
     });
+    // Actualiza el nombre del usuario (varía entre Doug y Camila según rol)
+    document.querySelectorAll('.user-chip .user-name').forEach(lbl => {
+      lbl.textContent = r.name;
+    });
     // Mantiene compatibilidad con IDs antiguos del template
     const ring = document.getElementById('avaRing');
     if(ring){ ring.textContent = r.initials; ring.style.background = r.bg; ring.style.color = r.fg; }
@@ -47,11 +55,21 @@
     document.querySelectorAll('.profile-dd__item').forEach(el => {
       el.classList.toggle('active', el.dataset.role === role);
     });
-    // Visibilidad de sidebar por rol (si la página usa el patrón)
-    document.querySelectorAll('.nav-row[data-role]').forEach(el => {
+    // Visibilidad por rol — generalizado a cualquier elemento con data-role
+    // (ej: nav-row, bloques de acciones admin-only). Excluye los items del
+    // dropdown del switcher (.profile-dd__item) — esos siempre están visibles
+    // porque son la lista de perfiles disponibles a elegir, no contenido
+    // restringido por rol.
+    document.querySelectorAll('[data-role]').forEach(el => {
+      if(el.classList.contains('profile-dd__item')) return;
       const dr = el.dataset.role;
       el.style.display = (dr === 'all' || dr === role) ? '' : 'none';
     });
+    // Hook opcional por página: si la página define onRoleApplied(role),
+    // se llama después del filtrado base. Permite a cada vista reaccionar
+    // (ej: cambiar título, hidratar un hero card, etc) sin depender del
+    // timing frágil de setTimeout(0) vs scripts deferred.
+    try { if(typeof window.onRoleApplied === 'function') window.onRoleApplied(role); } catch(_) {}
   }
 
   // Mapeo de páginas por rol: en qué vive cada perfil por default.
@@ -59,8 +77,11 @@
   // se redirige al "home" del perfil para que la UX refleje el cambio.
   const OPERATOR_PAGES = /incentivo-(08|09|10|11|14)/;
   const ADMIN_PAGES    = /incentivo-(02|03|04|05|06|07|12|13)/;
+  // Gestor de programa sólo vive en la lista (filtrada) y el detalle.
+  const PROGRAMA_PAGES = /incentivo-(03|05)/;
   const OPERATOR_HOME  = 'incentivo-08-asignar-buscar.html';
   const ADMIN_HOME     = 'incentivo-02-dashboard.html';
+  const PROGRAMA_HOME  = 'incentivo-03-programas.html';
 
   function switchRole(role){
     localStorage.setItem(STORAGE_KEY, role);
@@ -70,14 +91,26 @@
     const path = location.pathname;
     const onOperadorPage = OPERATOR_PAGES.test(path);
     const onAdminPage    = ADMIN_PAGES.test(path);
+    const onProgramaPage = PROGRAMA_PAGES.test(path);
 
     if(role === 'operador' && !onOperadorPage){
       setTimeout(() => { window.location.href = OPERATOR_HOME; }, 180);
+    } else if(role === 'programa' && !onProgramaPage){
+      // Gestor de programa: redirijo a su lista filtrada (PRG asignado).
+      setTimeout(() => { window.location.href = PROGRAMA_HOME; }, 180);
     } else if((role === 'admin' || role === 'gestor') && !onAdminPage){
       // Gestor de incentivos (admin) vive en el dashboard; si estoy en
       // pages del operador, redirijo.
       setTimeout(() => { window.location.href = ADMIN_HOME; }, 180);
     }
+  }
+
+  /* Helper: devuelve los IDs de programas asignados al rol actual.
+     Retorna null si el rol no tiene restricciones (ve todo). Las páginas
+     que renderizan listas pueden filtrar contra este array. */
+  function getRoleAssignments(){
+    const r = ROLES[currentRole()];
+    return (r && Array.isArray(r.assignedPrograms)) ? r.assignedPrograms.slice() : null;
   }
 
   function toggleProfileDD(ev){
@@ -187,4 +220,5 @@
   window.applyRole = applyRole;
   window.switchRole = switchRole;
   window.toggleProfileDD = toggleProfileDD;
+  window.getRoleAssignments = getRoleAssignments;
 })();

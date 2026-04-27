@@ -14,32 +14,22 @@
   .page-title{font-size:24px;font-weight:700;line-height:1.2;letter-spacing:-.01em;margin-bottom:4px;color:var(--naowee-color-text-primary,#282834)}
   .page-sub{font-size:14px;color:var(--naowee-color-text-secondary,#646587);line-height:1.5;max-width:640px}
 
-  /* Stepper sticky — paridad con shell.css (.page padding 28/32/40) */
-  .stepper-wrap{
-    position:sticky;top:0;z-index:10;
-    margin:0 0 24px;padding:0;
-    background:transparent;
-    transition:margin .22s ease,padding .22s ease,background .22s ease;
-  }
+  /* Stepper — paridad con paso 1: sticky directo, sin wrap full-bleed */
   .stepper{
+    position:sticky;top:0;z-index:10;
     display:flex;align-items:center;gap:0;
     padding:14px 20px;background:#fff;
     border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:14px;overflow-x:auto;
-    transition:box-shadow .22s,border-radius .22s,border-color .22s,border-top-width .22s;
+    border-radius:14px;
+    margin:0 0 24px;
+    overflow-x:auto;
+    transition:box-shadow .22s,border-radius .22s,border-color .22s,padding .18s ease;
   }
-  /* Stuck: full-bleed, pegado al header, pierde radios superiores */
-  .stepper-wrap.is-stuck{
-    margin:-28px -32px 24px;
-    padding:0 32px;
-    background:#fff;
-  }
-  .stepper-wrap.is-stuck .stepper{
-    border-top-left-radius:0;border-top-right-radius:0;
-    border-top-color:transparent;
+  .stepper.is-stuck{
     box-shadow:0 4px 16px rgba(40,40,52,.08);
   }
   .step{display:flex;align-items:center;gap:10px;flex-shrink:0;font-size:12.5px;font-weight:600;color:var(--naowee-color-text-secondary,#646587)}
+  .step-lbl{display:inline-block;white-space:nowrap;overflow:hidden;transition:max-width .18s ease,opacity .18s ease,margin-left .18s ease}
   .step .n{
     width:26px;height:26px;border-radius:50%;
     border:1.5px solid #d0d4e6;background:#fff;
@@ -87,7 +77,7 @@
   .recap__meta{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
   .recap__meta .dot{width:3px;height:3px;background:#d0d4e6;border-radius:50%}
 
-  .layout{display:grid;grid-template-columns:1fr 360px;gap:20px}
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
   @media(max-width:1100px){.layout{grid-template-columns:1fr}}
 
   /* Container unificado: recap + incentivos + códigos + footer */
@@ -186,27 +176,67 @@
     font-size:15px;font-weight:700;color:var(--naowee-color-text-primary,#282834);padding-right:30px;
   }
 
-  /* Code selector */
-  .code-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:12px;
-    max-height:300px;overflow-y:auto;padding:2px;
-  }
-  .code{
-    padding:12px 14px;border:1.5px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:10px;background:#fff;cursor:pointer;
-    transition:all .15s;
-    display:flex;flex-direction:column;gap:3px;
-  }
-  .code:hover{border-color:#d0d4e6;background:#fafbfd}
-  .code.selected{border-color:var(--naowee-color-text-accent,#d74009);background:#fff3e6}
-  .code__num{font-family:'SF Mono',monospace;font-size:12.5px;font-weight:700;color:var(--naowee-color-text-primary,#282834);letter-spacing:.3px}
-  .code__meta{font-size:10.5px;color:var(--naowee-color-text-secondary,#646587);font-weight:500}
-
-  .code-filters{
+  /* Code selector — vista tabla */
+  .code-toolbar{
     display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;
   }
-  .code-filters .naowee-searchbox{flex:1;min-width:200px}
-  .code-filters .naowee-searchbox .naowee-searchbox__input-wrap{border-radius:9999px;height:36px;padding:4px 12px}
+  .code-toolbar .naowee-searchbox{flex:1;min-width:240px;max-width:380px}
+  .code-toolbar .naowee-searchbox .naowee-searchbox__input-wrap{border-radius:9999px;height:36px;padding:4px 12px}
+  .code-toolbar__count{
+    font-size:12px;color:var(--naowee-color-text-secondary,#646587);
+    font-variant-numeric:tabular-nums;
+  }
+  .code-toolbar__count strong{color:var(--naowee-color-text-primary,#282834);font-weight:700}
+
+  .code-table-wrap{
+    margin-top:12px;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:12px;overflow:hidden;
+  }
+  .code-table-scroll{max-height:380px;overflow-y:auto}
+  .code-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+  .code-table thead th{
+    position:sticky;top:0;z-index:1;
+    font-family:'Inter',sans-serif;
+    font-size:11px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+    color:var(--naowee-color-text-secondary,#646587);
+    padding:11px 14px;text-align:left;background:#f5f6fa;border:none;white-space:nowrap;
+  }
+  .code-table tbody tr{cursor:pointer;transition:background .12s}
+  .code-table tbody tr:hover{background:#fafbfd}
+  .code-table tbody tr.selected{background:#fff7f2}
+  .code-table tbody tr.selected td{color:var(--naowee-color-text-primary,#282834)}
+  .code-table tbody td{
+    padding:11px 14px;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
+    color:var(--naowee-color-text-primary,#282834);vertical-align:middle;
+  }
+  .code-table tbody tr:last-child td{border-bottom:none}
+  .code-table th.col-radio,.code-table td.col-radio{width:36px;padding-right:0}
+  .code-table th.col-num{width:36%}
+  .code-table th.col-value,.code-table td.col-value{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+  .code-table .num-cell{font-family:'SF Mono','JetBrains Mono',monospace;font-size:12.5px;font-weight:700;letter-spacing:.3px;color:var(--naowee-color-text-primary,#282834)}
+  .code-table .meta-cell{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587)}
+
+  /* Radio mini DS */
+  .code-radio{
+    width:18px;height:18px;border-radius:50%;border:2px solid #c4c7dc;
+    display:inline-flex;align-items:center;justify-content:center;
+    transition:border-color .15s,background .15s;flex-shrink:0;
+  }
+  .code-table tr.selected .code-radio{border-color:var(--naowee-color-text-accent,#d74009)}
+  .code-table tr.selected .code-radio::after{
+    content:'';width:8px;height:8px;border-radius:50%;background:var(--naowee-color-text-accent,#d74009);
+  }
+  .code-table tr:hover .code-radio:not(.selected){border-color:#9c9ebf}
+
+  .code-empty{padding:36px 18px;text-align:center;color:#9c9ebf;font-size:13px}
+
+  .code-pager{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px 14px;border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
+    font-size:12px;color:var(--naowee-color-text-secondary,#646587);
+    background:#fff;
+  }
+  .code-pager .naowee-pagination__pages{margin-right:14px}
 
   /* Summary sidebar sin shadow */
   .summary{
@@ -278,17 +308,22 @@
 
     <div class="page">
 
-      <!-- Stepper sticky (sin page-header) -->
-      <div class="stepper-wrap" id="stepperWrap">
-        <div class="stepper">
-          <div class="step done"><span class="n"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Buscar deportista</div>
-          <span class="step-sep"></span>
-          <div class="step active"><span class="n">2</span> Seleccionar incentivo</div>
-          <span class="step-sep"></span>
-          <div class="step"><span class="n">3</span> Evidencia de entrega</div>
-          <span class="step-sep"></span>
-          <div class="step"><span class="n">4</span> Confirmación</div>
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Asignar incentivo</h1>
+          <p class="page-sub">Selecciona el incentivo aplicable y el código del inventario que vas a entregar.</p>
         </div>
+      </div>
+
+      <!-- Stepper sticky (paridad con paso 1) -->
+      <div class="stepper" id="stepperWrap">
+        <div class="step done"><span class="n"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="step-lbl">Buscar deportista</span></div>
+        <span class="step-sep"></span>
+        <div class="step active"><span class="n">2</span><span class="step-lbl">Seleccionar incentivo</span></div>
+        <span class="step-sep"></span>
+        <div class="step"><span class="n">3</span><span class="step-lbl">Evidencia de entrega</span></div>
+        <span class="step-sep"></span>
+        <div class="step"><span class="n">4</span><span class="step-lbl">Confirmación</span></div>
       </div>
 
       <div class="layout">
@@ -317,7 +352,7 @@
             <p class="desc">Selecciona el incentivo que vas a entregar. El valor se descontará del rubro del programa.</p>
 
             <div class="incentive-list" id="incList">
-              <div class="inc" data-id="beca" data-value="1000000" data-name="Beca educativa · Medallistas de oro" onclick="selectInc(this)">
+              <div class="inc" data-id="beca" data-category="beca" data-value="1000000" data-name="Beca educativa · Medallistas de oro" onclick="selectInc(this)">
                 <div class="inc__ico" style="background:#fff3e6;color:#d74009">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                 </div>
@@ -332,7 +367,7 @@
                 <div class="inc__value">$1.000.000</div>
               </div>
 
-              <div class="inc" data-id="kit" data-value="350000" data-name="Kit deportivo Atlántico" onclick="selectInc(this)">
+              <div class="inc" data-id="kit" data-category="kit" data-value="350000" data-name="Kit deportivo Atlántico" onclick="selectInc(this)">
                 <div class="inc__ico" style="background:#eef5ff;color:#1f78d1">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a3 3 0 016 0v3"/></svg>
                 </div>
@@ -346,25 +381,77 @@
                 </div>
                 <div class="inc__value">$350.000</div>
               </div>
+
+              <div class="inc" data-id="bono" data-category="bono" data-value="500000" data-name="Bono nutrición 2026" onclick="selectInc(this)">
+                <div class="inc__ico" style="background:#f3e8ff;color:#7c3aed">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                </div>
+                <div class="inc__body">
+                  <div class="inc__name">Bono nutrición 2026</div>
+                  <div class="inc__desc">Bono trimestral · canjeable con código en aliados</div>
+                  <div class="inc__tags">
+                    <span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small">Monetario</span>
+                    <span class="naowee-badge naowee-badge--caution naowee-badge--quiet naowee-badge--small">Bono nutrición</span>
+                  </div>
+                </div>
+                <div class="inc__value">$500.000</div>
+              </div>
             </div>
           </div>
 
           <div class="flow-section flow-section--hidden" id="codePanel">
             <h3><span class="step-num">2</span> Código del inventario</h3>
-            <p class="desc">Selecciona manualmente un código disponible del programa. Quedará marcado como asignado al confirmar la entrega.</p>
+            <p class="desc">Selecciona un código disponible del programa. Usa el buscador para encontrarlo rápido. Quedará marcado como asignado al confirmar la entrega.</p>
 
-            <div class="code-filters">
+            <div class="code-toolbar">
               <div class="naowee-searchbox naowee-searchbox--small naowee-searchbox--pill">
                 <div class="naowee-searchbox__input-wrap">
                   <span class="naowee-searchbox__icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                   </span>
-                  <input type="text" class="naowee-searchbox__input" id="codeSearch" placeholder="Buscar por código" oninput="filterCodes()"/>
+                  <input type="text" class="naowee-searchbox__input" id="codeSearch" placeholder="Buscar por código (ej. 2026BEC-00042)" oninput="filterCodes()"/>
+                  <button type="button" class="naowee-searchbox__clear" onclick="clearCodeSearch()" aria-label="Limpiar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+              <span class="code-toolbar__count" id="codeCount">—</span>
+            </div>
+
+            <div class="code-table-wrap">
+              <div class="code-table-scroll">
+                <table class="code-table">
+                  <thead>
+                    <tr>
+                      <th class="col-radio" aria-label="Selección"></th>
+                      <th class="col-num">Código</th>
+                      <th>Tipo</th>
+                      <th>Cargado</th>
+                      <th class="col-value">Valor</th>
+                    </tr>
+                  </thead>
+                  <tbody id="codeTbody"></tbody>
+                </table>
+              </div>
+              <div class="code-pager" id="codePager">
+                <span id="codePagerInfo">—</span>
+                <div class="naowee-pagination naowee-pagination--small">
+                  <div class="naowee-pagination__pages">
+                    <span class="naowee-pagination__label">Página</span>
+                    <input type="text" class="naowee-pagination__input" id="codePageInput" value="1" inputmode="numeric"/>
+                    <span class="naowee-pagination__total">de <strong id="codePageTotal">1</strong></span>
+                  </div>
+                  <div class="naowee-pagination__controls">
+                    <button type="button" class="naowee-pagination__btn" id="codePrev" onclick="changeCodePage(-1)" aria-label="Anterior">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button type="button" class="naowee-pagination__btn" id="codeNext" onclick="changeCodePage(1)" aria-label="Siguiente">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div class="code-grid" id="codeGrid"></div>
           </div>
 
           <!-- Footer nav (consistente) -->
@@ -430,43 +517,59 @@
 </div>
 
 <script>
+// Generación de códigos (cantidades realistas: 60 becas + 60 kits)
+const MONTHS = ['ene','feb','mar','abr','may','jun'];
+function buildCodes(prefix, type, valor, note, count, startNum){
+  const arr = [];
+  for(let i=0; i<count; i++){
+    const num = String(startNum + i).padStart(5,'0');
+    const day = String(((i*7)%27)+1).padStart(2,'0');
+    const m = MONTHS[i%MONTHS.length];
+    arr.push({ code: `${prefix}-${num}`, type, value: valor, note, fecha: `${day} ${m} 2026` });
+  }
+  return arr;
+}
 const ALL_CODES = [
-  { code:'2026BEC-00042', type:'beca', value:1000000, note:'Beca educ. oro' },
-  { code:'2026BEC-00043', type:'beca', value:1000000, note:'Beca educ. oro' },
-  { code:'2026BEC-00044', type:'beca', value:1000000, note:'Beca educ. oro' },
-  { code:'2026BEC-00045', type:'beca', value:1000000, note:'Beca educ. oro' },
-  { code:'2026BEC-00046', type:'beca', value:1000000, note:'Beca educ. oro' },
-  { code:'2026BEC-00047', type:'beca', value:1000000, note:'Beca educ. oro' },
-  { code:'2026KIT-01291', type:'kit',  value:350000,  note:'Kit disciplina pista' },
-  { code:'2026KIT-01292', type:'kit',  value:350000,  note:'Kit disciplina pista' },
-  { code:'2026KIT-01293', type:'kit',  value:350000,  note:'Kit disciplina pista' },
-  { code:'2026KIT-01294', type:'kit',  value:350000,  note:'Kit disciplina pista' },
-  { code:'2026KIT-01295', type:'kit',  value:350000,  note:'Kit disciplina pista' },
-  { code:'2026KIT-01296', type:'kit',  value:350000,  note:'Kit disciplina pista' }
+  ...buildCodes('2026BEC', 'beca', 1000000, 'Beca educativa · oro', 60, 42),
+  ...buildCodes('2026KIT', 'kit',  350000,  'Kit disciplina pista', 60, 1291),
+  ...buildCodes('2026BON', 'bono', 500000,  'Bono nutrición · trimestral', 60, 501)
 ];
 
+const PAGE_SIZE = 10;
 let selectedInc = null;
 let selectedCode = null;
 let activeFilter = 'all';
 let searchQ = '';
+let codePage = 1;
 
 function selectInc(el){
   document.querySelectorAll('.inc').forEach(x => x.classList.remove('selected'));
   el.classList.add('selected');
-  selectedInc = { id: el.dataset.id, value: +el.dataset.value, name: el.dataset.name };
+  const category = el.dataset.category || el.dataset.id;
+  selectedInc = { id: el.dataset.id, value: +el.dataset.value, name: el.dataset.name, category };
   activeFilter = el.dataset.id;
+
+  const cp = document.getElementById('codePanel');
+  const isBono = category === 'bono';
+
+  if(!isBono){
+    // No-bono: oculta panel de códigos, no requiere código para continuar
+    cp.classList.add('flow-section--hidden');
+    selectedCode = null;
+    updateSummary();
+    return;
+  }
+
+  // Bono: revela panel de códigos
   selectedCode = null;
   renderCodes();
   updateSummary();
 
-  const cp = document.getElementById('codePanel');
   const firstReveal = cp.classList.contains('flow-section--hidden');
   if(firstReveal){
     cp.classList.remove('flow-section--hidden');
-    // Trigger animation: next frame para que el navegador respete from{} inicial
     requestAnimationFrame(() => {
       cp.classList.add('flow-section--reveal');
-      // Suave scroll al nuevo panel para que el usuario vea el paso 2
       const scroller = document.querySelector('.page');
       if(scroller){
         setTimeout(() => {
@@ -474,33 +577,90 @@ function selectInc(el){
         }, 160);
       }
     });
-    // Limpia la clase de animación al terminar para no interferir con interacciones
     cp.addEventListener('animationend', () => cp.classList.remove('flow-section--reveal'), { once:true });
   }
 }
 
 function filterCodes(){
-  searchQ = document.getElementById('codeSearch').value.trim().toLowerCase();
+  const inp = document.getElementById('codeSearch');
+  searchQ = inp.value.trim().toLowerCase();
+  // Mostrar/ocultar el botón clear según contenido
+  const clear = inp.parentElement.querySelector('.naowee-searchbox__clear');
+  if(clear) clear.style.display = searchQ ? 'inline-flex' : 'none';
+  codePage = 1;
   renderCodes();
 }
 
-function renderCodes(){
-  const grid = document.getElementById('codeGrid');
-  const list = ALL_CODES.filter(c => {
+function clearCodeSearch(){
+  const inp = document.getElementById('codeSearch');
+  inp.value = '';
+  searchQ = '';
+  codePage = 1;
+  const clear = inp.parentElement.querySelector('.naowee-searchbox__clear');
+  if(clear) clear.style.display = 'none';
+  inp.focus();
+  renderCodes();
+}
+
+function getFilteredCodes(){
+  return ALL_CODES.filter(c => {
     if(activeFilter !== 'all' && c.type !== activeFilter) return false;
     if(searchQ && !c.code.toLowerCase().includes(searchQ)) return false;
     return true;
   });
-  if(!list.length){
-    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:28px;color:#9c9ebf;font-size:13px">Sin códigos con ese filtro.</div>`;
-    return;
+}
+
+function renderCodes(){
+  const tbody = document.getElementById('codeTbody');
+  const list = getFilteredCodes();
+  const total = list.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if(codePage > totalPages) codePage = totalPages;
+  const start = (codePage - 1) * PAGE_SIZE;
+  const end = Math.min(start + PAGE_SIZE, total);
+  const slice = list.slice(start, end);
+
+  // Contador en toolbar
+  const countEl = document.getElementById('codeCount');
+  if(countEl){
+    countEl.innerHTML = total === 0
+      ? '<strong>0</strong> códigos disponibles'
+      : `<strong>${total}</strong> código${total===1?'':'s'} disponible${total===1?'':'s'}`;
   }
-  grid.innerHTML = list.map(c => `
-    <div class="code ${selectedCode === c.code ? 'selected':''}" onclick="selectCode('${c.code}')">
-      <div class="code__num">${c.code}</div>
-      <div class="code__meta">${c.note} · $${c.value.toLocaleString('es-CO')}</div>
-    </div>
-  `).join('');
+
+  if(!total){
+    tbody.innerHTML = `<tr><td colspan="5"><div class="code-empty">Sin códigos con ese filtro. Prueba otro número o limpia el buscador.</div></td></tr>`;
+  } else {
+    const typeLabel = (t) => t === 'beca' ? 'Beca' : t === 'kit' ? 'Kit' : 'Bono';
+    const typeColor = (t) => t === 'beca' ? '#fff3e6' : t === 'kit' ? '#eef5ff' : '#f3e8ff';
+    const typeFg = (t) => t === 'beca' ? '#d74009' : t === 'kit' ? '#1f78d1' : '#7c3aed';
+    tbody.innerHTML = slice.map(c => {
+      const isSel = selectedCode === c.code;
+      return `
+        <tr class="${isSel ? 'selected':''}" onclick="selectCode('${c.code}')">
+          <td class="col-radio"><span class="code-radio"></span></td>
+          <td class="col-num"><span class="num-cell">${c.code}</span><div class="meta-cell">${c.note}</div></td>
+          <td><span class="naowee-badge naowee-badge--quiet naowee-badge--small" style="background:${typeColor(c.type)};color:${typeFg(c.type)}">${typeLabel(c.type)}</span></td>
+          <td class="meta-cell">${c.fecha}</td>
+          <td class="col-value">$${c.value.toLocaleString('es-CO')}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Pagination
+  document.getElementById('codePagerInfo').innerHTML = total === 0
+    ? 'Sin resultados'
+    : `Mostrando <strong style="color:var(--naowee-color-text-primary,#282834)">${start+1}–${end}</strong> de <strong style="color:var(--naowee-color-text-primary,#282834)">${total}</strong>`;
+  document.getElementById('codePageInput').value = codePage;
+  document.getElementById('codePageTotal').textContent = totalPages;
+  document.getElementById('codePrev').disabled = codePage <= 1;
+  document.getElementById('codeNext').disabled = codePage >= totalPages;
+}
+
+function changeCodePage(delta){
+  const totalPages = Math.max(1, Math.ceil(getFilteredCodes().length / PAGE_SIZE));
+  codePage = Math.max(1, Math.min(totalPages, codePage + delta));
+  renderCodes();
 }
 
 function selectCode(code){
@@ -513,21 +673,54 @@ function updateSummary(){
   const sumInc = document.getElementById('sumInc');
   const sumCode = document.getElementById('sumCode');
   const sumValue = document.getElementById('sumValue');
+  const btnNext = document.getElementById('btnNext');
   if(selectedInc){
     sumInc.classList.remove('pending');
     sumInc.querySelector('.val').textContent = selectedInc.name;
   }
+  const isBono = selectedInc?.category === 'bono';
   if(selectedCode){
     sumCode.classList.remove('pending');
     sumCode.querySelector('.val').textContent = selectedCode;
     sumCode.querySelector('.val').style.fontFamily = "'SF Mono',monospace";
+  } else if(selectedInc && !isBono){
+    // No-bono: el código no aplica
+    sumCode.classList.add('pending');
+    sumCode.querySelector('.val').textContent = 'No aplica';
+    sumCode.querySelector('.val').style.fontFamily = '';
+  }
+  // Valor + habilitar Continuar
+  if(selectedInc && (isBono ? selectedCode : true)){
     sumValue.classList.remove('pending');
     sumValue.querySelector('.val').textContent = `$${selectedInc.value.toLocaleString('es-CO')}`;
-    document.getElementById('btnNext').disabled = false;
+    btnNext.disabled = false;
+  } else {
+    btnNext.disabled = true;
   }
 }
 
 document.getElementById('nowLabel').textContent = new Date().toLocaleString('es-CO', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+
+// Estado inicial del clear button (oculto si no hay query)
+(function initSearchClear(){
+  const inp = document.getElementById('codeSearch');
+  if(!inp) return;
+  const clear = inp.parentElement.querySelector('.naowee-searchbox__clear');
+  if(clear && !inp.value) clear.style.display = 'none';
+})();
+
+// Saltar a página por número (input)
+(function bindCodePageInput(){
+  const el = document.getElementById('codePageInput');
+  if(!el) return;
+  el.addEventListener('change', e => {
+    const v = parseInt(e.target.value, 10) || 1;
+    const totalPages = Math.max(1, Math.ceil(getFilteredCodes().length / PAGE_SIZE));
+    codePage = Math.max(1, Math.min(totalPages, v));
+    renderCodes();
+  });
+})();
+
 renderCodes();
 
 /* Persistir el perfil si se accede con ?doc=XXX sin pasar por paso 1 — evita perder el perfil al hacer "Volver" */
@@ -538,6 +731,46 @@ renderCodes();
     const urlDoc = new URLSearchParams(location.search).get('doc');
     if(urlDoc){
       sessionStorage.setItem('inc-profile', JSON.stringify({ doc: urlDoc, kind: 'eligible', ts: Date.now() }));
+    }
+  }catch(e){}
+})();
+
+/* ── Filtrar incentivos según el kind del perfil (cuando ya tiene incentivos asignados) ── */
+(function filterAssignedIncentives(){
+  try{
+    const profile = JSON.parse(sessionStorage.getItem('inc-profile') || '{}');
+    // Mapa de incentivos ya asignados por kind: la lista de data-id que se debe ocultar.
+    const ASSIGNED_BY_KIND = {
+      'partial-assigned': ['beca']  // la beca ya fue asignada → solo queda el kit
+    };
+    const hideIds = ASSIGNED_BY_KIND[profile.kind];
+    if(!hideIds || !hideIds.length) return;
+    const list = document.getElementById('incList');
+    if(!list) return;
+    hideIds.forEach(id => {
+      const el = list.querySelector(`.inc[data-id="${id}"]`);
+      if(el) el.remove();
+    });
+    // Auto-seleccionar el único incentivo restante para acelerar el flujo
+    const remaining = list.querySelectorAll('.inc');
+    if(remaining.length === 1){
+      remaining[0].click();
+    }
+    // Mensaje contextual encima de la lista
+    const section = list.closest('.flow-section');
+    if(section && !section.querySelector('.assigned-note')){
+      const note = document.createElement('div');
+      note.className = 'naowee-message naowee-message--informative assigned-note';
+      note.style.cssText = 'margin:0 0 14px';
+      note.innerHTML = `
+        <div class="naowee-message__header">
+          <div class="naowee-message__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="naowee-message__text">Solo se muestra el incentivo <strong>pendiente</strong>. El otro ya fue asignado en una entrega anterior.</div>
+        </div>`;
+      const desc = section.querySelector('p.desc');
+      if(desc) desc.after(note); else section.prepend(note);
     }
   }catch(e){}
 })();
@@ -559,18 +792,78 @@ function fadeAndGo(url){
   setTimeout(() => { window.location.href = url; }, 260);
 }
 
-/* Sticky stepper — detecta scroll del contenedor .page (no window) */
+/* Progressive sticky collapse — paridad con paso 1.
+   Al hacer scroll: full-bleed, colapso de labels, pierde radii top, pegado al header. */
 (function(){
-  const wrap = document.getElementById('stepperWrap');
-  if(!wrap) return;
-  const scroller = document.querySelector('.page');
-  if(!scroller) return;
-  const handler = () => { wrap.classList.toggle('is-stuck', scroller.scrollTop > 4); };
-  scroller.addEventListener('scroll', handler, { passive: true });
-  handler();
+  const stepper = document.getElementById('stepperWrap');
+  if(!stepper) return;
+  const labels = stepper.querySelectorAll('.step-lbl');
+  const seps = stepper.querySelectorAll('.step-sep');
+  const page = document.querySelector('.page');
+  if(!page) return;
+
+  const COLLAPSE_RANGE = 60;
+  const labelWidths = Array.from(labels).map(el => {
+    const w = Math.ceil(el.getBoundingClientRect().width) + 2;
+    el.style.maxWidth = w + 'px';
+    return w;
+  });
+
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const pagePadTop = parseFloat(getComputedStyle(page).paddingTop) || 0;
+
+  function apply(progress){
+    stepper.classList.toggle('is-stuck', progress > 0);
+
+    const mH = lerp(0, -32, progress);
+    stepper.style.marginLeft = mH + 'px';
+    stepper.style.marginRight = mH + 'px';
+
+    const ty = lerp(0, -pagePadTop, progress);
+    stepper.style.transform = `translateY(${ty}px)`;
+
+    const radTop = lerp(14, 0, progress);
+    stepper.style.borderRadius = `${radTop}px ${radTop}px 14px 14px`;
+    if(progress >= .98){
+      stepper.style.borderTopWidth = '0';
+      stepper.style.paddingTop = (lerp(14, 11, progress) + 1) + 'px';
+    } else {
+      stepper.style.borderTopWidth = '';
+      stepper.style.paddingTop = lerp(14, 11, progress) + 'px';
+    }
+    stepper.style.paddingBottom = lerp(14, 11, progress) + 'px';
+    const padH = lerp(20, 44, progress);
+    stepper.style.paddingLeft = padH + 'px';
+    stepper.style.paddingRight = padH + 'px';
+
+    labels.forEach((el, i) => {
+      el.style.maxWidth = lerp(labelWidths[i], 0, progress) + 'px';
+      el.style.opacity = 1 - progress;
+      el.style.marginLeft = lerp(0, -6, progress) + 'px';
+    });
+    seps.forEach(s => {
+      s.style.minWidth = lerp(20, 12, progress) + 'px';
+      s.style.margin = `0 ${lerp(12, 6, progress)}px`;
+    });
+  }
+
+  function onScroll(){
+    const pageRectTop = page.getBoundingClientRect().top;
+    const pageContentTop = pageRectTop + pagePadTop;
+    const stepperRectTop = stepper.getBoundingClientRect().top;
+    const dist = stepperRectTop - pageContentTop;
+    const progress = Math.min(1, Math.max(0, 1 - dist / COLLAPSE_RANGE));
+    apply(progress);
+  }
+
+  page.addEventListener('scroll', onScroll, { passive:true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
 })();
 </script>
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
+
+<script src="shared/footer-scroll.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">

@@ -152,28 +152,33 @@
 }
 .wz-shake{ animation: wzShake .45s cubic-bezier(.36,.07,.19,.97); }
 
+/* Required marker — asterisco naranja en labels (dropdown + textfield).
+   El DS sólo define ::after para textfield (color rojo); aquí unificamos
+   ambos en accent naranja del proyecto. */
+.naowee-dropdown__label--required::after,
+.naowee-textfield__label--required::after{
+  content: ' *';
+  color: var(--naowee-color-text-accent, #d74009);
+}
+
+/* Cuando el field del wizard está en error, sólo mostramos el helper de
+   error (.naowee-helper--negative con badge "Este campo es obligatorio")
+   y ocultamos el helper informativo original (ej: "Debe ser posterior a
+   la vigencia desde") para no duplicar mensajes en rojo. Scope al wizard
+   para no afectar otros modales (revertir, etc). */
+.wz-modal .naowee-textfield--error .naowee-textfield__helper,
+.wz-modal .naowee-dropdown--error .naowee-dropdown__helper{ display: none; }
+
 /* Toggle cards (tipo de incentivo) */
 .toggle-cards{ display: flex; flex-direction: column; gap: 8px; }
 .toggle-card{
   display: flex; gap: 12px; padding: 14px 16px;
   border: 1.5px solid var(--naowee-color-border-default, #e7e9f3);
-  border-radius: 12px; cursor: pointer; align-items: flex-start; transition: all .15s;
+  border-radius: 12px; cursor: pointer; align-items: center; transition: all .15s;
 }
 .toggle-card:hover{ border-color: var(--naowee-color-border-strong, #d0d4e6); }
 .toggle-card.active{ background: #fff3e6; border-color: var(--naowee-color-text-accent, #d74009); }
-.toggle-card__check{
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--naowee-color-border-strong, #d0d4e6);
-  flex-shrink: 0; margin-top: 1px; position: relative;
-}
-.toggle-card.active .toggle-card__check{
-  border-color: var(--naowee-color-text-accent, #d74009);
-  background: var(--naowee-color-text-accent, #d74009);
-}
-.toggle-card.active .toggle-card__check::after{
-  content: ""; position: absolute; top: 5px; left: 5px;
-  width: 6px; height: 6px; background: #fff; border-radius: 50%;
-}
+.toggle-card .naowee-radio{ padding: 0; flex-shrink: 0; }
 .toggle-card__title{ font-size: 13px; font-weight: 700; color: var(--naowee-color-text-primary, #282834); margin-bottom: 2px; }
 .toggle-card__desc{ font-size: 11.5px; color: var(--naowee-color-text-secondary, #646587); line-height: 1.4; }
 
@@ -250,6 +255,37 @@
 .cond-row > .x-btn{ align-self: center; }
 .cond-row [data-cond-value]{ display: block; min-width: 0; }
 
+/* Chip de regla implícita (ej. tipoUsuario=personal_apoyo →
+   "primer entrenador en su historial"). Se renderiza debajo de la fila
+   ocupando todo el ancho del grid. */
+.cond-row__implied{
+  grid-column: 1 / -1;
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 2px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--naowee-color-feedback-fill-positive-quiet, #DEFADE);
+  color: var(--naowee-color-feedback-text-positive-quiet-on-fill, #17641A);
+  border: 1px solid var(--naowee-color-feedback-border-positive-loud, #14A919);
+  font-size: 12.5px; line-height: 1.4;
+  animation: wzImpliedFadeIn .22s ease-out both;
+}
+.cond-row__implied svg{
+  flex-shrink: 0;
+  color: var(--naowee-color-feedback-icon-positive-loud, #1f8923);
+}
+.cond-row__implied strong{ font-weight: 700; }
+@keyframes wzImpliedFadeIn{
+  from{ opacity: 0; transform: translateY(-2px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+/* En la vista previa, la regla implícita se muestra como texto ligado */
+.wz-cond-preview__implied{
+  font-style: italic;
+  color: var(--naowee-color-feedback-text-positive-loud, #1f8923);
+}
+
 /* Dropdowns en cond-row usan los estilos del DS (.naowee-dropdown).
    Sólo ajustamos tamaño: alto 40px (medium DS) y padding horizontal
    compacto para que quepan 3 controles + value en el grid. */
@@ -321,6 +357,104 @@
   font-size: 13px; line-height: 1.6;
   color: var(--naowee-color-text-primary, #282834);
 }
+/* Lenguaje natural — frases unitarias en lugar de chunks técnicos. */
+.wz-cond-preview__sentence{
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--naowee-color-text-primary, #282834);
+}
+.wz-cond-preview__chunk{ display: inline; }
+.wz-cond-preview__or-list{
+  list-style: none; padding: 0; margin: 6px 0 0;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.wz-cond-preview__or-list li{
+  position: relative; padding: 10px 12px 10px 32px;
+  background: #fff;
+  border: 1px solid #ffd9b3;
+  border-radius: 10px;
+  font-size: 13.5px; line-height: 1.6;
+}
+.wz-cond-preview__or-list li::before{
+  content: counter(or-item);
+  position: absolute; left: 10px; top: 10px;
+  width: 18px; height: 18px;
+  background: var(--naowee-color-text-accent, #d74009); color: #fff;
+  border-radius: 50%;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  counter-increment: or-item;
+}
+.wz-cond-preview__or-list{ counter-reset: or-item; }
+.wz-cond-preview__implied-note{
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  background: var(--naowee-color-feedback-fill-positive-quiet, #DEFADE);
+  border: 1px solid var(--naowee-color-feedback-border-positive-loud, #14A919);
+  border-radius: 8px;
+  color: var(--naowee-color-feedback-text-positive-quiet-on-fill, #17641A);
+  font-size: 12.5px; line-height: 1.5;
+}
+.wz-cond-preview__implied-note strong{ font-weight: 700; }
+
+/* Paneles del paso 3 — uno por incentivo en multi mode. */
+.wz-cond-panels{ display: flex; flex-direction: column; gap: 24px; }
+.wz-cond-panel{
+  display: flex; flex-direction: column; gap: 14px;
+}
+.wz-cond-panels:has(.wz-cond-panel + .wz-cond-panel) .wz-cond-panel{
+  /* Sólo cuando hay más de un panel (multi), envolver en card. */
+  padding: 16px;
+  background: #fafbfd;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 14px;
+}
+.wz-cond-panel__head{
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed var(--naowee-color-border-default, #e7e9f3);
+  margin-bottom: 4px;
+}
+.wz-cond-panel__num{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  background: var(--naowee-color-text-accent, #d74009); color: #fff;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.wz-cond-panel__title{
+  font-size: 14px; font-weight: 700;
+  color: var(--naowee-color-text-primary, #282834);
+}
+
+/* Bloques por incentivo en la página de detalle */
+.cond-inc-block{
+  padding: 14px 16px;
+  background: #fafbfd;
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.cond-inc-block__head{
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--naowee-color-border-default, #e7e9f3);
+}
+.cond-inc-block__num{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  background: var(--naowee-color-text-accent, #d74009); color: #fff;
+  border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+  flex-shrink: 0;
+}
+.cond-inc-block__name{
+  font-size: 14px; font-weight: 700;
+  color: var(--naowee-color-text-primary, #282834);
+}
 .wz-cond-preview__intro{
   font-size: 12px;
   color: var(--naowee-color-text-secondary, #646587);
@@ -334,7 +468,7 @@
   border-radius: 10px;
 }
 .wz-cond-preview__group-lbl{
-  font-size: 10px; font-weight: 700; letter-spacing: .5px;
+  font-size: 10px; font-weight: 600; letter-spacing: .5px;
   color: var(--naowee-color-text-accent, #d74009);
   text-transform: uppercase;
 }
@@ -343,7 +477,7 @@
   color: var(--naowee-color-text-primary, #282834);
 }
 .wz-cond-preview__field{
-  font-weight: 700;
+  font-weight: 600;
   color: var(--naowee-color-text-primary, #282834);
 }
 .wz-cond-preview__val{
@@ -352,7 +486,7 @@
   background: #fff3e6;
   color: var(--naowee-color-text-accent, #d74009);
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12.5px;
   margin: 0 1px;
 }
@@ -363,7 +497,7 @@
 }
 .wz-cond-preview__conn{
   display: inline-block;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: lowercase;
   letter-spacing: .3px;
   padding: 0 4px;
@@ -421,7 +555,16 @@
 .cond-group__head{ justify-content: flex-start; }
 .wz-modal .naowee-segment.wz-condop-seg{ margin: 0; }
 
-/* Step 3 — lista de incentivos, tarjetas con badge */
+/* Stepper item totalmente oculto — el DS le aplica display:flex con mayor
+   especificidad que el atributo nativo [hidden], así que forzamos vía clase
+   con !important. El paso 4 (Códigos) usa esto cuando no hay incentivo Bono. */
+.naowee-stepper__step.wz-step-hidden{ display: none !important; }
+/* También oculta el conector cuando un step está oculto, para evitar barras
+   "huérfanas" colgando entre los pasos visibles. */
+.naowee-stepper__step.wz-step-hidden + * .naowee-stepper__connector{ display: none !important; }
+
+/* Step 2 — Tipos & rubro: rubro total al tope + lista de incentivos */
+.wz-rubro-row{ display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 18px; }
 .wz-types-group{ display: flex; flex-direction: column; gap: 16px; }
 .wz-inc-list{ display: flex; flex-direction: column; gap: 12px; }
 .wz-inc-card{
@@ -431,17 +574,45 @@
   background: #fafbfd;
   box-shadow: 0 1px 2px rgba(40,40,52,.04);
 }
+/* Grid del incentivo card. Cambia según single vs multi:
+   - Single (1 incentivo, todo el rubro): nombre / categoría / valor unitario
+   - Multi (varios incentivos): 2 filas — fila 1 nombre/categoría, fila 2 rubro/unitario
+   minmax(0, 1fr) evita overflow cuando los placeholders/values son anchos. */
+.wz-inc-card__grid{
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.wz-inc-card__grid > *{ min-width: 0; }
+/* En modo single ocultamos el campo rubro per-card (todo el rubro va al único
+   incentivo) y dejamos el layout de 3 columnas. */
+.wz-inc-list--single .wz-inc-card__rubro{ display: none; }
+/* En modo multi pasamos a grid de 2 columnas y los 4 campos se acomodan en 2 filas. */
+.wz-inc-list--multi .wz-inc-card__grid{
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  row-gap: 14px;
+}
+@media (max-width: 760px){
+  .wz-inc-card__grid,
+  .wz-inc-list--multi .wz-inc-card__grid{ grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Etiqueta "(opcional)" del valor unitario — secundaria y discreta */
+.wz-inc-card__optional{
+  font-weight: 400;
+  font-size: 11.5px;
+  color: var(--naowee-color-text-secondary, #646587);
+  margin-left: 4px;
+}
+
+/* Resumen de asignación de rubro (sólo visible en modo multi) */
+.wz-multi-budget{ margin-top: 4px; margin-bottom: 6px; }
+.wz-multi-budget .naowee-message{ padding: 12px 14px; }
+.wz-multi-budget .naowee-message strong{ font-weight: 700; }
 .wz-inc-card__head{
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px;
 }
-.wz-inc-card__badge{
-  font-size: 10.5px; font-weight: 700; letter-spacing: .4px;
-  color: var(--naowee-color-text-accent, #d74009);
-  background: #fff3e6;
-  padding: 3px 10px; border-radius: 9999px;
-  text-transform: uppercase;
-}
+/* Badge: estilos del DS (.naowee-badge--quiet --neutral --small) */
 .wz-inc-card__remove{
   border: none; background: transparent; cursor: pointer;
   color: var(--naowee-color-text-secondary, #646587);
@@ -591,6 +762,14 @@
 }
 .wz-tag-multi__option:hover{background:#f4f5f9}
 .wz-tag-multi__option.is-selected{background:#fff3e6;font-weight:600;color:var(--naowee-color-text-accent,#d74009)}
+/* Opción deshabilitada cuando una exclusiva (ej. "Nacional") ya está activa.
+   Visual: opacidad atenuada + cursor not-allowed, sin hover. */
+.wz-tag-multi__option.is-disabled{
+  opacity: .4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.wz-tag-multi__option.is-disabled:hover{ background: transparent; }
 
 /* Checkbox visual (pattern .naowee-checkbox__box del DS) */
 .wz-tag-multi__check{
@@ -649,10 +828,7 @@
 .wz-inc-list--single .wz-inc-card__head{ display: none; }
 
 /* Multi mode: badge prominente + card con accent en head */
-.wz-inc-list--multi .wz-inc-card__badge{
-  background: var(--naowee-color-text-accent, #d74009);
-  color: #fff;
-}
+/* Multi mode: badge low-contrast del DS (sin override de color) */
 
 /* ═════ Helper text (label de ayuda bajo inputs) ═════ */
 .naowee-textfield__helper{
@@ -1044,6 +1220,7 @@
   color: var(--naowee-color-text-secondary, #646587);
   text-transform: uppercase; letter-spacing: .4px;
 }
+.wz-manual--code-only .wz-manual__cols{ grid-template-columns: 1fr 32px; }
 .wz-manual__rows{ display: flex; flex-direction: column; gap: 0; }
 .wz-manual__rows .manual-row{ margin-bottom: 6px; }
 .wz-manual__hint{
@@ -1093,6 +1270,110 @@
   border: 1px solid var(--naowee-color-border-default, #e7e9f3);
 }
 .wz-dropzone__fmts{ display: flex; gap: 5px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+
+/* File input (textfield-style + ghost CTA + DS green tag) — Step 1 resolución */
+.wz-fileinput{ display: flex; flex-direction: column; gap: 6px; }
+.wz-fileinput__label{
+  font-size: 13px; font-weight: 500;
+  color: var(--naowee-color-text-primary, #282834);
+}
+.wz-fileinput__field{
+  display: flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 6px 6px 6px 12px;
+  border: 1px solid var(--naowee-color-border-strong, #d0d4e6);
+  border-radius: 8px;
+  background: var(--naowee-color-surface, #fff);
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+.wz-fileinput[data-state="empty"] .wz-fileinput__field:focus-within,
+.wz-fileinput__field.is-dragover{
+  border-color: var(--naowee-color-text-accent, #d74009);
+  box-shadow: 0 0 0 3px rgba(215, 64, 9, .12);
+}
+.wz-fileinput__field.is-dragover{ background: #fff8f3; }
+.wz-fileinput__slot{
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 6px;
+}
+.wz-fileinput__placeholder{
+  font-size: 13px;
+  color: var(--naowee-color-text-secondary, #646587);
+}
+.wz-fileinput__action{ display: inline-flex; align-items: center; flex-shrink: 0; }
+.wz-fileinput__cta{ flex-shrink: 0; }
+
+/* Pending filename (during upload, neutral text on the left) */
+.wz-fileinput__pending{
+  display: inline-flex; align-items: center; gap: 6px;
+  min-width: 0; max-width: 100%;
+  font-size: 13px; font-weight: 500;
+  color: var(--naowee-color-text-primary, #282834);
+  animation: wzFileFadeIn .18s ease-out both;
+}
+.wz-fileinput__pending-ico{ color: var(--naowee-color-text-secondary, #646587); flex-shrink: 0; }
+.wz-fileinput__pending-name{
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Determinate progress spinner — green, on the right (CTA side) */
+.wz-fileinput__progress{
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 4px;
+  font-size: 12.5px;
+  color: var(--naowee-color-feedback-text-positive-loud, #1f8923);
+  animation: wzFileFadeIn .22s ease-out both;
+}
+.wz-fileinput__ring{
+  flex-shrink: 0;
+  color: var(--naowee-color-feedback-icon-positive-loud, #1f8923);
+  animation: wzRingSpin 1.6s linear infinite;
+  transform-origin: 50% 50%;
+}
+.wz-fileinput__ring-track{
+  stroke: var(--naowee-color-green-100, #DEFADE);
+}
+.wz-fileinput__ring-fill{
+  stroke: currentColor;
+  transition: stroke-dashoffset .25s cubic-bezier(.4, 0, .2, 1);
+}
+.wz-fileinput__progress-pct{
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: .2px;
+  min-width: 32px; text-align: right;
+}
+
+/* DS tag — name truncation + entrance animation */
+.wz-fileinput__tag{ animation: wzTagPop .26s cubic-bezier(.34, 1.4, .5, 1) both; }
+.wz-fileinput__tag-name{
+  max-width: 280px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+@keyframes wzRingSpin{
+  to{ transform: rotate(360deg); }
+}
+@keyframes wzFileFadeIn{
+  from{ opacity: 0; transform: translateX(4px); }
+  to{ opacity: 1; transform: translateX(0); }
+}
+@keyframes wzTagPop{
+  from{ opacity: 0; transform: scale(.92); }
+  to{ opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce){
+  .wz-fileinput__ring,
+  .wz-fileinput__pending,
+  .wz-fileinput__progress,
+  .wz-fileinput__tag{ animation: none !important; }
+  .wz-fileinput__ring-fill{ transition: none !important; }
+}
+
+.wz-fileinput__hint{
+  font-size: 11.5px;
+  color: var(--naowee-color-text-secondary, #646587);
+}
 .fmt{
   font-size: 9.5px; font-weight: 700; padding: 2px 7px;
   border-radius: 4px; background: #fff;
@@ -1112,6 +1393,7 @@
   border-radius: 10px; margin-bottom: 8px;
   box-shadow: 0 1px 2px rgba(40,40,52,.04);
 }
+.manual-row--code-only{ grid-template-columns: 1fr 32px; }
 .manual-row > .x-btn{
   justify-self: center;
 }

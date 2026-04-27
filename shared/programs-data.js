@@ -121,7 +121,7 @@ window.PROGRAMS_DATA = [
     longDesc: 'Cobertura del costo de inscripción a los juegos universitarios 2026 para estudiantes-atletas activos en universidades públicas.',
     iconBg: '#fff3e6',
     iconColor: '#d74009',
-    status: 'paused',
+    status: 'active',
     event: 'Juegos Universitarios 2026',
     coverage: 'Nacional',
     responsible: 'Doug Vargas',
@@ -289,4 +289,34 @@ window.PROGRAMS_DATA = [
 
 window.getProgramById = function(id){
   return window.PROGRAMS_DATA.find(p => p.id === id) || window.PROGRAMS_DATA[0];
+};
+
+/* ══ Iconografía de categorías de incentivo ══════════════════════════════
+   8 iconos representativos. Stroke-based (24x24, stroke-width 1.6, currentColor).
+   Cada path es el contenido interno de un <svg>; quien lo consume decide
+   tamaño, color de fondo y color de stroke. Accesible vía window.CAT_ICONS.
+   Para asignar el icono de un programa: tomar la categoría del primer
+   incentivo (programa puede tener varios; el primero define el icono). */
+window.CAT_ICONS = {
+  // Birrete con base — formación académica
+  'Beca':        '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v4c0 1.66 2.69 3 6 3s6-1.34 6-3v-4"/><line x1="22" y1="10" x2="22" y2="15"/>',
+  // Bolsa deportiva con asa y franja central
+  'Kit':         '<path d="M5 9h14a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z"/><path d="M9 9V7a3 3 0 016 0v2"/><line x1="4" y1="13" x2="20" y2="13"/>',
+  // Cupón / voucher con perforaciones laterales tipo ticket
+  'Bono':        '<path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v3a1.5 1.5 0 000 3v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a1.5 1.5 0 000-3V7z"/><line x1="13" y1="6" x2="13" y2="9" stroke-dasharray="1.5 1.5"/><line x1="13" y1="11" x2="13" y2="13" stroke-dasharray="1.5 1.5"/><line x1="13" y1="15" x2="13" y2="18" stroke-dasharray="1.5 1.5"/>',
+  // Bus frontal con ventanas y ruedas
+  'Transporte':  '<rect x="4" y="3" width="16" height="14" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><rect x="6" y="11" width="3.5" height="3" rx=".5"/><rect x="14.5" y="11" width="3.5" height="3" rx=".5"/><circle cx="8" cy="20" r="1.5"/><circle cx="16" cy="20" r="1.5"/>',
+  // Portapapeles con check — formulario inscrito
+  'Inscripción': '<rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/><polyline points="9 13 11 15 15 11"/>',
+  // Etiqueta de precio con símbolo % adentro
+  'Descuento':   '<path d="M20 12L12 20a2 2 0 01-2.83 0l-6.59-6.59A2 2 0 012 12V4a2 2 0 012-2h8a2 2 0 011.41.59L20 9.17a2 2 0 010 2.83z"/><circle cx="7" cy="7" r="1"/><line x1="9.5" y1="14.5" x2="14.5" y2="9.5"/><circle cx="10" cy="14" r=".4"/><circle cx="14" cy="10" r=".4"/>',
+  // Carnet de acceso con foto + líneas (ID-card)
+  'Pase':        '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5 16c.5-1.5 1.5-2.5 3-2.5s2.5 1 3 2.5"/><line x1="14" y1="10" x2="19" y2="10"/><line x1="14" y1="13" x2="18" y2="13"/>',
+  // Billete con moneda central y puntos en esquinas
+  'Dinero':      '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><circle cx="6" cy="12" r=".7"/><circle cx="18" cy="12" r=".7"/>'
+};
+
+/* Helper: devuelve la categoría primaria (1er incentivo) con fallback. */
+window.getProgramCategory = function(p){
+  return (p && p.incentives && p.incentives[0] && p.incentives[0].category) || 'Beca';
 };

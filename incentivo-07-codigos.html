@@ -171,16 +171,35 @@
   .cod-revert-btn{white-space:nowrap}
   .cod-noaction{color:#b5b9d4;font-size:13px}
 
-  /* Asterisco de campo obligatorio + helper text */
-  .rv-req{color:var(--naowee-color-text-accent,#d74009);font-weight:700;margin-left:2px}
+  /* Helper text del modal — base + error */
   .rv-helper{
     font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);
     margin-top:6px;line-height:1.4;
   }
-  .naowee-dropdown--error .rv-helper,
-  .naowee-dropdown--error .naowee-textfield__helper{
-    color:var(--naowee-color-feedback-text-negative-loud,#b42318);
+  .naowee-textfield__helper{
+    font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);
+    margin-top:6px;line-height:1.4;
+    transition:color .2s;
   }
+  /* Helper en rojo cuando el field está en error */
+  .naowee-dropdown--error .rv-helper,
+  .naowee-dropdown--error .naowee-textfield__helper,
+  .naowee-textfield--error .naowee-textfield__helper{
+    color:var(--naowee-color-feedback-text-negative-loud,#b42318);
+    font-weight:600;
+  }
+
+  /* Realizado por — pseudo-readonly: card sutil con icono y texto, sin input */
+  .rv-readonly{
+    display:flex;align-items:center;gap:10px;
+    padding:0 14px;height:42px;
+    background:#f7f8fc;
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:10px;
+    color:var(--naowee-color-text-secondary,#646587);
+  }
+  .rv-readonly__ico{flex-shrink:0;color:var(--naowee-color-text-accent,#d74009)}
+  .rv-readonly__val{font-size:13px;font-weight:500;color:var(--naowee-color-text-primary,#282834)}
 
   /* Wiggle animation al fallar validación */
   @keyframes rvShake{
@@ -243,33 +262,72 @@
 
   .rv-body{padding:8px 24px 24px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
 
-  /* Summary card del código que se va a revertir */
+  /* Summary card del código a revertir — top con icon+code+monto, divider,
+     filas Programa/Beneficiario abajo. Jerarquía clara y typo deliberada. */
   .rv-summary{
-    display:flex;align-items:center;gap:14px;padding:14px;
-    background:linear-gradient(160deg,#fff 0%,#fff8f2 100%);
-    border-radius:12px;
-    box-shadow:inset 0 0 0 1px rgba(215,64,9,.14);
+    padding:16px 18px;
+    background:linear-gradient(180deg,#fff 0%,#fff8f2 100%);
+    border:1px solid rgba(215,64,9,.18);
+    border-radius:14px;
+  }
+  .rv-summary__top{
+    display:flex;align-items:center;gap:14px;
   }
   .rv-summary__ico{
-    width:40px;height:40px;border-radius:11px;flex-shrink:0;
-    background:linear-gradient(135deg,#ffe7cc 0%,#fff3e6 100%);
+    width:44px;height:44px;border-radius:12px;flex-shrink:0;
+    background:#fff3e6;
     color:var(--naowee-color-text-accent,#d74009);
     display:inline-flex;align-items:center;justify-content:center;
-    box-shadow:inset 0 0 0 1px rgba(215,64,9,.10);
+    box-shadow:inset 0 0 0 1px rgba(215,64,9,.14);
   }
-  .rv-summary__body{flex:1;min-width:0}
+  .rv-summary__main{flex:1;min-width:0}
+  .rv-summary__lbl{
+    font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--naowee-color-text-secondary,#646587);
+  }
   .rv-summary__code{
-    font-family:'SF Mono',monospace;font-size:13px;font-weight:700;
+    font-family:'SF Mono',monospace;font-size:15px;font-weight:700;
     color:var(--naowee-color-text-primary,#282834);
+    letter-spacing:.2px;margin-top:2px;
   }
-  .rv-summary__meta{
-    font-size:12px;color:var(--naowee-color-text-secondary,#646587);margin-top:2px;
-    display:flex;gap:8px;flex-wrap:wrap;
+  .rv-summary__amount{text-align:right;flex-shrink:0}
+  .rv-summary__amount-lbl{
+    font-size:10.5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+    color:var(--naowee-color-text-secondary,#646587);
   }
-  .rv-summary__meta strong{color:var(--naowee-color-text-primary,#282834);font-weight:600}
   .rv-summary__val{
-    font-size:15px;font-weight:700;color:var(--naowee-color-text-accent,#d74009);
-    font-variant-numeric:tabular-nums;flex-shrink:0;
+    font-size:18px;font-weight:800;color:var(--naowee-color-text-accent,#d74009);
+    font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.1;margin-top:2px;
+  }
+  .rv-summary__divider{
+    height:1px;background:rgba(215,64,9,.14);
+    margin:14px -18px;
+  }
+  .rv-summary__rows{
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .rv-summary__row{
+    display:grid;grid-template-columns:110px 1fr;gap:12px;
+    font-size:12.5px;
+  }
+  .rv-summary__row-lbl{
+    color:var(--naowee-color-text-secondary,#646587);font-weight:500;
+  }
+  .rv-summary__row-val{
+    color:var(--naowee-color-text-primary,#282834);font-weight:600;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* Helper "Este campo es obligatorio" — usa .naowee-dropdown__helper del DS
+     (font/size/line-height/padding-top del system) y .rv-error-only sólo
+     controla la visibilidad: oculto por defecto, visible cuando el field
+     padre tiene la clase --error. Color rojo viene del DS para dropdown
+     y se complementa aquí para textfield. */
+  .rv-error-only{display:none}
+  .naowee-textfield--error .rv-error-only,
+  .naowee-dropdown--error .rv-error-only{display:block}
+  .naowee-textfield--error .naowee-dropdown__helper.rv-error-only{
+    color:var(--naowee-color-feedback-fill-negative-loud,#b42318);
   }
 
   .rv-footer{
@@ -277,25 +335,23 @@
     display:flex;gap:10px;justify-content:flex-end;
   }
 
-  /* Toast patrón naowee-message — bottom-right */
+  /* Toast estructura DS naowee-message — bottom-right.
+     Sólo añadimos position fixed, ancho y shadow. El resto de estilos
+     (bg, padding, layout title/text/action/dismiss) viene del DS. */
   .rv-toast-wrap{
     position:fixed;bottom:24px;right:24px;z-index:1500;
-    display:flex;flex-direction:column;gap:8px;
+    display:flex;flex-direction:column;gap:10px;
     pointer-events:none;max-width:calc(100vw - 48px);
   }
   .rv-toast-wrap .rv-toast{
-    pointer-events:auto;min-width:320px;max-width:420px;
-    box-shadow:0 12px 32px rgba(40,40,52,.18);padding:12px 14px;
+    pointer-events:auto;min-width:340px;max-width:420px;
+    box-shadow:0 12px 32px rgba(40,40,52,.18);
+    animation: rvToastIn .25s cubic-bezier(.16,1,.3,1) both;
   }
-  .rv-toast .naowee-message__header{display:flex;align-items:center;gap:10px;width:100%}
-  .rv-toast .naowee-message__text{flex:1;min-width:0;font-size:13px;line-height:1.4}
-  .rv-toast__dismiss{
-    width:24px;height:24px;border-radius:6px;border:none;background:transparent;
-    cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
-    color:var(--naowee-color-text-secondary,#646587);flex-shrink:0;
+  @keyframes rvToastIn{
+    from{ opacity:0; transform: translateY(8px); }
+    to  { opacity:1; transform: translateY(0); }
   }
-  .rv-toast__dismiss:hover{background:rgba(0,0,0,.05)}
-  .rv-toast__dismiss svg{width:14px;height:14px}
 </style>
 </head>
 <body>
@@ -315,21 +371,25 @@
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS</div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-02-dashboard.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9" rx=".5"/><rect x="11" y="7" width="3" height="13" rx=".5"/><rect x="16" y="14" width="3" height="6" rx=".5"/></svg></div>
         <span class="lbl">Dashboard</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-03-programas.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><rect x="8" y="8" width="13" height="13" rx="2"/></svg></div>
         <span class="lbl">Programas</span>
       </div>
       <div class="nav-row active">
         <div class="active-bar"></div>
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="3" y1="15" x2="19" y2="15"/></svg></div>
         <span class="lbl">Códigos</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-12-asignaciones.html')">
-        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h13M8 12h13M8 17h13"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/></svg></div>
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="6" cy="18" r="1.5"/><line x1="6" y1="7.5" x2="6" y2="10.5"/><line x1="6" y1="13.5" x2="6" y2="16.5"/><line x1="11" y1="6" x2="20" y2="6"/><line x1="11" y1="12" x2="18" y2="12"/><line x1="11" y1="18" x2="16" y2="18"/></svg></div>
         <span class="lbl">Historial</span>
+      </div>
+      <div class="nav-row" data-role="admin" onclick="fadeAndGo('incentivo-15-reporteria.html')">
+        <div class="icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/><circle cx="18" cy="9" r="1.5"/></svg></div>
+        <span class="lbl">Reportería</span>
       </div>
     </nav>
     <div class="sidebar-bottom">
@@ -372,7 +432,7 @@
           <div class="kpi-card__top">
             <div class="kpi-card__lbl">Códigos totales</div>
             <div class="kpi-card__ico kpi-card__ico--brand">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="3" y1="15" x2="19" y2="15"/></svg>
             </div>
           </div>
           <div class="kpi-card__val" id="kpiTotal">—</div>
@@ -445,9 +505,25 @@
               </button>
               <div class="toolbar-dd-menu" role="listbox">
                 <div class="toolbar-dd-item" role="option" aria-selected="true" data-val="all" onclick="setEstado('all','Estado: Todos')">Todos los estados</div>
+                <div class="toolbar-dd-item" role="option" data-val="disp" onclick="setEstado('disp','Disponibles')"><span class="dd-dot" style="background:#9c9ebf"></span>Disponibles</div>
                 <div class="toolbar-dd-item" role="option" data-val="asig" onclick="setEstado('asig','Asignados')"><span class="dd-dot" style="background:#15803d"></span>Asignados</div>
-                <div class="toolbar-dd-item" role="option" data-val="disp" onclick="setEstado('disp','Disponibles')"><span class="dd-dot" style="background:#d74009"></span>Disponibles</div>
+                <div class="toolbar-dd-item" role="option" data-val="reasig" onclick="setEstado('reasig','Reasignados')"><span class="dd-dot" style="background:#7c3aed"></span>Reasignados</div>
                 <div class="toolbar-dd-item" role="option" data-val="rev" onclick="setEstado('rev','Revertidos')"><span class="dd-dot" style="background:#9e0015"></span>Revertidos</div>
+              </div>
+            </div>
+
+            <div class="toolbar-dd-wrap" id="ddTipoWrap">
+              <button type="button" class="toolbar-dd" onclick="toggleDD('ddTipoWrap')">
+                <span id="ddTipoLabel">Tipo: Todos</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="toolbar-dd-menu" role="listbox">
+                <div class="toolbar-dd-item" role="option" aria-selected="true" data-val="all" onclick="setTipo('all','Tipo: Todos')">Todos los tipos</div>
+                <div class="toolbar-dd-item" role="option" data-val="Bono" onclick="setTipo('Bono','Tipo: Bono')"><span class="dd-dot" style="background:#7c3aed"></span>Bono</div>
+                <div class="toolbar-dd-item" role="option" data-val="Beca" onclick="setTipo('Beca','Tipo: Beca')"><span class="dd-dot" style="background:#d74009"></span>Beca</div>
+                <div class="toolbar-dd-item" role="option" data-val="Kit" onclick="setTipo('Kit','Tipo: Kit')"><span class="dd-dot" style="background:#1f78d1"></span>Kit</div>
+                <div class="toolbar-dd-item" role="option" data-val="Inscripción" onclick="setTipo('Inscripción','Tipo: Inscripción')"><span class="dd-dot" style="background:#15803d"></span>Inscripción</div>
+                <div class="toolbar-dd-item" role="option" data-val="Transporte" onclick="setTipo('Transporte','Tipo: Transporte')"><span class="dd-dot" style="background:#0891b2"></span>Transporte</div>
               </div>
             </div>
 
@@ -513,35 +589,48 @@ function buildCodigos(){
   const all = [];
   window.PROGRAMS_DATA.forEach(p => {
     if(!p.codes.total) return;
-    // Generate deterministic codes per program
-    const prefix = p.id.includes('BEC') ? '' : '';
-    for(let i = 1; i <= p.codes.total; i++){
-      const code = `${p.id.replace('PRG-','')}-${String(i).padStart(5, '0')}`;
+    const tipo = p.incentives?.[0]?.category || 'Otro';
+    const isBono = tipo === 'Bono';
+
+    // Bono → inventario completo (disp/asig/reasig/rev)
+    // Resto → solo registros de asignación (asig/reasig/rev), sin código
+    const limit = isBono ? p.codes.total : (p.codes.asig + p.codes.rev);
+    if(!limit) return;
+
+    for(let i = 1; i <= limit; i++){
+      const code = isBono ? `${p.id.replace('PRG-','')}-${String(i).padStart(5, '0')}` : null;
       let estado;
-      // Distribution based on program data
-      if(i > p.codes.total - p.codes.rev) estado = 'rev';
-      else if(i > p.codes.asig + p.codes.rev - p.codes.rev) estado = 'disp';
-      else if(i <= p.codes.asig) estado = 'asig';
-      else estado = 'disp';
-      // Correct distribution: first N = asig, next M = rev, last K = disp (roughly)
-      if(i <= p.codes.asig) estado = 'asig';
-      else if(i <= p.codes.asig + p.codes.rev) estado = 'rev';
-      else estado = 'disp';
+      if(isBono){
+        if(i <= p.codes.asig){
+          estado = (i % 12 === 0) ? 'reasig' : 'asig';
+        } else if(i <= p.codes.asig + p.codes.rev){
+          estado = 'rev';
+        } else {
+          estado = 'disp';
+        }
+      } else {
+        // Sin inventario de códigos: solo asig (con reasignaciones esporádicas) + rev
+        if(i <= p.codes.asig){
+          estado = (i % 18 === 0) ? 'reasig' : 'asig';
+        } else {
+          estado = 'rev';
+        }
+      }
       const benefIdx = (i * 7) % PEOPLE.length;
       const benef = estado === 'disp' ? null : PEOPLE[benefIdx];
       const op = estado === 'disp' ? null : OPERATORS[i % OPERATORS.length];
-      const day = Math.max(1, 22 - Math.floor(i / Math.max(5, p.codes.total/20)));
+      const day = Math.max(1, 22 - Math.floor(i / Math.max(5, limit/20)));
       const hour = String(8 + (i * 3) % 12).padStart(2, '0');
       const min = String((i * 13) % 60).padStart(2, '0');
       const fecha = estado === 'disp' ? null : `${day} ${p.from.split(' ')[1]} · ${hour}:${min}`;
-      all.push({ code, prg: p, estado, benef, op, fecha, valor: p.unit });
+      all.push({ code, prg: p, estado, benef, op, fecha, valor: p.unit, tipo });
     }
   });
   return all;
 }
 
 const ALL = buildCodigos();
-const state = { estado: 'all', prog: 'all', search: '', page: 1, pageSize: 10 };
+const state = { estado: 'all', prog: 'all', tipo: 'all', search: '', page: 1, pageSize: 10 };
 
 /* ══ KPI numbers ══ */
 function updateKPIs(){
@@ -592,6 +681,13 @@ function setEstado(val, label){
   toggleDD('ddEstadoWrap');
   renderCodigos();
 }
+function setTipo(val, label){
+  state.tipo = val; state.page = 1;
+  document.getElementById('ddTipoLabel').textContent = label;
+  document.querySelectorAll('#ddTipoWrap .toolbar-dd-item').forEach(it => it.setAttribute('aria-selected', it.dataset.val === val ? 'true' : 'false'));
+  toggleDD('ddTipoWrap');
+  renderCodigos();
+}
 function setProg(val, label){
   state.prog = val; state.page = 1;
   document.getElementById('ddProgLabel').textContent = label;
@@ -611,10 +707,11 @@ function clearSearch(id){
 function filteredCodigos(){
   return ALL.filter(c => {
     if(state.estado !== 'all' && c.estado !== state.estado) return false;
+    if(state.tipo !== 'all' && c.tipo !== state.tipo) return false;
     if(state.prog !== 'all' && c.prg.id !== state.prog) return false;
     if(state.search){
       const q = state.search.toLowerCase();
-      const hay = `${c.code} ${c.benef || ''} ${c.op || ''}`.toLowerCase();
+      const hay = `${c.code || ''} ${c.benef || ''} ${c.op || ''} ${c.prg.name}`.toLowerCase();
       if(!hay.includes(q)) return false;
     }
     return true;
@@ -622,9 +719,10 @@ function filteredCodigos(){
 }
 
 const badges = {
-  asig: '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>',
-  rev: '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>',
-  disp: '<span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">Disponible</span>'
+  disp:   '<span class="naowee-badge naowee-badge--neutral naowee-badge--quiet naowee-badge--small">Disponible</span>',
+  asig:   '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Asignado</span>',
+  reasig: '<span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small" style="background:#f3e8ff;color:#7c3aed">Reasignado</span>',
+  rev:    '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
 };
 
 const CAT_ICON = '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>';
@@ -652,9 +750,12 @@ function renderCodigos(){
              Revertir
            </button>`
         : `<span class="cod-noaction">—</span>`;
+      const codeCell = c.code
+        ? `<code>${c.code}</code>`
+        : `<span style="font-family:'Inter',sans-serif;font-size:12.5px;color:#9c9ebf;font-style:italic">Sin código</span>`;
       return `
         <tr onclick="fadeAndGo('incentivo-05-programa-detalle.html?id=${c.prg.id}')">
-          <td><code>${c.code}</code></td>
+          <td>${codeCell}</td>
           <td>
             <div class="prg-mini">
               <div class="prg-mini__ico" style="background:${c.prg.iconBg};color:${c.prg.iconColor}">
@@ -822,7 +923,7 @@ function wireRevertModalListeners(){
     if(e.key === 'Escape' && document.getElementById('rvOverlay')?.classList.contains('open')) closeRevertModal();
   });
 
-  // Limpia errores al escribir
+  // Limpia error al escribir
   ['rvSolicitante','rvJust'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', function(){
       this.closest('.naowee-textfield')?.classList.remove('naowee-textfield--error');
@@ -844,12 +945,14 @@ function doRevert(){
     invalid.push(document.getElementById('rvCatDD'));
   }
   if(!solicitante){
-    document.getElementById('rvSolicitanteField').classList.add('naowee-textfield--error');
-    invalid.push(document.getElementById('rvSolicitanteField'));
+    const f = document.getElementById('rvSolicitanteField');
+    f.classList.add('naowee-textfield--error');
+    invalid.push(f);
   }
   if(!just){
-    document.getElementById('rvJustField').classList.add('naowee-textfield--error');
-    invalid.push(document.getElementById('rvJustField'));
+    const f = document.getElementById('rvJustField');
+    f.classList.add('naowee-textfield--error');
+    invalid.push(f);
   }
   if(invalid.length){
     // Wiggle a todos los campos inválidos + scroll al primero
@@ -907,7 +1010,8 @@ function doRevert(){
   const valM = '$' + (c.valor/1000).toLocaleString('es-CO') + 'K';
   showRvToast({
     variant: 'positive',
-    text: `<strong>Código ${c.code} revertido con éxito.</strong><br/>${valM} volvió al rubro de <em>${c.prg.name}</em>. Registro disponible en el historial.`,
+    title: `Código ${c.code} revertido`,
+    text: `${valM} volvió al rubro de ${c.prg.name}. Registro disponible en el historial.`,
     cta: {
       label: 'Ver programa',
       url: `incentivo-05-programa-detalle.html?id=${c.prg.id}`
@@ -915,54 +1019,57 @@ function doRevert(){
   });
 }
 
-/* Toast estilo naowee-message con CTA opcional */
+/* Toast estilo naowee-message del DS — estructura: header (icon + title +
+   dismiss) + content (text + action). Mantenemos las clases del DS para
+   que tipografía/colores/padding vengan del system. */
 function showRvToast(opts){
-  // Compat: si viene un string, tratarlo como text simple
   if(typeof opts === 'string') opts = { text: opts, variant: 'positive' };
-  const { variant = 'positive', text, cta } = opts;
+  const { variant = 'positive', title, text, cta } = opts;
   const wrap = document.getElementById('rvToastWrap');
   if(!wrap) return;
   const el = document.createElement('div');
   el.className = `rv-toast naowee-message naowee-message--${variant}`;
-  const ico = variant === 'positive'
+  const icoSvg = variant === 'positive'
     ? '<polyline points="20 6 9 17 4 12"/>'
     : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
-  const ctaHTML = cta
-    ? `<button type="button" class="rv-toast__cta" data-cta-url="${cta.url}">
-         ${cta.label}
-         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-       </button>`
+  const titleHTML = title ? `<div class="naowee-message__title">${title}</div>` : '';
+  const textHTML  = text  ? `<div class="naowee-message__text">${text}</div>`  : '';
+  const ctaHTML   = cta
+    ? `<button type="button" class="naowee-message__action" data-cta-url="${cta.url}">${cta.label}</button>`
     : '';
+  // Si hay title + text/cta, el body va dentro de __content (col layout DS)
+  const bodyHTML = (title && (text || cta))
+    ? `<div class="naowee-message__content">${textHTML}${ctaHTML}</div>`
+    : `${textHTML}${ctaHTML}`;
   el.innerHTML = `
     <div class="naowee-message__header">
       <div class="naowee-message__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${ico}</svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${icoSvg}</svg>
       </div>
-      <div class="naowee-message__text">
-        <span>${text}</span>
-        ${ctaHTML}
-      </div>
-      <button type="button" class="rv-toast__dismiss" aria-label="Cerrar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      ${titleHTML}
+      <button type="button" class="naowee-message__dismiss" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-    </div>`;
+    </div>
+    ${bodyHTML}`;
   wrap.appendChild(el);
   const dismiss = () => { el.style.transition = 'opacity .2s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 220); };
-  el.querySelector('.rv-toast__dismiss').addEventListener('click', dismiss);
-  const ctaBtn = el.querySelector('.rv-toast__cta');
+  el.querySelector('.naowee-message__dismiss').addEventListener('click', dismiss);
+  const ctaBtn = el.querySelector('.naowee-message__action');
   if(ctaBtn){
     ctaBtn.addEventListener('click', () => {
       const url = ctaBtn.dataset.ctaUrl;
       if(url) window.location.href = url;
     });
   }
-  // Dismiss auto a los 7s (más tiempo si hay CTA)
   setTimeout(dismiss, cta ? 7000 : 5000);
 }
 
 </script>
-<script src="shared/profile-switcher.js" defer></script>
+<script src="shared/profile-switcher.js?v=role-6" defer></script>
 
+
+<script src="shared/footer-scroll.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
@@ -987,22 +1094,35 @@ function showRvToast(opts){
     <div class="rv-body">
       <!-- Resumen del código a revertir -->
       <div class="rv-summary" id="rvSummary">
-        <div class="rv-summary__ico">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg>
-        </div>
-        <div class="rv-summary__body">
-          <div class="rv-summary__code" id="rvCode">—</div>
-          <div class="rv-summary__meta">
-            <span>Programa: <strong id="rvProg">—</strong></span>
-            <span>Beneficiario: <strong id="rvBenef">—</strong></span>
+        <div class="rv-summary__top">
+          <div class="rv-summary__ico">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="3" y1="15" x2="19" y2="15"/></svg>
+          </div>
+          <div class="rv-summary__main">
+            <div class="rv-summary__lbl">Código a revertir</div>
+            <div class="rv-summary__code" id="rvCode">—</div>
+          </div>
+          <div class="rv-summary__amount">
+            <div class="rv-summary__amount-lbl">Se devolverá</div>
+            <div class="rv-summary__val" id="rvValor">—</div>
           </div>
         </div>
-        <div class="rv-summary__val" id="rvValor">—</div>
+        <div class="rv-summary__divider"></div>
+        <div class="rv-summary__rows">
+          <div class="rv-summary__row">
+            <span class="rv-summary__row-lbl">Programa</span>
+            <span class="rv-summary__row-val" id="rvProg">—</span>
+          </div>
+          <div class="rv-summary__row">
+            <span class="rv-summary__row-lbl">Beneficiario</span>
+            <span class="rv-summary__row-val" id="rvBenef">—</span>
+          </div>
+        </div>
       </div>
 
       <!-- Motivo de la reversión -->
       <div class="naowee-dropdown" id="rvCatDD" data-rv-dropdown>
-        <label class="naowee-dropdown__label naowee-dropdown__label--required">Motivo de la reversión <span class="rv-req">*</span></label>
+        <label class="naowee-dropdown__label naowee-dropdown__label--required">Motivo de la reversión</label>
         <div class="naowee-dropdown__trigger" tabindex="0">
           <span class="naowee-dropdown__placeholder">Selecciona un motivo</span>
           <div class="naowee-dropdown__controls">
@@ -1018,32 +1138,33 @@ function showRvToast(opts){
           <div class="naowee-dropdown__option" data-val="cancelacion">Cancelación del programa</div>
           <div class="naowee-dropdown__option" data-val="otro">Otro motivo</div>
         </div>
-        <div class="rv-helper">Campo obligatorio — indica por qué se reversa.</div>
+        <div class="naowee-dropdown__helper rv-error-only">Este campo es obligatorio</div>
       </div>
 
       <!-- Solicitante -->
       <div class="naowee-textfield" id="rvSolicitanteField">
-        <label class="naowee-textfield__label naowee-textfield__label--required">Solicitante <span class="rv-req">*</span></label>
+        <label class="naowee-textfield__label naowee-textfield__label--required">Solicitante</label>
         <div class="naowee-textfield__input-wrap">
           <input class="naowee-textfield__input" id="rvSolicitante" type="text" placeholder="Nombre de quien solicita la reversión" maxlength="100"/>
         </div>
-        <div class="naowee-textfield__helper">Campo obligatorio — persona que solicitó la reversión (beneficiario, coordinador, etc).</div>
+        <div class="naowee-dropdown__helper rv-error-only">Este campo es obligatorio</div>
       </div>
 
       <!-- Justificación -->
       <div class="naowee-textfield naowee-textfield--textarea" id="rvJustField">
-        <label class="naowee-textfield__label naowee-textfield__label--required">Justificación <span class="rv-req">*</span></label>
+        <label class="naowee-textfield__label naowee-textfield__label--required">Justificación</label>
         <div class="naowee-textfield__input-wrap">
           <textarea class="naowee-textfield__input" id="rvJust" rows="3" placeholder="Describe los detalles de la reversión (evidencia, contexto, acción de seguimiento)..." maxlength="400"></textarea>
         </div>
-        <div class="naowee-textfield__helper">Campo obligatorio — describe la evidencia y el contexto.</div>
+        <div class="naowee-dropdown__helper rv-error-only">Este campo es obligatorio</div>
       </div>
 
       <!-- Autor (readonly) -->
-      <div class="naowee-textfield">
+      <div class="naowee-textfield naowee-textfield--readonly">
         <label class="naowee-textfield__label">Realizado por</label>
-        <div class="naowee-textfield__input-wrap">
-          <input class="naowee-textfield__input" type="text" value="Doug Vargas · Gestor de incentivos" readonly/>
+        <div class="naowee-textfield__input-wrap rv-readonly">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="rv-readonly__ico"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="rv-readonly__val">Doug Vargas · Gestor de incentivos</span>
         </div>
       </div>
     </div>

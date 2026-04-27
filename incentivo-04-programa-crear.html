@@ -236,16 +236,16 @@
     <nav class="sidebar-nav">
       <div class="nav-section">INCENTIVOS · GESTOR</div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-02-dashboard.html')">
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20" x2="21" y2="20"/><rect x="6" y="11" width="3" height="9" rx=".5"/><rect x="11" y="7" width="3" height="13" rx=".5"/><rect x="16" y="14" width="3" height="6" rx=".5"/></svg></div>
         <span class="lbl">Dashboard</span>
       </div>
       <div class="nav-row active">
         <div class="active-bar"></div>
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d74009" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="13" height="13" rx="2"/><rect x="8" y="8" width="13" height="13" rx="2"/></svg></div>
         <span class="lbl">Programas</span>
       </div>
       <div class="nav-row" onclick="fadeAndGo('incentivo-07-codigos.html')">
-        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="4" height="14"/><rect x="9" y="5" width="2" height="14"/><rect x="13" y="5" width="4" height="14"/><rect x="19" y="5" width="2" height="14"/></svg></div>
+        <div class="icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#646587" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="15" y2="20"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="3" y1="15" x2="19" y2="15"/></svg></div>
         <span class="lbl">Códigos</span>
       </div>
     </nav>
@@ -766,7 +766,44 @@ function addManualRow(){
 }
 
 function saveDraft(){
-  alert('Borrador guardado. Podrás retomarlo desde la lista de programas.');
+  // Captura datos del formulario y empuja un draft a la cola en sessionStorage.
+  // La lista de programas (incentivo-03) drena la cola al cargar y lo ubica
+  // como primera fila — sin toasts ni alertas.
+  const name = (document.getElementById('f-name')?.value || '').trim() || 'Programa sin nombre';
+  const desc = (document.querySelector('.fcard textarea')?.value || '').trim();
+  const rubroStr = (document.getElementById('f-rubro')?.value || '').replace(/\D/g, '');
+  const rubro = rubroStr ? Number(rubroStr) : 0;
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  const fmtDate = v => {
+    if(!v) return '—';
+    const [y, m, d] = v.split('-');
+    const mm = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][Number(m) - 1] || m;
+    return `${d} ${mm} ${y}`;
+  };
+  const from = fmtDate(dateInputs[0]?.value || '');
+  const to = fmtDate(dateInputs[1]?.value || '');
+
+  const draft = {
+    id: 'PRG-2026-' + String(Date.now()).slice(-3),
+    name,
+    shortDesc: desc.slice(0, 80) || 'Sin descripción',
+    longDesc: desc,
+    iconBg: '#f5f6fa', iconColor: '#646587',
+    status: 'draft',
+    event: '', coverage: '—', responsible: 'Doug Vargas',
+    rubro, exec: 0, unit: 0,
+    codes: { total: 0, avail: 0, asig: 0, rev: 0 },
+    from, to,
+    actoAdmin: '', fuente: 'Ministerio del Deporte',
+    incentives: [], conditions: { groups: [], summary: '' }
+  };
+  // Persistir en cola para que la página destino lo inserte al tope.
+  const KEY = 'naowee:program-draft-queue';
+  const queue = JSON.parse(sessionStorage.getItem(KEY) || '[]');
+  queue.push(draft);
+  sessionStorage.setItem(KEY, JSON.stringify(queue));
+  // Navegar a la lista de programas — el draft aparecerá de primero.
+  window.location.href = 'incentivo-03-programas.html';
 }
 function confirmCancel(){
   if(confirm('¿Salir sin guardar? Los cambios se perderán.')){
@@ -782,6 +819,8 @@ function fadeAndGo(url){window.location.href=url}
 
 render();
 </script>
+
+<script src="shared/footer-scroll.js" defer></script>
 
 <!-- Footer flotante Naowee -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
