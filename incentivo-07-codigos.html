@@ -173,18 +173,18 @@
   /* ═══ Icono + popover de historial de reversión ═══ */
   .cod-cell{display:inline-flex;align-items:center;gap:8px}
   .rev-history-btn{
-    width:22px;height:22px;border-radius:6px;border:none;background:transparent;
+    width:24px;height:24px;border-radius:6px;border:none;background:#fff3e6;
     display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
-    color:#9ca3af;transition:background .15s,color .15s;flex-shrink:0;
+    color:#d74009;transition:background .15s,color .15s,transform .12s;flex-shrink:0;
   }
-  .rev-history-btn:hover{background:#fff3e6;color:#d74009}
+  .rev-history-btn:hover{background:#ffdaa3;transform:scale(1.08)}
   .rev-history-btn svg{width:14px;height:14px}
 
   .rev-popover{
     position:fixed;z-index:200;
     background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
     border-radius:12px;box-shadow:0 16px 40px rgba(40,40,52,.16);
-    width:340px;max-width:calc(100vw - 24px);padding:0;
+    width:560px;max-width:calc(100vw - 24px);padding:0;
     opacity:0;transform:translateY(-4px);pointer-events:none;
     transition:opacity .18s,transform .18s;
   }
@@ -202,7 +202,9 @@
   .rv-pop__close:hover{background:#f5f6fa;color:#282834}
   .rv-pop__close svg{width:14px;height:14px}
 
-  .rv-pop__body{padding:14px 16px;display:flex;flex-direction:column;gap:14px;max-height:60vh;overflow-y:auto}
+  .rv-pop__body{padding:14px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;max-height:70vh;overflow-y:auto}
+  .rv-row.rv-row--full{grid-column:1 / -1}
+  @media(max-width:560px){.rv-pop__body{grid-template-columns:1fr}}
 
   /* Timeline de estados */
   .rv-trail{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -1168,7 +1170,7 @@ function openRevPopover(id, btn){
   pop.querySelector('.rv-pop__title').textContent = 'Historial de reversión';
   pop.querySelector('.rv-pop__sub').textContent = c.code || `${c.tipo} · ${c.prg.id}`;
   pop.querySelector('.rv-pop__body').innerHTML = `
-    <div class="rv-row">
+    <div class="rv-row rv-row--full">
       <div class="rv-row__lbl">Estados</div>
       <div class="rv-trail">${stateLine}</div>
     </div>
@@ -1188,12 +1190,12 @@ function openRevPopover(id, btn){
       <div class="rv-row__lbl">Fecha y hora</div>
       <div class="rv-row__val">${entry.fecha}</div>
     </div>
-    <div class="rv-row">
+    <div class="rv-row rv-row--full">
       <div class="rv-row__lbl">Beneficiario previo</div>
       <div class="rv-row__val">${entry.beneficiarioPrevio} <span style="color:#646587">(asignado por ${entry.operadorPrevio} · ${entry.fechaAsignacion})</span></div>
     </div>
     ${entry.justificacion ? `
-    <div class="rv-row">
+    <div class="rv-row rv-row--full">
       <div class="rv-row__lbl">Justificación</div>
       <div class="rv-row__val">${entry.justificacion}</div>
     </div>` : ''}
@@ -1201,7 +1203,7 @@ function openRevPopover(id, btn){
 
   // Posicionar popover cerca del botón disparador
   const r = btn.getBoundingClientRect();
-  const popW = 340;
+  const popW = 560;
   let left = r.right + 8;
   if(left + popW > window.innerWidth - 12) left = r.left - popW - 8;
   if(left < 12) left = 12;
