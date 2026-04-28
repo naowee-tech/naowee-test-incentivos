@@ -413,6 +413,53 @@
   .ev-foot__hint{display:inline-flex;align-items:center;gap:6px}
   .ev-foot__hint svg{width:14px;height:14px}
 
+  /* ═══ Icono + popover de historial de reversión (paridad con incentivo-07) ═══ */
+  .cod-cell{display:inline-flex;align-items:center;gap:8px}
+  .rev-history-btn{
+    width:22px;height:22px;border-radius:6px;border:none;background:transparent;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+    color:#9ca3af;transition:background .15s,color .15s;flex-shrink:0;
+  }
+  .rev-history-btn:hover{background:#fff3e6;color:#d74009}
+  .rev-history-btn svg{width:14px;height:14px}
+  .rev-popover{
+    position:fixed;z-index:200;
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:12px;box-shadow:0 16px 40px rgba(40,40,52,.16);
+    width:340px;max-width:calc(100vw - 24px);padding:0;
+    opacity:0;transform:translateY(-4px);pointer-events:none;
+    transition:opacity .18s,transform .18s;
+  }
+  .rev-popover.is-open{opacity:1;transform:translateY(0);pointer-events:auto}
+  .rv-pop__head{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:12px 16px;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
+  }
+  .rv-pop__title{font-size:13px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
+  .rv-pop__sub{font-size:11px;color:var(--naowee-color-text-secondary,#646587);margin-top:1px;font-family:'SF Mono',monospace}
+  .rv-pop__close{
+    width:26px;height:26px;border-radius:6px;border:none;background:transparent;
+    color:#9ca3af;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  }
+  .rv-pop__close:hover{background:#f5f6fa;color:#282834}
+  .rv-pop__close svg{width:14px;height:14px}
+  .rv-pop__body{padding:14px 16px;display:flex;flex-direction:column;gap:14px;max-height:60vh;overflow-y:auto}
+  .rv-trail{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .rv-state{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9999px;
+    font-size:11px;font-weight:700;letter-spacing:.2px;
+  }
+  .rv-state--asig{background:#e6f4e7;color:#15803d}
+  .rv-state--rev{background:#ffe4ee;color:#be185d}
+  .rv-state--disp{background:#eef5ff;color:#1f78d1}
+  .rv-state__dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .rv-arrow{color:#c4c7dc;font-size:12px;display:inline-flex;align-items:center}
+  .rv-row{display:flex;flex-direction:column;gap:2px;padding-bottom:10px;border-bottom:1px dashed var(--naowee-color-border-default,#e7e9f3)}
+  .rv-row:last-child{border-bottom:none;padding-bottom:0}
+  .rv-row__lbl{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--naowee-color-text-secondary,#646587)}
+  .rv-row__val{font-size:12.5px;color:var(--naowee-color-text-primary,#282834);font-weight:500;line-height:1.45}
+  .rv-row__val strong{font-weight:700}
+
   /* ═════ MODAL: Cargar códigos ═════ */
   .cc-overlay{
     position:fixed;inset:0;z-index:1100;
@@ -1260,6 +1307,12 @@ function seedCodigos(){
   // Programa demo seeded en programs-data.js: mantener la data fake rica para la demo.
   const out = [];
   const total = (CURRENT_PROGRAM && CURRENT_PROGRAM.codes && CURRENT_PROGRAM.codes.total) || 200;
+  const RV_MOTIVOS = [
+    { k:'devolucion', label:'Devolución del beneficiario', just:'El beneficiario solicitó devolver el código por cambio de programa.' },
+    { k:'error',      label:'Error en la asignación',      just:'Se detectó un error en los datos del beneficiario tras la entrega.' },
+    { k:'no-elegible',label:'Beneficiario no elegible',     just:'Auditoría posterior identificó que el beneficiario no cumplía requisitos.' },
+    { k:'fraude',     label:'Sospecha de fraude',           just:'Caso reportado por la línea de auditoría. Bajo investigación.' }
+  ];
   for(let i = 1; i <= total; i++){
     const code = `2026BEC-${String(i).padStart(5, '0')}`;
     let estado;
@@ -1278,7 +1331,27 @@ function seedCodigos(){
     const fecha = estado === 'disp'
       ? `${15 - (i % 12)} feb · cargado`
       : `${day} abr · ${hour}:${min}`;
-    out.push({ code, estado, benef, op, fecha, uploader });
+    // Seed history: ~1/8 de los disp arrancan con reversión previa
+    let reversionHistory = null;
+    if(estado === 'disp' && i % 8 === 0){
+      const m = RV_MOTIVOS[i % RV_MOTIVOS.length];
+      const benefPrev = PEOPLE[(i*11) % PEOPLE.length];
+      const opPrev = OPERATORS[(i*5) % OPERATORS.length];
+      const dayR = String(Math.max(1, day - 2)).padStart(2,'0');
+      reversionHistory = [{
+        beneficiarioPrevio: benefPrev,
+        operadorPrevio: opPrev,
+        fechaAsignacion: `${day} abr 2026 · ${hour}:${min}`,
+        motivo: m.k,
+        motivoLabel: m.label,
+        solicitante: ['Carlos Pérez','Mariana Soto','Felipe Cárdenas','Andrea López'][i % 4],
+        justificacion: m.just,
+        autor: 'Doug Vargas · Gestor de incentivos',
+        fecha: `${dayR} abr 2026 · ${hour}:${min}`,
+        valor: CURRENT_PROGRAM.unit
+      }];
+    }
+    out.push({ code, estado, benef, op, fecha, uploader, reversionHistory });
   }
   state.all = out;
 }
@@ -1344,8 +1417,14 @@ function renderCodigos(){
     const muted = r.estado === 'disp' || r.estado === 'rev';
     const mutedStyle = muted ? ' style="color:#9c9ebf"' : '';
     const valStyle = r.estado === 'rev' ? 'text-align:right;color:#9c9ebf' : 'text-align:right;font-weight:700';
+    const hasHistory = r.reversionHistory && r.reversionHistory.length > 0;
+    const histBtn = hasHistory
+      ? `<button type="button" class="rev-history-btn" onclick="event.stopPropagation();openRevPopover('${r.code}', this)" aria-label="Historial de reversión" title="Ver historial de reversión">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><polyline points="3 4 3 9 8 9"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+         </button>`
+      : '';
     return `<tr>
-      <td><code>${r.code}</code></td>
+      <td><span class="cod-cell"><code>${r.code}</code>${histBtn}</span></td>
       <td>${badges[r.estado] || badges.disp}</td>
       <td>${r.uploader || '—'}</td>
       <td${mutedStyle}>${r.fecha || '—'}</td>
@@ -1481,6 +1560,43 @@ function changeAsignPage(delta){
   asignState.page = Math.max(1, Math.min(totalPages, asignState.page + delta));
   renderAsign();
 }
+
+/* ═══ Popover de historial de reversión ═══ */
+function openRevPopover(code, btn){
+  const r = state.all.find(x => x.code === code);
+  if(!r || !r.reversionHistory || !r.reversionHistory.length) return;
+  const entry = r.reversionHistory[r.reversionHistory.length - 1];
+  const pop = document.getElementById('revPopover');
+  if(!pop) return;
+  const stateLine = `<span class="rv-state rv-state--asig"><span class="rv-state__dot"></span>Asignado</span><span class="rv-arrow">→</span><span class="rv-state rv-state--rev"><span class="rv-state__dot"></span>Revertido</span><span class="rv-arrow">→</span><span class="rv-state rv-state--disp"><span class="rv-state__dot"></span>Disponible</span>`;
+  pop.querySelector('.rv-pop__title').textContent = 'Historial de reversión';
+  pop.querySelector('.rv-pop__sub').textContent = r.code;
+  pop.querySelector('.rv-pop__body').innerHTML = `
+    <div class="rv-row"><div class="rv-row__lbl">Estados</div><div class="rv-trail">${stateLine}</div></div>
+    <div class="rv-row"><div class="rv-row__lbl">Motivo</div><div class="rv-row__val"><strong>${entry.motivoLabel}</strong></div></div>
+    <div class="rv-row"><div class="rv-row__lbl">Solicitada por</div><div class="rv-row__val">${entry.solicitante}</div></div>
+    <div class="rv-row"><div class="rv-row__lbl">Revertida por</div><div class="rv-row__val">${entry.autor}</div></div>
+    <div class="rv-row"><div class="rv-row__lbl">Fecha y hora</div><div class="rv-row__val">${entry.fecha}</div></div>
+    <div class="rv-row"><div class="rv-row__lbl">Beneficiario previo</div><div class="rv-row__val">${entry.beneficiarioPrevio} <span style="color:#646587">(asignado por ${entry.operadorPrevio} · ${entry.fechaAsignacion})</span></div></div>
+    ${entry.justificacion ? `<div class="rv-row"><div class="rv-row__lbl">Justificación</div><div class="rv-row__val">${entry.justificacion}</div></div>` : ''}
+  `;
+  const rect = btn.getBoundingClientRect();
+  const popW = 340;
+  let left = rect.right + 8;
+  if(left + popW > window.innerWidth - 12) left = rect.left - popW - 8;
+  if(left < 12) left = 12;
+  let top = rect.top + rect.height/2 - 60;
+  if(top + 360 > window.innerHeight - 12) top = window.innerHeight - 372;
+  if(top < 12) top = 12;
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+  pop.classList.add('is-open');
+}
+function closeRevPopover(){ document.getElementById('revPopover')?.classList.remove('is-open'); }
+document.addEventListener('click', e => {
+  if(!e.target.closest('#revPopover') && !e.target.closest('.rev-history-btn')) closeRevPopover();
+});
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeRevPopover(); });
 
 /* ═══ Lightbox de evidencia ═══ */
 const EV_PALETTES = [
@@ -1805,6 +1921,20 @@ function clearSearch(inputId){
   <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
   <div class="naowee-floating-footer__sep"></div>
   <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
+</div>
+
+<!-- Popover de historial de reversión -->
+<div class="rev-popover" id="revPopover" role="dialog" aria-modal="false" aria-labelledby="revPopTitle">
+  <div class="rv-pop__head">
+    <div>
+      <div class="rv-pop__title" id="revPopTitle">Historial de reversión</div>
+      <div class="rv-pop__sub">—</div>
+    </div>
+    <button type="button" class="rv-pop__close" onclick="closeRevPopover()" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="rv-pop__body"></div>
 </div>
 
 </body>
