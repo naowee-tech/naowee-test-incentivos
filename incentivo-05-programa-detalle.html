@@ -771,7 +771,7 @@
                     <div class="toolbar-dd-item" role="option" data-val="rev" onclick="setEstadoFilter('rev','Revertidos')"><span class="dd-dot" style="background:#9e0015"></span>Revertidos</div>
                   </div>
                 </div>
-                <button class="naowee-btn naowee-btn--loud naowee-btn--small" onclick="openCargarCodigos()">
+                <button class="naowee-btn naowee-btn--loud naowee-btn--small" id="btnCargarCodigos" onclick="openCargarCodigos()">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   Cargar códigos
                 </button>
@@ -989,6 +989,15 @@ function hydrateProgram(){
   document.getElementById('kpiInv').textContent = p.codes.avail;
   document.getElementById('kpiRev').textContent = p.codes.rev;
   document.getElementById('kpiRevSub').textContent = p.codes.total ? `${((p.codes.rev/p.codes.total)*100).toFixed(1)}% del total` : '—';
+
+  // Regla de negocio: solo programas tipo Bono manejan inventario de códigos.
+  // Para los demás (Beca, Kit, Inscripción, Transporte) ocultamos el tab y
+  // el botón "Cargar códigos".
+  const isBonoProgram = mainCat === 'Bono';
+  const cargarBtn = document.getElementById('btnCargarCodigos');
+  if(cargarBtn) cargarBtn.style.display = isBonoProgram ? '' : 'none';
+  // Marca el container del tab códigos para estilizar el empty state
+  document.querySelector('.tab-pane[data-pane="codigos"]')?.classList.toggle('codigos-pane--no-codes', !isBonoProgram);
 
   // Tab counts
   const totalConds = p.conditions.groups.reduce((acc, g) => acc + g.rules.length, 0);
@@ -1235,6 +1244,12 @@ const state = { all: [], filter: 'all', search: '', page: 1, pageSize: 10 };
 const asignState = { all: [], region: 'all', search: '', page: 1, pageSize: 10 };
 
 function seedCodigos(){
+  // Regla de negocio: solo Bono usa inventario de códigos
+  const primaryCat = CURRENT_PROGRAM?.incentives?.[0]?.category;
+  if(primaryCat !== 'Bono'){
+    state.all = [];
+    return;
+  }
   // Programa creado por el usuario en el wizard: usar SUS códigos reales.
   // Si no asignó nada todavía, mostrar lista vacía — sin operadores/beneficiarios fake.
   if(CURRENT_PROGRAM && CURRENT_PROGRAM._userCreated){
@@ -1296,6 +1311,34 @@ function renderCodigos(){
     reasig: '<span class="naowee-badge naowee-badge--informative naowee-badge--quiet naowee-badge--small" style="background:#f3e8ff;color:#7c3aed">Reasignado</span>',
     rev:    '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
   };
+
+  // Empty state especial: este programa no usa códigos (no es Bono)
+  const primaryCat = CURRENT_PROGRAM?.incentives?.[0]?.category;
+  const isBonoProg = primaryCat === 'Bono';
+
+  if(!isBonoProg){
+    tbody.innerHTML = `<tr><td colspan="5" style="padding:0">
+      <div class="naowee-message naowee-message--informative" style="margin:18px;border-radius:12px">
+        <div class="naowee-message__header">
+          <div class="naowee-message__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="naowee-message__text">
+            Este programa no maneja inventario de códigos. Los incentivos tipo
+            <strong>${primaryCat || '—'}</strong> se entregan directamente al beneficiario sin
+            requerir un código canjeable. Las asignaciones quedan registradas en el tab
+            <strong>Asignaciones</strong>.
+          </div>
+        </div>
+      </div>
+    </td></tr>`;
+    document.getElementById('pagInfo').textContent = '—';
+    document.getElementById('pagInput').value = 1;
+    document.getElementById('pagTotal').textContent = 1;
+    document.getElementById('pagPrev').disabled = true;
+    document.getElementById('pagNext').disabled = true;
+    return;
+  }
 
   tbody.innerHTML = slice.length ? slice.map(r => {
     const muted = r.estado === 'disp' || r.estado === 'rev';
@@ -1588,11 +1631,13 @@ document.addEventListener('keydown', e => {
         </button>
       </div>
 
-      <div class="cc-summary">
-        <div class="cc-summary__ico">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <div class="naowee-message naowee-message--informative" style="margin-top:14px">
+        <div class="naowee-message__header">
+          <div class="naowee-message__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="naowee-message__text" id="ccSummaryText">Rubro disponible: <strong>$18.000.000</strong> (18 códigos × $1.000.000). Los nuevos códigos se agregarán al inventario actual.</div>
         </div>
-        <div id="ccSummaryText">Rubro disponible: <strong>$18.000.000</strong> (18 códigos × $1.000.000). Los nuevos códigos se agregarán al inventario actual.</div>
       </div>
     </div>
 
