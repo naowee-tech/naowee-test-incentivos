@@ -164,6 +164,10 @@
   .asig-table tbody tr:hover{background:#fafbfd}
   .asig-table tbody tr:last-child td{border-bottom:none}
   .asig-table code{font-family:'SF Mono',monospace;font-size:12px;color:var(--naowee-color-text-accent,#d74009)}
+  .asig-table .code-link{text-decoration:none;border-bottom:1px dashed transparent;transition:border-color .15s,color .15s}
+  .asig-table .code-link:hover{border-bottom-color:var(--naowee-color-text-accent,#d74009)}
+  .asig-table .code-link:hover code{color:#a83208}
+  .asig-table .code-link:focus-visible{outline:2px solid var(--naowee-color-text-accent,#d74009);outline-offset:2px;border-radius:3px}
 
   /* Column widths */
   .asig-table th:nth-child(1),.asig-table td:nth-child(1){width:13%}
@@ -589,7 +593,7 @@ function render(){
             </div>
           </div>
         </td>
-        <td><code>${a.code}</code></td>
+        <td><a href="incentivo-05-programa-detalle.html?id=${a.prg.id}" onclick="event.stopPropagation();fadeAndGo('incentivo-05-programa-detalle.html?id=${a.prg.id}');return false" class="code-link" title="Ver detalle del programa ${a.prg.name}"><code>${a.code}</code></a></td>
         <td>
           <div class="prg-mini">
             <div class="prg-mini__ico" style="background:${a.prg.iconBg};color:${a.prg.iconColor}">
