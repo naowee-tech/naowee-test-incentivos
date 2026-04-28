@@ -27,7 +27,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Beca educativa · Medallistas de oro', category: 'Beca',
         detail: 'Cualitativo + monetario · 200 cupos planeados',
-        value: 1000000, valueLabel: '$' + (1000000 * float(m.group(1))).__round__(), valueFoot: 'por beneficiario',
+        value: 1000000, valueLabel: '$1.000.000', valueFoot: 'por beneficiario',
         badges: [{ text: 'Beca', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
     ],
     conditions: {
@@ -65,7 +65,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Kit uniforme · Atletismo pista', category: 'Kit',
         detail: 'Camiseta, pantaloneta, medias y spikes · 250 unidades',
-        value: 350000, valueLabel: '$' + (1000 * float(m.group(1))).__round__(), valueFoot: 'por kit',
+        value: 350000, valueLabel: '$350.000', valueFoot: 'por kit',
         badges: [{ text: 'Kit', variant: 'caution' }, { text: 'En especie', variant: 'neutral' }] }
     ],
     conditions: {
@@ -100,7 +100,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Bono transporte mensual', category: 'Bono',
         detail: 'Recarga TransMilenio/SITP · 500 cupos',
-        value: 120000, valueLabel: '$' + (1000 * float(m.group(1))).__round__(), valueFoot: 'por mes',
+        value: 120000, valueLabel: '$120.000', valueFoot: 'por mes',
         badges: [{ text: 'Bono', variant: 'informative' }, { text: 'Transporte', variant: 'positive' }] }
     ],
     conditions: {
@@ -136,7 +136,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Pago inscripción · Juegos Universitarios', category: 'Inscripción',
         detail: 'Cubre cuota única de inscripción · 80 cupos',
-        value: 250000, valueLabel: '$' + (1000 * float(m.group(1))).__round__(), valueFoot: 'por inscrito',
+        value: 250000, valueLabel: '$250.000', valueFoot: 'por inscrito',
         badges: [{ text: 'Inscripción', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
     ],
     conditions: {
@@ -171,7 +171,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Beca integral alto rendimiento', category: 'Beca',
         detail: 'Pendiente definir número de cupos',
-        value: 5000000, valueLabel: '$' + (1000000 * float(m.group(1))).__round__(), valueFoot: 'por beneficiario mensual',
+        value: 5000000, valueLabel: '$5.000.000', valueFoot: 'por beneficiario mensual',
         badges: [{ text: 'Beca', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }, { text: 'Borrador', variant: 'neutral' }] }
     ],
     conditions: {
@@ -205,7 +205,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Bono participación · Olimpiadas indígenas', category: 'Bono',
         detail: 'Pago único de participación · 180 cupos',
-        value: 250000, valueLabel: '$' + (1000 * float(m.group(1))).__round__(), valueFoot: 'por deportista',
+        value: 250000, valueLabel: '$250.000', valueFoot: 'por deportista',
         badges: [{ text: 'Bono', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
     ],
     conditions: {
@@ -239,7 +239,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Kit fútbol juvenil', category: 'Kit',
         detail: 'Uniforme + guayos + balón · 100 unidades',
-        value: 320000, valueLabel: '$' + (1000 * float(m.group(1))).__round__(), valueFoot: 'por kit',
+        value: 320000, valueLabel: '$320.000', valueFoot: 'por kit',
         badges: [{ text: 'Kit', variant: 'caution' }, { text: 'En especie', variant: 'neutral' }] }
     ],
     conditions: {
@@ -273,7 +273,7 @@ window.PROGRAMS_DATA = [
     incentives: [
       { name: 'Beca universitaria · Medallistas', category: 'Beca',
         detail: 'Matrícula semestre 2026-I · 180 cupos',
-        value: 1000000, valueLabel: '$' + (1000000 * float(m.group(1))).__round__(), valueFoot: 'por beneficiario',
+        value: 1000000, valueLabel: '$1.000.000', valueFoot: 'por beneficiario',
         badges: [{ text: 'Beca', variant: 'informative' }, { text: 'Monetario', variant: 'positive' }] }
     ],
     conditions: {
