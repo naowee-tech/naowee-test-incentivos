@@ -992,23 +992,36 @@ function doRevert(){
     return;
   }
 
-  // 1) Actualiza el código in-memory
-  c.estado = 'rev';
-  c.benef = c.benef || '—';
-  // 2) Ajusta contadores del programa
+  // 1) Snapshot de quién lo tenía antes — se conserva sólo en el
+  //    historial. El código vuelve a estar disponible.
+  const prevBenef = c.benef || '—';
+  const prevOp = c.op || '—';
+  const prevFecha = c.fecha || '—';
+
+  // 2) Actualiza el código in-memory: vuelve a "disponible"
+  c.estado = 'disp';
+  c.benef = null;
+  c.op = null;
+  c.fecha = null;
+
+  // 3) Ajusta contadores del programa: -1 asignado, +1 disponible.
+  //    NO se incrementa rev (la reversión ya no es un estado del código,
+  //    es una entrada en el historial).
   if(c.prg && c.prg.codes){
-    c.prg.codes.rev = (c.prg.codes.rev || 0) + 1;
-    c.prg.codes.asig = Math.max(0, (c.prg.codes.asig || 1) - 1);
-    c.prg.codes.disponibles = (c.prg.codes.disponibles || 0);
+    c.prg.codes.asig  = Math.max(0, (c.prg.codes.asig  || 1) - 1);
+    c.prg.codes.avail = (c.prg.codes.avail || 0) + 1;
   }
-  // 3) Registra en historial (localStorage — trazabilidad simple)
+
+  // 4) Registra en historial (localStorage — trazabilidad)
   try {
     const hist = JSON.parse(localStorage.getItem('naowee-reversiones') || '[]');
     hist.push({
       code: c.code,
       programa: c.prg.name,
       programaId: c.prg.id,
-      beneficiario: c.benef,
+      beneficiarioPrevio: prevBenef,
+      operadorPrevio: prevOp,
+      fechaAsignacion: prevFecha,
       valor: c.valor,
       motivo,
       motivoLabel: RV_MOTIVOS[motivo] || motivo,
@@ -1027,8 +1040,8 @@ function doRevert(){
   const valM = '$' + Number(c.valor||0).toLocaleString('es-CO');
   showRvToast({
     variant: 'positive',
-    title: `Código ${c.code} revertido`,
-    text: `${valM} volvió al rubro de ${c.prg.name}. Registro disponible en el historial.`,
+    title: `Código ${c.code} de nuevo disponible`,
+    text: `${valM} volvió al rubro de ${c.prg.name} y el código queda disponible para una nueva asignación. La reversión queda registrada en el historial.`,
     cta: {
       label: 'Ver programa',
       url: `incentivo-05-programa-detalle.html?id=${c.prg.id}&from=codigos`
