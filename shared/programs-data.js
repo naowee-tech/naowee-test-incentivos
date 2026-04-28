@@ -98,7 +98,7 @@ window.PROGRAMS_DATA = [
     actoAdmin: 'Acuerdo 2026-CUN-042',
     fuente: 'Gobernación Cundinamarca · 2026',
     incentives: [
-      { name: 'Bono transporte mensual', category: 'Transporte',
+      { name: 'Bono transporte mensual', category: 'Bono',
         detail: 'Recarga TransMilenio/SITP · 500 cupos',
         value: 120000, valueLabel: '$120K', valueFoot: 'por mes',
         badges: [{ text: 'Bono', variant: 'informative' }, { text: 'Transporte', variant: 'positive' }] }
