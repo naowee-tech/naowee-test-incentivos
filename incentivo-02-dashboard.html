@@ -89,25 +89,34 @@
 
   /* Period picker · usa naowee-segment del DS */
 
-  /* Greeting */
+  /* Greeting hero — reemplaza el page-header tradicional.
+     Sin borde: solo el barrido degradado warm peach define el área. */
   .greeting-row{
-    display:flex;justify-content:space-between;align-items:center;gap:16px;
-    padding:16px 22px;
-    background:linear-gradient(135deg,#fff7ec 0%,#fff 60%,#fafbfd 100%);
-    border:1px solid var(--naowee-color-border-default,#e7e9f3);
-    border-radius:12px;margin-bottom:20px;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:24px;
+    padding:24px 28px;
+    background:linear-gradient(120deg,#fff7ec 0%,#fff5e3 28%,#fff 70%,#fafbfd 100%);
+    border:none;border-radius:16px;margin-bottom:24px;flex-wrap:wrap;
   }
-  .greeting{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--naowee-color-text-primary,#282834)}
-  .greeting strong{color:var(--naowee-color-text-primary,#282834);font-weight:700}
+  .greeting{display:flex;align-items:center;gap:18px;flex:1;min-width:0}
+  .greeting__text{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .greeting__title{
+    font-size:24px;font-weight:700;line-height:1.2;letter-spacing:-.01em;
+    color:var(--naowee-color-text-primary,#282834);margin:0;
+  }
+  .greeting__sub{
+    font-size:14px;line-height:1.55;
+    color:var(--naowee-color-text-secondary,#646587);margin:0;max-width:760px;
+  }
+  .greeting__sub strong{color:var(--naowee-color-text-primary,#282834);font-weight:700}
   .greeting__avatar{
     display:inline-flex;align-items:center;justify-content:center;
-    width:42px;height:42px;border-radius:50%;
+    width:56px;height:56px;border-radius:50%;
     background:linear-gradient(135deg,#fef3c7 0%,#fcd34d 60%,#f59e0b 100%);
-    font-size:22px;line-height:1;flex-shrink:0;
+    font-size:30px;line-height:1;flex-shrink:0;
     box-shadow:
       0 0 0 1px rgba(245,158,11,.18),
-      0 6px 16px rgba(245,158,11,.28),
-      0 2px 4px rgba(245,158,11,.16);
+      0 10px 24px rgba(245,158,11,.28),
+      0 3px 6px rgba(245,158,11,.16);
     animation:greetWave 2.4s cubic-bezier(.4,0,.2,1) .3s infinite;
     transform-origin:70% 70%;
   }
@@ -119,6 +128,10 @@
   }
   @media(prefers-reduced-motion:reduce){
     .greeting__avatar{animation:none}
+  }
+  .greeting-row__actions{display:flex;gap:10px;align-items:center;flex-shrink:0}
+  @media(max-width:900px){
+    .greeting-row__actions{width:100%;justify-content:flex-start}
   }
 
   /* Progress override — tamaño visual cómodo */
@@ -187,13 +200,16 @@
 
     <div class="page">
 
-      <!-- ═══ Page header ═══ -->
-      <div class="page-header">
-        <div class="page-header__title-group">
-          <h1 class="page-title">Dashboard de incentivos</h1>
-          <p class="page-sub">Vista ejecutiva de los programas a nivel nacional. Monitorea inventario, ejecución presupuestal y asignaciones en tiempo real.</p>
+      <!-- ═══ Greeting + acciones (reemplaza el page-header tradicional) ═══ -->
+      <div class="greeting-row">
+        <div class="greeting">
+          <span class="greeting__avatar" aria-hidden="true">👋</span>
+          <div class="greeting__text">
+            <h1 class="greeting__title">Buenos días, Doug</h1>
+            <p class="greeting__sub">Tienes <strong>3 programas activos</strong> y <strong>47 asignaciones hoy</strong>. Vista ejecutiva de los programas a nivel nacional — monitorea inventario, ejecución presupuestal y asignaciones en tiempo real.</p>
+          </div>
         </div>
-        <div class="page-header__actions">
+        <div class="greeting-row__actions">
           <button class="naowee-btn naowee-btn--mute naowee-btn--large" onclick="fadeAndGo('incentivo-03-programas.html')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
             Ver programas
@@ -202,14 +218,6 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nuevo programa
           </button>
-        </div>
-      </div>
-
-      <!-- Greeting -->
-      <div class="greeting-row">
-        <div class="greeting">
-          <span class="greeting__avatar" aria-hidden="true">👋</span>
-          <div class="greeting__text"><strong>Buenos días, Doug</strong> — tienes <strong>3 programas activos</strong> y <strong>47 asignaciones hoy</strong>.</div>
         </div>
       </div>
 
