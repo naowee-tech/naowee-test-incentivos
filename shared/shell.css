@@ -79,7 +79,8 @@ a{color:inherit;text-decoration:none}
   width:var(--sidebar-w);min-width:var(--sidebar-w);
   background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;height:100vh;overflow-y:auto;
-  transition:width .28s cubic-bezier(.4,0,.2,1),min-width .28s cubic-bezier(.4,0,.2,1);
+  /* Apple-style smooth easing — más profesional que el cubic-bezier estándar */
+  transition:width .36s cubic-bezier(.32,.72,0,1),min-width .36s cubic-bezier(.32,.72,0,1);
 }
 
 .sidebar-logo{
@@ -125,7 +126,8 @@ a{color:inherit;text-decoration:none}
   flex:1;font-size:14px;font-weight:600;color:var(--text-primary);
   white-space:nowrap;overflow:hidden;
   max-width:200px;opacity:1;
-  transition:opacity .14s ease .12s, max-width .26s cubic-bezier(.4,0,.2,1) .04s;
+  /* Entrada al expandir: ancho primero, opacity con delay */
+  transition:opacity .2s ease .18s, max-width .36s cubic-bezier(.32,.72,0,1) .04s;
 }
 .nav-row .nav-arrow{
   width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
@@ -157,11 +159,10 @@ a{color:inherit;text-decoration:none}
 
 .sidebar-bottom{padding:8px 0;border-top:1px solid var(--border)}
 
-/* ═══ Collapsed: fade sutil de labels + iconos centrados ═══
+/* ═══ Collapsed: fade sutil + hover/active como cuadrado del icono ═══
    En vez de display:none (corte abrupto) usamos max-width:0 + opacity:0
    para que los textos se desvanezcan suavemente antes/durante el
-   shrink del sidebar. Aplica a TODOS los nav-row (nav superior +
-   sidebar-bottom como Cerrar sesión) por consistencia. */
+   shrink del sidebar. */
 .sidebar.collapsed{width:72px;min-width:72px;overflow:hidden}
 .sidebar.collapsed .sb-logo-img,
 .sidebar.collapsed .logo-sep,
@@ -170,14 +171,33 @@ a{color:inherit;text-decoration:none}
 .sidebar.collapsed .nav-row .lbl,
 .sidebar.collapsed .nav-row .nav-arrow{
   max-width:0;opacity:0;pointer-events:none;margin-left:0;margin-right:0;
-  /* Salida más rápida que la entrada: fade out primero, sin delay */
-  transition:opacity .12s ease, max-width .22s cubic-bezier(.4,0,.2,1);
+  /* Salida: fade primero, luego shrink */
+  transition:opacity .14s ease, max-width .3s cubic-bezier(.32,.72,0,1) .04s;
 }
 .sidebar.collapsed .sidebar-logo{justify-content:center;padding:0}
-.sidebar.collapsed .nav-row{justify-content:center;padding:0;gap:0}
+.sidebar.collapsed .nav-row{justify-content:center;padding:0;gap:0;background:transparent}
+.sidebar.collapsed .nav-row:hover{background:transparent}
+.sidebar.collapsed .nav-row.active:hover{background:transparent}
 .sidebar.collapsed .nav-row .icon{margin-left:0}
-/* La barra naranja sigue visible en el lado izquierdo del row activo */
-.sidebar.collapsed .active-bar{left:2px}
+
+/* Hover y activo: cuadrado de 40x40 centrado en el icono.
+   Implementado vía ::before para no alterar el flex del .icon. */
+.sidebar.collapsed .nav-row::before{
+  content:'';position:absolute;left:50%;top:50%;
+  width:40px;height:40px;border-radius:8px;
+  transform:translate(-50%,-50%);
+  background:transparent;pointer-events:none;
+  transition:background .2s cubic-bezier(.32,.72,0,1);
+  z-index:0;
+}
+.sidebar.collapsed .nav-row:hover::before{background:#f5f6fa}
+.sidebar.collapsed .nav-row.active::before{background:#fff3e6}
+.sidebar.collapsed .nav-row.active:hover::before{background:#ffe4cf}
+.sidebar.collapsed .nav-row .icon{position:relative;z-index:1}
+
+/* La barra naranja vertical no aplica en colapsado: el cuadrado accent
+   ya cumple la función de indicador activo. */
+.sidebar.collapsed .active-bar{display:none}
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
