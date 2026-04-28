@@ -181,17 +181,20 @@
   .fecha-cell__hour{font-size:11px;color:var(--naowee-color-text-secondary,#646587);margin-top:2px}
 
   .benef-cell{display:flex;align-items:center;gap:10px;min-width:0}
+  /* Avatar deportista — variante DS neutra (blanco con borde gris) para
+     no competir cromáticamente con los thumbnails coloridos del programa */
   .av-sm{
     width:32px;height:32px;border-radius:50%;
     display:inline-flex;align-items:center;justify-content:center;
     font-size:11px;font-weight:700;flex-shrink:0;
+    background:#fff;
+    color:var(--naowee-color-text-primary,#282834);
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);
   }
-  .av-sm--purple{background:#ede5ff;color:#6d28d9}
-  .av-sm--orange{background:#fff3e6;color:#c2410c}
-  .av-sm--green{background:#e6f4e7;color:#15803d}
-  .av-sm--blue{background:#eef5ff;color:#1d4ed8}
-  .av-sm--pink{background:#ffe4ee;color:#be185d}
-  .av-sm--teal{background:#ccfbf1;color:#0f766e}
+  /* Variantes de color obsoletas: se neutralizan a la base para evitar
+     ruido visual con los iconos del programa */
+  .av-sm--purple,.av-sm--orange,.av-sm--green,
+  .av-sm--blue,.av-sm--pink,.av-sm--teal{background:#fff;color:var(--naowee-color-text-primary,#282834)}
   .benef-cell__body{min-width:0}
   .benef-cell__name{font-weight:600;color:var(--naowee-color-text-primary,#282834);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .benef-cell__cc{font-size:11.5px;color:var(--naowee-color-text-secondary,#646587);margin-top:1px}
@@ -572,16 +575,11 @@ const badges = {
   asig: '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Entregado</span>',
   rev: '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
 };
-// Iconos por categoría del incentivo (primer incentivo del programa)
-const TYPE_ICONS = {
-  'Beca':        '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
-  'Kit':         '<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a3 3 0 016 0v3"/>',
-  'Bono':        '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
-  'Inscripción': '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 11h20M6 14h2M11 14h2"/>',
-  'Transporte':  '<rect x="4" y="3" width="16" height="14" rx="2"/><line x1="2" y1="13" x2="22" y2="13"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/>'
-};
+// Reutiliza el mapa de iconos centralizado del DS — paridad total con la
+// página de detalle del programa (incentivo-05) y el resto del sistema.
 function iconForType(tipo){
-  return TYPE_ICONS[tipo] || TYPE_ICONS['Beca'];
+  const icons = window.CAT_ICONS || {};
+  return icons[tipo] || icons['Beca'] || '';
 }
 
 function render(){
