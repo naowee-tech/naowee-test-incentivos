@@ -661,7 +661,7 @@ function hydrateProgramHero(){
   if(badge) badge.className = `naowee-badge naowee-badge--${meta.variant} naowee-badge--quiet naowee-badge--small`;
   set('progHeroBadgeText', meta.label);
   // KPIs financieros / inventario
-  const fmt = (v) => '$' + (v/1000000).toFixed(0) + 'M';
+  const fmt = (v) => '$' + Number(v||0).toLocaleString('es-CO');
   set('progHeroRubro', fmt(p.rubro));
   set('progHeroRubroSub', `${p.codes.total.toLocaleString('es-CO')} códigos × ${fmt(p.rubro / Math.max(p.codes.total,1))}`);
   const execPct = p.rubro > 0 ? Math.round((p.exec / p.rubro) * 100) : 0;
@@ -717,9 +717,9 @@ function renderRows(){
           </td>
           <td>
             <div class="rubro-cell">
-              <span class="rubro-cell__val">${p.rubro ? '$' + (p.rubro/1000000).toFixed(0)+'M' : '—'}</span>
+              <span class="rubro-cell__val">${p.rubro ? '$' + Number(p.rubro).toLocaleString('es-CO') : '—'}</span>
               ${p.rubro ? `<div class="naowee-progress naowee-progress--positive"><div class="naowee-progress__fill" style="width:${execPct}%"></div></div>
-                <span class="rubro-cell__exec">${execPct}% · $${(p.exec/1000000).toFixed(1)}M</span>` : '<span class="rubro-cell__exec">Sin configurar</span>'}
+                <span class="rubro-cell__exec">${execPct}% · $${Number(p.exec||0).toLocaleString('es-CO')}</span>` : '<span class="rubro-cell__exec">Sin configurar</span>'}
             </div>
           </td>
           <td>

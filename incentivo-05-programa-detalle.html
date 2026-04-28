@@ -937,12 +937,12 @@ const STATUS_META = {
 // Iconografía de categorías: ahora viene de shared/programs-data.js
 // (window.CAT_ICONS). Alias local para no tocar callsites.
 const CAT_ICONS = window.CAT_ICONS;
-function formatMoney(n){ return '$' + n.toLocaleString('es-CO'); }
+function formatMoney(n){return '$' + Number(n||0).toLocaleString('es-CO')}
 function formatMoneyShort(n){
   if(!n) return '$0';
   if(n >= 1000000000) return '$' + (n/1000000000).toFixed(1).replace('.0','') + 'B';
-  if(n >= 1000000) return '$' + (n/1000000).toFixed(0) + 'M';
-  if(n >= 1000) return '$' + (n/1000).toFixed(0) + 'K';
+  
+  
   return '$' + n;
 }
 
@@ -980,7 +980,7 @@ function hydrateProgram(){
 
   // KPI strip
   const execPct = p.rubro ? Math.round((p.exec/p.rubro)*100) : 0;
-  const unitM = p.unit >= 1000000 ? `$${(p.unit/1000000).toFixed(1).replace('.0','')}M` : `$${(p.unit/1000).toFixed(0)}K`;
+  const unitM = '$' + Number(p.unit||0).toLocaleString('es-CO');
   document.getElementById('kpiRubro').textContent = formatMoneyShort(p.rubro);
   document.getElementById('kpiRubroSub').textContent = p.codes.total > 0 ? `${p.codes.total} códigos × ${unitM}` : 'Pendiente configurar';
   document.getElementById('kpiExec').textContent = formatMoneyShort(p.exec);
@@ -1592,7 +1592,7 @@ document.addEventListener('keydown', e => {
         <div class="cc-summary__ico">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
         </div>
-        <div id="ccSummaryText">Rubro disponible: <strong>$18.000.000</strong> (18 códigos × $1M). Los nuevos códigos se agregarán al inventario actual.</div>
+        <div id="ccSummaryText">Rubro disponible: <strong>$18.000.000</strong> (18 códigos × $1.000.000). Los nuevos códigos se agregarán al inventario actual.</div>
       </div>
     </div>
 
