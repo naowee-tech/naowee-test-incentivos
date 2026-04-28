@@ -169,6 +169,58 @@
 
   /* ═════ Revertir: botón en tabla + modal ═════ */
   .cod-revert-btn{white-space:nowrap}
+
+  /* ═══ Icono + popover de historial de reversión ═══ */
+  .cod-cell{display:inline-flex;align-items:center;gap:8px}
+  .rev-history-btn{
+    width:22px;height:22px;border-radius:6px;border:none;background:transparent;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+    color:#9ca3af;transition:background .15s,color .15s;flex-shrink:0;
+  }
+  .rev-history-btn:hover{background:#fff3e6;color:#d74009}
+  .rev-history-btn svg{width:14px;height:14px}
+
+  .rev-popover{
+    position:fixed;z-index:200;
+    background:#fff;border:1px solid var(--naowee-color-border-default,#e7e9f3);
+    border-radius:12px;box-shadow:0 16px 40px rgba(40,40,52,.16);
+    width:340px;max-width:calc(100vw - 24px);padding:0;
+    opacity:0;transform:translateY(-4px);pointer-events:none;
+    transition:opacity .18s,transform .18s;
+  }
+  .rev-popover.is-open{opacity:1;transform:translateY(0);pointer-events:auto}
+  .rv-pop__head{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:12px 16px;border-bottom:1px solid var(--naowee-color-border-default,#e7e9f3);
+  }
+  .rv-pop__title{font-size:13px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
+  .rv-pop__sub{font-size:11px;color:var(--naowee-color-text-secondary,#646587);margin-top:1px;font-family:'SF Mono',monospace}
+  .rv-pop__close{
+    width:26px;height:26px;border-radius:6px;border:none;background:transparent;
+    color:#9ca3af;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  }
+  .rv-pop__close:hover{background:#f5f6fa;color:#282834}
+  .rv-pop__close svg{width:14px;height:14px}
+
+  .rv-pop__body{padding:14px 16px;display:flex;flex-direction:column;gap:14px;max-height:60vh;overflow-y:auto}
+
+  /* Timeline de estados */
+  .rv-trail{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .rv-state{
+    display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9999px;
+    font-size:11px;font-weight:700;letter-spacing:.2px;
+  }
+  .rv-state--asig{background:#e6f4e7;color:#15803d}
+  .rv-state--rev{background:#ffe4ee;color:#be185d}
+  .rv-state--disp{background:#eef5ff;color:#1f78d1}
+  .rv-state__dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .rv-arrow{color:#c4c7dc;font-size:12px;display:inline-flex;align-items:center}
+
+  .rv-row{display:flex;flex-direction:column;gap:2px;padding-bottom:10px;border-bottom:1px dashed var(--naowee-color-border-default,#e7e9f3)}
+  .rv-row:last-child{border-bottom:none;padding-bottom:0}
+  .rv-row__lbl{font-size:10.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--naowee-color-text-secondary,#646587)}
+  .rv-row__val{font-size:12.5px;color:var(--naowee-color-text-primary,#282834);font-weight:500;line-height:1.45}
+  .rv-row__val strong{font-weight:700}
   .cod-noaction{color:#b5b9d4;font-size:13px}
 
   /* Helper text del modal — base + error */
@@ -635,7 +687,42 @@ function buildCodigos(){
       const hour = String(8 + (i * 3) % 12).padStart(2, '0');
       const min = String((i * 13) % 60).padStart(2, '0');
       const fecha = estado === 'disp' ? null : `${day} ${p.from.split(' ')[1]} · ${hour}:${min}`;
-      all.push({ code, prg: p, estado, benef, op, fecha, valor: p.unit, tipo });
+      // Algunos códigos disp en bonos provienen de reversiones previas
+      // (ahora son disponibles otra vez). Los marcamos con history para
+      // mostrar el feature de trazabilidad.
+      const reversionHistory = [];
+      if(isBono && estado === 'disp' && i % 7 === 0){
+        const benefPrev = PEOPLE[(i*11) % PEOPLE.length];
+        const opPrev = OPERATORS[(i*5) % OPERATORS.length];
+        const motivos = [
+          { k:'devolucion', label:'Devolución del beneficiario',
+            just:'El beneficiario solicitó devolver el código por cambio personal de programa.' },
+          { k:'error', label:'Error en la asignación',
+            just:'Se detectó un error en los datos del beneficiario tras la entrega.' },
+          { k:'no-elegible', label:'Beneficiario no elegible',
+            just:'Auditoría posterior identificó que el beneficiario no cumplía el requisito de matrícula activa.' },
+          { k:'fraude', label:'Sospecha de fraude',
+            just:'Caso reportado por la línea de auditoría. Bajo investigación.' }
+        ];
+        const m = motivos[i % motivos.length];
+        const dayR = Math.max(1, day + 3);
+        const hourR = String((parseInt(hour,10)+5) % 24).padStart(2,'0');
+        reversionHistory.push({
+          beneficiarioPrevio: benefPrev,
+          operadorPrevio: opPrev,
+          fechaAsignacion: `${day} ${p.from.split(' ')[1]} · ${hour}:${min}`,
+          motivo: m.k,
+          motivoLabel: m.label,
+          solicitante: ['Carlos Pérez','Mariana Soto','Felipe Cárdenas','Andrea López'][i % 4],
+          justificacion: m.just,
+          autor: 'Doug Vargas · Gestor de incentivos',
+          fecha: `${dayR} ${p.from.split(' ')[1]} 2026 · ${hourR}:${min}`,
+          valor: p.unit
+        });
+      }
+      // _id sintético para lookup (los no-bono no tienen código real)
+      const _id = code || `${p.id}-NC-${String(i).padStart(5,'0')}`;
+      all.push({ _id, code, prg: p, estado, benef, op, fecha, valor: p.unit, tipo, reversionHistory });
     }
   });
   return all;
@@ -760,16 +847,22 @@ function renderCodigos(){
     body.innerHTML = slice.map(c => {
       const mutedBenef = !c.benef;
       const mutedValor = c.estado === 'rev';
-      // Sólo asignados se pueden revertir
-      const actionCell = c.estado === 'asig'
-        ? `<button type="button" class="naowee-btn naowee-btn--mute naowee-btn--small cod-revert-btn" onclick="event.stopPropagation(); openRevertModal('${c.code}')">
+      // Sólo asignados se pueden revertir (cualquier tipo, no solo bono)
+      const actionCell = (c.estado === 'asig' || c.estado === 'reasig')
+        ? `<button type="button" class="naowee-btn naowee-btn--mute naowee-btn--small cod-revert-btn" onclick="event.stopPropagation(); openRevertModal('${c._id}')">
              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
              Revertir
            </button>`
         : `<span class="cod-noaction">—</span>`;
+      const hasHistory = c.reversionHistory && c.reversionHistory.length > 0;
+      const histBtn = hasHistory
+        ? `<button type="button" class="rev-history-btn" onclick="event.stopPropagation();openRevPopover('${c._id}', this)" aria-label="Historial de reversión" title="Ver historial de reversión">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><polyline points="3 4 3 9 8 9"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+           </button>`
+        : '';
       const codeCell = c.code
-        ? `<code>${c.code}</code>`
-        : `<span style="font-family:'Inter',sans-serif;font-size:12.5px;color:#9c9ebf;font-style:italic">Sin código</span>`;
+        ? `<span class="cod-cell"><code>${c.code}</code>${histBtn}</span>`
+        : `<span class="cod-cell"><span style="font-family:'Inter',sans-serif;font-size:12.5px;color:#9c9ebf;font-style:italic">Sin código</span>${histBtn}</span>`;
       return `
         <tr onclick="fadeAndGo('incentivo-05-programa-detalle.html?id=${c.prg.id}')">
           <td>${codeCell}</td>
@@ -840,7 +933,7 @@ function fadeAndGo(url){window.location.href=url}
    ═══════════════════════════════════════════════════════════════ */
 let rvTargetCode = null;
 
-function findCod(code){ return ALL.find(c => c.code === code); }
+function findCod(id){ return ALL.find(c => c._id === id || c.code === id); }
 
 const RV_MOTIVOS = {
   'devolucion': 'Devolución del beneficiario',
@@ -852,14 +945,14 @@ const RV_MOTIVOS = {
   'otro': 'Otro motivo'
 };
 
-function openRevertModal(code){
-  const c = findCod(code);
+function openRevertModal(id){
+  const c = findCod(id);
   if(!c) return;
-  rvTargetCode = code;
+  rvTargetCode = c._id;
   // Wire listeners on first open (el script se ejecuta antes del HTML del modal)
   wireRevertModalListeners();
-  // Llenar summary
-  document.getElementById('rvCode').textContent = c.code;
+  // Llenar summary — para non-bono (sin código) mostramos un placeholder
+  document.getElementById('rvCode').textContent = c.code || `${c.tipo} · ${c.prg.id}`;
   document.getElementById('rvProg').textContent = c.prg.name;
   document.getElementById('rvBenef').textContent = c.benef || '—';
   document.getElementById('rvValor').textContent = '$' + Number(c.valor||0).toLocaleString('es-CO');
@@ -1012,24 +1105,31 @@ function doRevert(){
     c.prg.codes.avail = (c.prg.codes.avail || 0) + 1;
   }
 
-  // 4) Registra en historial (localStorage — trazabilidad)
+  // 4) Registra en historial — ATADO al código (in-memory) Y en localStorage
+  const entry = {
+    code: c.code,
+    programa: c.prg.name,
+    programaId: c.prg.id,
+    beneficiarioPrevio: prevBenef,
+    operadorPrevio: prevOp,
+    fechaAsignacion: prevFecha,
+    valor: c.valor,
+    motivo,
+    motivoLabel: RV_MOTIVOS[motivo] || motivo,
+    solicitante,
+    justificacion: just,
+    autor: 'Doug Vargas · Gestor de incentivos',
+    fecha: (() => {
+      const d = new Date();
+      const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      return `${String(d.getDate()).padStart(2,'0')} ${months[d.getMonth()]} ${d.getFullYear()} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    })()
+  };
+  if(!Array.isArray(c.reversionHistory)) c.reversionHistory = [];
+  c.reversionHistory.push(entry);
   try {
     const hist = JSON.parse(localStorage.getItem('naowee-reversiones') || '[]');
-    hist.push({
-      code: c.code,
-      programa: c.prg.name,
-      programaId: c.prg.id,
-      beneficiarioPrevio: prevBenef,
-      operadorPrevio: prevOp,
-      fechaAsignacion: prevFecha,
-      valor: c.valor,
-      motivo,
-      motivoLabel: RV_MOTIVOS[motivo] || motivo,
-      solicitante,
-      justificacion: just,
-      autor: 'Doug Vargas · Gestor de incentivos',
-      fecha: new Date().toISOString()
-    });
+    hist.push({ ...entry, codeId: c._id });
     localStorage.setItem('naowee-reversiones', JSON.stringify(hist));
   } catch(_) {}
 
@@ -1052,6 +1152,72 @@ function doRevert(){
 /* Toast estilo naowee-message del DS — estructura: header (icon + title +
    dismiss) + content (text + action). Mantenemos las clases del DS para
    que tipografía/colores/padding vengan del system. */
+/* ═══ Popover de historial de reversión ═══ */
+function openRevPopover(id, btn){
+  const c = findCod(id);
+  if(!c || !c.reversionHistory || !c.reversionHistory.length) return;
+  const entry = c.reversionHistory[c.reversionHistory.length - 1]; // la más reciente
+  const pop = document.getElementById('revPopover');
+  if(!pop) return;
+
+  // Estados según el flujo: el código fue Asignado → Revertido → ahora Disponible
+  const stateLine = c.estado === 'disp'
+    ? `<span class="rv-state rv-state--asig"><span class="rv-state__dot"></span>Asignado</span><span class="rv-arrow">→</span><span class="rv-state rv-state--rev"><span class="rv-state__dot"></span>Revertido</span><span class="rv-arrow">→</span><span class="rv-state rv-state--disp"><span class="rv-state__dot"></span>Disponible</span>`
+    : `<span class="rv-state rv-state--asig"><span class="rv-state__dot"></span>Asignado</span><span class="rv-arrow">→</span><span class="rv-state rv-state--rev"><span class="rv-state__dot"></span>Revertido</span>`;
+
+  pop.querySelector('.rv-pop__title').textContent = 'Historial de reversión';
+  pop.querySelector('.rv-pop__sub').textContent = c.code || `${c.tipo} · ${c.prg.id}`;
+  pop.querySelector('.rv-pop__body').innerHTML = `
+    <div class="rv-row">
+      <div class="rv-row__lbl">Estados</div>
+      <div class="rv-trail">${stateLine}</div>
+    </div>
+    <div class="rv-row">
+      <div class="rv-row__lbl">Motivo</div>
+      <div class="rv-row__val"><strong>${entry.motivoLabel}</strong></div>
+    </div>
+    <div class="rv-row">
+      <div class="rv-row__lbl">Solicitada por</div>
+      <div class="rv-row__val">${entry.solicitante}</div>
+    </div>
+    <div class="rv-row">
+      <div class="rv-row__lbl">Revertida por</div>
+      <div class="rv-row__val">${entry.autor}</div>
+    </div>
+    <div class="rv-row">
+      <div class="rv-row__lbl">Fecha y hora</div>
+      <div class="rv-row__val">${entry.fecha}</div>
+    </div>
+    <div class="rv-row">
+      <div class="rv-row__lbl">Beneficiario previo</div>
+      <div class="rv-row__val">${entry.beneficiarioPrevio} <span style="color:#646587">(asignado por ${entry.operadorPrevio} · ${entry.fechaAsignacion})</span></div>
+    </div>
+    ${entry.justificacion ? `
+    <div class="rv-row">
+      <div class="rv-row__lbl">Justificación</div>
+      <div class="rv-row__val">${entry.justificacion}</div>
+    </div>` : ''}
+  `;
+
+  // Posicionar popover cerca del botón disparador
+  const r = btn.getBoundingClientRect();
+  const popW = 340;
+  let left = r.right + 8;
+  if(left + popW > window.innerWidth - 12) left = r.left - popW - 8;
+  if(left < 12) left = 12;
+  let top = r.top + r.height/2 - 60;
+  if(top + 360 > window.innerHeight - 12) top = window.innerHeight - 372;
+  if(top < 12) top = 12;
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+  pop.classList.add('is-open');
+}
+function closeRevPopover(){ document.getElementById('revPopover')?.classList.remove('is-open'); }
+document.addEventListener('click', e => {
+  if(!e.target.closest('#revPopover') && !e.target.closest('.rev-history-btn')) closeRevPopover();
+});
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeRevPopover(); });
+
 function showRvToast(opts){
   if(typeof opts === 'string') opts = { text: opts, variant: 'positive' };
   const { variant = 'positive', title, text, cta } = opts;
@@ -1211,6 +1377,20 @@ function showRvToast(opts){
 
 <!-- Toast container -->
 <div class="rv-toast-wrap" id="rvToastWrap" aria-live="polite"></div>
+
+<!-- Popover de historial de reversión -->
+<div class="rev-popover" id="revPopover" role="dialog" aria-modal="false" aria-labelledby="revPopTitle">
+  <div class="rv-pop__head">
+    <div>
+      <div class="rv-pop__title" id="revPopTitle">Historial de reversión</div>
+      <div class="rv-pop__sub">—</div>
+    </div>
+    <button type="button" class="rv-pop__close" onclick="closeRevPopover()" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="rv-pop__body"></div>
+</div>
 
 </body>
 </html>
