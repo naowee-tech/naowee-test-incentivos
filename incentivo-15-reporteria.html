@@ -608,8 +608,9 @@ function render(){
 function renderActiveTags(){
   const logros = { oro:'Medalla de oro', plata:'Medalla de plata', bronce:'Medalla de bronce' };
   const tags = [];
-  if (state.ano !== '2026' && state.ano !== 'all') tags.push({ k:'ano', def:'2026', label:'Año: '+state.ano });
+  // Año siempre se muestra: es un filtro siempre activo (el default 2026 también filtra datos).
   if (state.ano === 'all') tags.push({ k:'ano', def:'2026', label:'Todos los años' });
+  else tags.push({ k:'ano', def:'all', label:'Año: '+state.ano });
   if (state.mes !== 'all') tags.push({ k:'mes', def:'all', label:MESES_FULL[+state.mes] });
   if (state.prog !== 'all') {
     const p = PROGRAMS.find(x => x.id === state.prog);
