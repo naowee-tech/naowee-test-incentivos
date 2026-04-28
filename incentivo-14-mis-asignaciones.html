@@ -437,11 +437,16 @@ function buildAsignaciones(){
       const year = p.id.startsWith('PRG-2026') ? 2026 : 2025;
       const fecha = `${String(day).padStart(2,'0')} ${MONTHS[monthIdx]} ${year}`;
       const hora = `${hour}:${min}`;
+      const tipo = p.incentives?.[0]?.category || 'Otro';
+      // Solo Bono lleva código asociado al inventario
+      const finalCode = tipo === 'Bono' ? code : null;
+      // ~5% de los incentivos no monetarios sin valor asignado (kit en especie)
+      const finalValor = (tipo === 'Kit' && globalIdx % 18 === 0) ? null : unitValue;
       all.push({
-        code, prg: p, estado,
+        code: finalCode, prg: p, estado, tipo,
         person, cc, initials, avClass: AV_COLORS[globalIdx % AV_COLORS.length],
         op, region, fecha, hora,
-        valor: unitValue,
+        valor: finalValor,
         sortKey: year * 10000 + monthIdx * 100 + day,
         year, monthIdx, day
       });
@@ -465,13 +470,20 @@ function updateKPIs(){
   const unicos = new Set(ALL.filter(a => a.estado === 'asig').map(a => a.person)).size;
 
   document.getElementById('kpiTotal').textContent = total.toLocaleString('es-CO');
-  document.getElementById('kpiMonto').textContent = formatMoney(monto);
+  document.getElementById('kpiMonto').textContent = formatMoneyCompact(monto);
   document.getElementById('kpiUnicos').textContent = unicos.toLocaleString('es-CO');
   document.getElementById('kpiRev').textContent = rev.toLocaleString('es-CO');
   document.getElementById('kpiRevPct').textContent = total > 0 ? `${((rev/total)*100).toFixed(1)}%` : '0%';
 }
 
 function formatMoney(v){
+  if(!v || v <= 0) return null;
+  return '$' + Number(v).toLocaleString('es-CO');
+}
+
+// Compacto solo para KPIs / cards (no para la tabla)
+function formatMoneyCompact(v){
+  if(!v || v <= 0) return '$0';
   if(v >= 1000000) return '$' + (v/1000000).toFixed(1).replace('.0','') + 'M';
   if(v >= 1000) return '$' + (v/1000).toFixed(0) + 'K';
   return '$' + v.toLocaleString('es-CO');
@@ -560,7 +572,17 @@ const badges = {
   asig: '<span class="naowee-badge naowee-badge--positive naowee-badge--quiet naowee-badge--small">Entregado</span>',
   rev: '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
 };
-const CAT_ICON = '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>';
+// Iconos por categoría del incentivo (primer incentivo del programa)
+const TYPE_ICONS = {
+  'Beca':        '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  'Kit':         '<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a3 3 0 016 0v3"/>',
+  'Bono':        '<circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>',
+  'Inscripción': '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M2 11h20M6 14h2M11 14h2"/>',
+  'Transporte':  '<rect x="4" y="3" width="16" height="14" rx="2"/><line x1="2" y1="13" x2="22" y2="13"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/>'
+};
+function iconForType(tipo){
+  return TYPE_ICONS[tipo] || TYPE_ICONS['Beca'];
+}
 
 function render(){
   const list = filtered();
@@ -577,8 +599,15 @@ function render(){
   } else {
     body.innerHTML = slice.map(a => {
       const mutedValor = a.estado === 'rev';
+      const codeCell = a.code
+        ? `<a href="incentivo-05-programa-detalle.html?id=${a.prg.id}&from=mis-asignaciones" onclick="event.stopPropagation();fadeAndGo('incentivo-05-programa-detalle.html?id=${a.prg.id}&from=mis-asignaciones');return false" class="code-link" title="Ver detalle del programa ${a.prg.name}"><code>${a.code}</code></a>`
+        : `<span style="font-family:'Inter',sans-serif;font-size:12.5px;color:#9c9ebf;font-style:italic">Sin código</span>`;
+      const moneyTxt = formatMoney(a.valor);
+      const valorCell = moneyTxt
+        ? `<span class="valor-cell${mutedValor ? ' muted' : ''}">${moneyTxt}</span>`
+        : `<span style="font-family:'Inter',sans-serif;font-size:12.5px;color:#9c9ebf;font-style:italic">Sin valor</span>`;
       return `
-      <tr onclick="fadeAndGo('incentivo-05-programa-detalle.html?id=${a.prg.id}')">
+      <tr onclick="fadeAndGo('incentivo-05-programa-detalle.html?id=${a.prg.id}&from=mis-asignaciones')">
         <td>
           <div class="fecha-cell">${a.fecha}</div>
           <div class="fecha-cell__hour">${a.hora}</div>
@@ -592,11 +621,11 @@ function render(){
             </div>
           </div>
         </td>
-        <td><a href="incentivo-05-programa-detalle.html?id=${a.prg.id}&from=mis-asignaciones" onclick="event.stopPropagation();fadeAndGo('incentivo-05-programa-detalle.html?id=${a.prg.id}&from=mis-asignaciones');return false" class="code-link" title="Ver detalle del programa ${a.prg.name}"><code>${a.code}</code></a></td>
+        <td>${codeCell}</td>
         <td>
           <div class="prg-mini">
             <div class="prg-mini__ico" style="background:${a.prg.iconBg};color:${a.prg.iconColor}">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${CAT_ICON}</svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${iconForType(a.tipo)}</svg>
             </div>
             <div class="prg-mini__body">
               <div class="prg-mini__name">${a.prg.name}</div>
@@ -604,7 +633,7 @@ function render(){
             </div>
           </div>
         </td>
-        <td><span class="valor-cell${mutedValor ? ' muted' : ''}">${formatMoney(a.valor)}</span></td>
+        <td>${valorCell}</td>
         <td style="text-align:right">${badges[a.estado]}</td>
       </tr>
     `;}).join('');
