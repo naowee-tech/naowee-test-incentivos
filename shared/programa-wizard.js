@@ -2360,7 +2360,7 @@
     const rubro = parseMoney(document.getElementById('wzRubroTotal'));
     const cards = [...document.querySelectorAll('.wz-pane[data-pane="2"] .wz-inc-card')];
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-    const fmtMoney = v => v >= 1000000 ? `$${(v/1000000).toFixed(1).replace('.0','')}M` : v >= 1000 ? `$${(v/1000).toFixed(0)}K` : `$${v}`;
+    const fmtMoney = v => '$' + Number(v||0).toLocaleString('es-CO');
     const VARIANT_BY_CAT = { bono:'positive', beca:'informative', kit:'caution', transporte:'neutral', inscripcion:'informative', descuento:'caution', pase:'neutral', dinero:'positive' };
     const incentives = cards.map(c => {
       const incName = (c.querySelector('.naowee-textfield input[type="text"]')?.value || '').trim() || 'Incentivo sin nombre';

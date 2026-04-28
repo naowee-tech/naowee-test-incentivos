@@ -266,8 +266,8 @@
      filas Programa/Beneficiario abajo. Jerarquía clara y typo deliberada. */
   .rv-summary{
     padding:16px 18px;
-    background:linear-gradient(180deg,#fff 0%,#fff8f2 100%);
-    border:1px solid rgba(215,64,9,.18);
+    background:#f5f6fa;
+    border:1px solid var(--naowee-color-border-default,#e7e9f3);
     border-radius:14px;
   }
   .rv-summary__top{
@@ -275,10 +275,10 @@
   }
   .rv-summary__ico{
     width:44px;height:44px;border-radius:12px;flex-shrink:0;
-    background:#fff3e6;
-    color:var(--naowee-color-text-accent,#d74009);
+    background:#fff;
+    color:var(--naowee-color-text-secondary,#646587);
     display:inline-flex;align-items:center;justify-content:center;
-    box-shadow:inset 0 0 0 1px rgba(215,64,9,.14);
+    box-shadow:inset 0 0 0 1px var(--naowee-color-border-default,#e7e9f3);
   }
   .rv-summary__main{flex:1;min-width:0}
   .rv-summary__lbl{
@@ -296,11 +296,11 @@
     color:var(--naowee-color-text-secondary,#646587);
   }
   .rv-summary__val{
-    font-size:18px;font-weight:800;color:var(--naowee-color-text-accent,#d74009);
+    font-size:18px;font-weight:800;color:var(--naowee-color-text-primary,#282834);
     font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1.1;margin-top:2px;
   }
   .rv-summary__divider{
-    height:1px;background:rgba(215,64,9,.14);
+    height:1px;background:var(--naowee-color-border-default,#e7e9f3);
     margin:14px -18px;
   }
   .rv-summary__rows{
@@ -318,17 +318,29 @@
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
 
-  /* Helper "Este campo es obligatorio" — usa .naowee-dropdown__helper del DS
-     (font/size/line-height/padding-top del system) y .rv-error-only sólo
-     controla la visibilidad: oculto por defecto, visible cuando el field
-     padre tiene la clase --error. Color rojo viene del DS para dropdown
-     y se complementa aquí para textfield. */
+  /* Helper "Este campo es obligatorio" — badge negative del DS
+     Visible solo cuando el field padre tiene .--error */
   .rv-error-only{display:none}
   .naowee-textfield--error .rv-error-only,
-  .naowee-dropdown--error .rv-error-only{display:block}
-  .naowee-textfield--error .naowee-dropdown__helper.rv-error-only{
-    color:var(--naowee-color-feedback-fill-negative-loud,#b42318);
+  .naowee-dropdown--error .rv-error-only{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:6px;
+    padding:3px 10px;border-radius:9999px;
+    background:#fff0ee;color:#b42318;
+    font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;
+    letter-spacing:.2px;line-height:1.4;
+    width:fit-content;
   }
+  .naowee-textfield--error .rv-error-only::before,
+  .naowee-dropdown--error .rv-error-only::before{
+    content:'';width:6px;height:6px;border-radius:50%;
+    background:#b42318;flex-shrink:0;
+  }
+
+  /* Dropdown menú: pegado al trigger sin gap (anula cualquier margin
+     que el helper pueda introducir en flujo) */
+  #rvCatDD .naowee-dropdown__menu{margin-top:4px}
+  #rvCatDD.naowee-dropdown--error .naowee-dropdown__menu{margin-top:4px}
 
   .rv-footer{
     padding:16px 24px;border-top:1px solid var(--naowee-color-border-default,#e7e9f3);
@@ -725,7 +737,12 @@ const badges = {
   rev:    '<span class="naowee-badge naowee-badge--negative naowee-badge--quiet naowee-badge--small">Revertido</span>'
 };
 
-const CAT_ICON = '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>';
+// Icono por categoría — reusa window.CAT_ICONS centralizado (paridad
+// con incentivo-14, incentivo-05 y el resto del sistema)
+function iconForType(tipo){
+  const icons = window.CAT_ICONS || {};
+  return icons[tipo] || icons['Beca'] || '';
+}
 
 function renderCodigos(){
   const list = filteredCodigos();
@@ -759,7 +776,7 @@ function renderCodigos(){
           <td>
             <div class="prg-mini">
               <div class="prg-mini__ico" style="background:${c.prg.iconBg};color:${c.prg.iconColor}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${CAT_ICON}</svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${iconForType(c.tipo)}</svg>
               </div>
               <div class="prg-mini__body">
                 <div class="prg-mini__name">${c.prg.name}</div>
@@ -771,7 +788,7 @@ function renderCodigos(){
           <td><span class="benef-cell${mutedBenef ? ' muted' : ''}">${c.benef || '—'}</span></td>
           <td><span class="op-cell">${c.op || '—'}</span></td>
           <td><span class="fecha-cell">${c.fecha || '—'}</span></td>
-          <td><span class="valor-cell${mutedValor ? ' muted' : ''}">$${(c.valor/1000).toLocaleString('es-CO')}K</span></td>
+          <td><span class="valor-cell${mutedValor ? ' muted' : ''}">$${Number(c.valor||0).toLocaleString('es-CO')}</span></td>
           <td>${actionCell}</td>
         </tr>
       `;
@@ -845,7 +862,7 @@ function openRevertModal(code){
   document.getElementById('rvCode').textContent = c.code;
   document.getElementById('rvProg').textContent = c.prg.name;
   document.getElementById('rvBenef').textContent = c.benef || '—';
-  document.getElementById('rvValor').textContent = '$' + (c.valor/1000).toLocaleString('es-CO') + 'K';
+  document.getElementById('rvValor').textContent = '$' + Number(c.valor||0).toLocaleString('es-CO');
   // Reset form
   resetRevertForm();
   // Abrir overlay
@@ -1007,14 +1024,14 @@ function doRevert(){
   closeRevertModal();
   updateKPIs();
   renderCodigos();
-  const valM = '$' + (c.valor/1000).toLocaleString('es-CO') + 'K';
+  const valM = '$' + Number(c.valor||0).toLocaleString('es-CO');
   showRvToast({
     variant: 'positive',
     title: `Código ${c.code} revertido`,
     text: `${valM} volvió al rubro de ${c.prg.name}. Registro disponible en el historial.`,
     cta: {
       label: 'Ver programa',
-      url: `incentivo-05-programa-detalle.html?id=${c.prg.id}`
+      url: `incentivo-05-programa-detalle.html?id=${c.prg.id}&from=codigos`
     }
   });
 }

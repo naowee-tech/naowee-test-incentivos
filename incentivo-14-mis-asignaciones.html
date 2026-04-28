@@ -479,10 +479,7 @@ function updateKPIs(){
   document.getElementById('kpiRevPct').textContent = total > 0 ? `${((rev/total)*100).toFixed(1)}%` : '0%';
 }
 
-function formatMoney(v){
-  if(!v || v <= 0) return null;
-  return '$' + Number(v).toLocaleString('es-CO');
-}
+function formatMoney(v){if(!v||v<=0)return null;return '$' + Number(v).toLocaleString('es-CO')}
 
 // Compacto solo para KPIs / cards (no para la tabla)
 function formatMoneyCompact(v){
