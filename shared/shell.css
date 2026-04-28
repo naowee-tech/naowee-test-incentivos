@@ -98,8 +98,8 @@ a{color:inherit;text-decoration:none}
 .burger-btn svg{transition:transform .3s cubic-bezier(.4,0,.2,1)}
 .sidebar.collapsed .burger-btn svg{transform:rotate(180deg)}
 
-.sb-logo-img{height:40px;width:auto;display:block;flex-shrink:0}
-.logo-sep{width:1px;height:32px;background:var(--border);flex-shrink:0}
+.sb-logo-img{height:46px;width:auto;display:block;flex-shrink:0}
+.logo-sep{width:1px;height:36px;background:var(--border);flex-shrink:0}
 
 /* Fallback por si alguna pantalla vieja usa .naowee-logo */
 .naowee-logo{height:33px;flex-shrink:0}
