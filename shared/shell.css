@@ -113,7 +113,8 @@ a{color:inherit;text-decoration:none}
 .nav-row{
   display:flex;align-items:center;gap:12px;height:44px;
   padding:0 20px 0 0;border-radius:var(--radius-sm);cursor:pointer;
-  transition:background .12s,padding .25s cubic-bezier(.4,0,.2,1),justify-content .25s;
+  margin:0 10px;  /* respiro lateral: el hover/active no toca los bordes del sidebar */
+  transition:background .12s,padding .25s cubic-bezier(.4,0,.2,1),justify-content .25s,margin .28s cubic-bezier(.32,.72,0,1);
   position:relative;
 }
 .nav-row:hover{background:#f5f6fa}
@@ -139,7 +140,9 @@ a{color:inherit;text-decoration:none}
    Aparece al cargar la página (cambio de "sesión del menú") con un
    slide+scale sutil que lo hace sentir intencional, no un pop. */
 .active-bar{
-  position:absolute;left:4px;top:8px;width:4px;height:28px;
+  /* left negativo: la barra sobresale del row y queda pegada al borde
+     del sidebar, manteniendo el respiro lateral del hover */
+  position:absolute;left:-6px;top:8px;width:4px;height:28px;
   background:var(--accent);border-radius:25px;
   transform-origin:center;
   animation:activeBarIn .42s cubic-bezier(.16,1,.3,1) both;
