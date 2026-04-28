@@ -605,13 +605,34 @@
 
     <div class="page">
 
-      <!-- Regresar -->
+      <!-- Regresar (respeta el origen vía ?from=) -->
       <div class="back-link-wrap">
-        <button type="button" class="naowee-btn naowee-btn--link naowee-btn--small" onclick="fadeAndGo('incentivo-03-programas.html')">
+        <button type="button" class="naowee-btn naowee-btn--link naowee-btn--small" id="backBtn" onclick="goBackToOrigin()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-          Regresar a la lista
+          <span id="backBtnLabel">Regresar a la lista</span>
         </button>
       </div>
+      <script>
+        (function(){
+          // Mapa de orígenes → label + href
+          const ORIGINS = {
+            'mis-asignaciones': { href:'incentivo-14-mis-asignaciones.html', label:'Regresar a Mis asignaciones' },
+            'historial':        { href:'incentivo-12-asignaciones.html',     label:'Regresar al Historial' },
+            'codigos':          { href:'incentivo-07-codigos.html',          label:'Regresar a Códigos' },
+            'reporteria':       { href:'incentivo-15-reporteria.html',       label:'Regresar a Reportería' },
+            'dashboard':        { href:'incentivo-02-dashboard.html',        label:'Regresar al Dashboard' }
+          };
+          const params = new URLSearchParams(location.search);
+          const from = params.get('from');
+          const target = (from && ORIGINS[from]) || { href:'incentivo-03-programas.html', label:'Regresar a la lista' };
+          window.__backOrigin = target.href;
+          const lbl = document.getElementById('backBtnLabel');
+          if(lbl) lbl.textContent = target.label;
+        })();
+        function goBackToOrigin(){
+          fadeAndGo(window.__backOrigin || 'incentivo-03-programas.html');
+        }
+      </script>
 
       <!-- Hero card: detail-head + KPIs unificados -->
       <div class="hero-card">
