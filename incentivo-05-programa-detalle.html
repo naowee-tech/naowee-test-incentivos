@@ -495,6 +495,52 @@
   .cc-body{padding:0 26px 24px;overflow:auto}
   .cc-segment{display:flex;width:100%;margin:0 auto 18px}
   .cc-segment .naowee-segment__item{flex:1;justify-content:center}
+
+  /* Step 1: tipo de incentivo */
+  .cc-type-block{margin-bottom:18px}
+  .cc-type-block__lbl{
+    display:block;font-size:12.5px;font-weight:700;color:var(--naowee-color-text-primary,#282834);
+    margin-bottom:4px;
+  }
+  .cc-type-block__hint{
+    font-size:12px;color:var(--naowee-color-text-secondary,#646587);
+    line-height:1.45;margin-bottom:12px;
+  }
+  .cc-type-block__hint strong{color:var(--naowee-color-text-primary,#282834);font-weight:700}
+  .cc-type-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:8px;
+  }
+  @media(max-width:760px){.cc-type-grid{grid-template-columns:repeat(2,1fr)}}
+  .cc-type-card{
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    padding:14px 10px;border-radius:12px;border:1.5px solid var(--naowee-color-border-default,#e7e9f3);
+    background:#fff;cursor:pointer;font-family:'Inter',sans-serif;
+    transition:border-color .15s,background .15s,transform .12s;
+  }
+  .cc-type-card:hover{border-color:#c4c7dc;background:#fafbfd}
+  .cc-type-card.is-selected{
+    border-color:var(--naowee-color-text-accent,#d74009);
+    background:#fff7f2;
+    box-shadow:0 0 0 3px rgba(215,64,9,.10);
+  }
+  .cc-type-card__ico{
+    width:36px;height:36px;border-radius:10px;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  .cc-type-card__ico svg{width:20px;height:20px}
+  .cc-type-card__lbl{font-size:13px;font-weight:700;color:var(--naowee-color-text-primary,#282834)}
+  .cc-type-card__hint{font-size:10.5px;color:var(--naowee-color-text-secondary,#646587);font-weight:500}
+  .cc-type-card.is-selected .cc-type-card__hint{color:var(--naowee-color-text-accent,#d74009);font-weight:700}
+
+  /* Non-Bono section */
+  .cc-nb-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  @media(max-width:560px){.cc-nb-grid{grid-template-columns:1fr}}
+  .cc-nb-total{
+    margin-top:14px;padding:12px 16px;border-radius:10px;background:#fafbfd;
+    border:1px dashed var(--naowee-color-border-default,#e7e9f3);
+    font-size:13px;color:var(--naowee-color-text-secondary,#646587);
+  }
+  .cc-nb-total strong{font-size:16px;font-weight:800;color:var(--naowee-color-text-primary,#282834);font-variant-numeric:tabular-nums}
   .cc-mode{display:none}
   .cc-mode.active{display:block}
 
@@ -1704,11 +1750,46 @@ document.addEventListener('keydown', e => {
     </div>
 
     <div class="cc-body">
-      <div class="naowee-segment naowee-segment--small cc-segment" id="ccSeg">
-        <div class="naowee-segment__pill"></div>
-        <button type="button" class="naowee-segment__item naowee-segment__item--active" data-val="upload" onclick="switchCCMode('upload', this)">Cargar archivo</button>
-        <button type="button" class="naowee-segment__item" data-val="manual" onclick="switchCCMode('manual', this)">Manual</button>
+      <!-- Step 1: tipo de incentivo -->
+      <div class="cc-type-block">
+        <label class="cc-type-block__lbl">Tipo de incentivo</label>
+        <p class="cc-type-block__hint">Solo los <strong>bonos</strong> manejan códigos canjeables. El resto de tipos se cargan como cantidad de cupos disponibles.</p>
+        <div class="cc-type-grid" id="ccTypeGrid">
+          <button type="button" class="cc-type-card" data-cat="Bono" onclick="selectCCType('Bono', this)">
+            <span class="cc-type-card__ico" style="background:#f3e8ff;color:#7c3aed"></span>
+            <span class="cc-type-card__lbl">Bono</span>
+            <span class="cc-type-card__hint">Código canjeable</span>
+          </button>
+          <button type="button" class="cc-type-card" data-cat="Beca" onclick="selectCCType('Beca', this)">
+            <span class="cc-type-card__ico" style="background:#fff3e6;color:#d74009"></span>
+            <span class="cc-type-card__lbl">Beca</span>
+            <span class="cc-type-card__hint">Sin código</span>
+          </button>
+          <button type="button" class="cc-type-card" data-cat="Kit" onclick="selectCCType('Kit', this)">
+            <span class="cc-type-card__ico" style="background:#eef5ff;color:#1f78d1"></span>
+            <span class="cc-type-card__lbl">Kit</span>
+            <span class="cc-type-card__hint">Sin código</span>
+          </button>
+          <button type="button" class="cc-type-card" data-cat="Inscripción" onclick="selectCCType('Inscripción', this)">
+            <span class="cc-type-card__ico" style="background:#e6f4e7;color:#15803d"></span>
+            <span class="cc-type-card__lbl">Inscripción</span>
+            <span class="cc-type-card__hint">Sin código</span>
+          </button>
+          <button type="button" class="cc-type-card" data-cat="Transporte" onclick="selectCCType('Transporte', this)">
+            <span class="cc-type-card__ico" style="background:#cffafe;color:#0891b2"></span>
+            <span class="cc-type-card__lbl">Transporte</span>
+            <span class="cc-type-card__hint">Sin código</span>
+          </button>
+        </div>
       </div>
+
+      <!-- Step 2 — Bono: file/manual -->
+      <div id="ccBonoSection" hidden>
+        <div class="naowee-segment naowee-segment--small cc-segment" id="ccSeg">
+          <div class="naowee-segment__pill"></div>
+          <button type="button" class="naowee-segment__item naowee-segment__item--active" data-val="upload" onclick="switchCCMode('upload', this)">Cargar archivo</button>
+          <button type="button" class="naowee-segment__item" data-val="manual" onclick="switchCCMode('manual', this)">Manual</button>
+        </div>
 
       <!-- Upload mode -->
       <div class="cc-mode active" data-mode="upload">
@@ -1746,8 +1827,28 @@ document.addEventListener('keydown', e => {
           Agregar código
         </button>
       </div>
+      </div><!-- /#ccBonoSection -->
 
-      <div class="naowee-message naowee-message--informative" style="margin-top:14px">
+      <!-- Step 2 — No-Bono: cantidad + valor (sin código) -->
+      <div id="ccNonBonoSection" hidden>
+        <div class="cc-nb-grid">
+          <div class="naowee-textfield">
+            <label class="naowee-textfield__label">Cantidad de cupos a agregar</label>
+            <div class="naowee-textfield__input-wrap">
+              <input class="naowee-textfield__input" id="ccNbQty" type="number" min="1" value="10"/>
+            </div>
+          </div>
+          <div class="naowee-textfield">
+            <label class="naowee-textfield__label">Valor por unidad (COP)</label>
+            <div class="naowee-textfield__input-wrap">
+              <input class="naowee-textfield__input" id="ccNbValue" type="number" min="0" value="1000000"/>
+            </div>
+          </div>
+        </div>
+        <div class="cc-nb-total" id="ccNbTotal">Total: <strong>$10.000.000</strong></div>
+      </div>
+
+      <div class="naowee-message naowee-message--informative" id="ccSummaryMsg" style="margin-top:14px;display:none">
         <div class="naowee-message__header">
           <div class="naowee-message__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
@@ -1765,16 +1866,65 @@ document.addEventListener('keydown', e => {
 </div>
 
 <script>
-/* ══ Modal Cargar códigos ══ */
+/* ══ Modal Cargar inventario ══ */
+let ccSelectedType = null;
+
 function openCargarCodigos(){
   const ov = document.getElementById('ccOverlay');
   if(!ov) return;
+  // Inyecta iconos en las cards de tipo desde el catálogo central CAT_ICONS
+  const grid = document.getElementById('ccTypeGrid');
+  if(grid && !grid.dataset.ready){
+    grid.querySelectorAll('.cc-type-card').forEach(card => {
+      const cat = card.dataset.cat;
+      const icoBox = card.querySelector('.cc-type-card__ico');
+      if(icoBox && window.CAT_ICONS && window.CAT_ICONS[cat]){
+        icoBox.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${window.CAT_ICONS[cat]}</svg>`;
+      }
+    });
+    grid.dataset.ready = '1';
+  }
+  // Reset estado: ninguna sección visible, ningún tipo seleccionado
+  ccSelectedType = null;
+  grid.querySelectorAll('.cc-type-card').forEach(c => c.classList.remove('is-selected'));
+  document.getElementById('ccBonoSection').hidden = true;
+  document.getElementById('ccNonBonoSection').hidden = true;
+  document.getElementById('ccSummaryMsg').style.display = 'none';
   if(document.getElementById('ccManualRows').children.length === 0){
     for(let i = 0; i < 3; i++) addCCRow();
   }
   ov.classList.add('open');
-  setTimeout(positionCCPill, 50);
 }
+
+function selectCCType(cat, btn){
+  ccSelectedType = cat;
+  document.querySelectorAll('#ccTypeGrid .cc-type-card').forEach(c => c.classList.toggle('is-selected', c === btn));
+  const isBono = cat === 'Bono';
+  document.getElementById('ccBonoSection').hidden = !isBono;
+  document.getElementById('ccNonBonoSection').hidden = isBono;
+  // Summary message contextual
+  const msg = document.getElementById('ccSummaryMsg');
+  const text = document.getElementById('ccSummaryText');
+  msg.style.display = 'flex';
+  if(isBono){
+    text.innerHTML = `Rubro disponible: <strong>$18.000.000</strong> (18 códigos × $1.000.000). Los nuevos códigos se agregarán al inventario actual.`;
+    setTimeout(positionCCPill, 50);
+  } else {
+    text.innerHTML = `Los <strong>${cat.toLowerCase()}s</strong> no manejan código canjeable. Indica la cantidad de cupos y el valor por unidad — quedarán disponibles para asignar directamente al beneficiario.`;
+    updateCCNbTotal();
+  }
+}
+
+function updateCCNbTotal(){
+  const qty = parseInt(document.getElementById('ccNbQty')?.value || '0', 10) || 0;
+  const val = parseInt(document.getElementById('ccNbValue')?.value || '0', 10) || 0;
+  const total = qty * val;
+  const el = document.getElementById('ccNbTotal');
+  if(el) el.innerHTML = `Total: <strong>$${Number(total).toLocaleString('es-CO')}</strong>`;
+}
+document.addEventListener('input', e => {
+  if(e.target && (e.target.id === 'ccNbQty' || e.target.id === 'ccNbValue')) updateCCNbTotal();
+});
 function closeCargarCodigos(){
   document.getElementById('ccOverlay').classList.remove('open');
 }
